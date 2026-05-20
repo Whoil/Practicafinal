@@ -1,0 +1,18 @@
+{
+  "tipos": [
+    "persona",
+    "lugar"
+  ],
+  "tripletas": [
+    {
+      "s": "persona:A",
+      "p": "conoce",
+      "o": "persona:B"
+    },
+    {
+      "s": "persona:B",
+      "p": "vive_en",
+      "o": "lugar:C"
+    }
+  ]
+}
