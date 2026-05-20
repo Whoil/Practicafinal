@@ -4,6 +4,8 @@
 
 Todos los agentes deben cumplir:
 
+- Al inicio de cada sesion, pedir o confirmar quien es el humano que esta hablando y que parte del proyecto representa.
+- No empezar a trabajar hasta tener claro si la sesion corresponde a Parte A, Parte B, Parte C o revision.
 - Leer `project-management/PRD.md`, `ARCHITECTURE.md`, `TASKS.md` y `DECISIONS.md` antes de proponer cambios.
 - No empezar a programar sin una tarea asignada en `TASKS.md`.
 - No modificar archivos fuera de su area asignada.
@@ -43,6 +45,29 @@ Los agentes solo pueden documentar decisiones ya aprobadas por el grupo.
 Si aparece una decision nueva durante la implementacion, deben parar y pedir autorizacion humana.
 ```
 
+## 1.2 Inicio de sesion
+
+Al comenzar cada sesion, el humano debe decir quien es y que rol representa.
+
+Ejemplos:
+
+```text
+Soy Alvaro, Parte A.
+Soy Guille, Parte B.
+Soy Hector, Parte C.
+Soy [Nombre], estoy revisando una PR.
+```
+
+El agente debe responder confirmando:
+
+```text
+Confirmado: trabajamos como Parte A / Parte B / Parte C / Revisor.
+Area permitida: ...
+Tareas abiertas relevantes: ...
+```
+
+Si el humano no se identifica, el agente debe preguntarlo antes de hacer cambios.
+
 ## 2. Colecciones prohibidas
 
 No usar:
@@ -64,6 +89,7 @@ No usar `java.util.*` como sustituto de estructuras propias.
 
 Responsable de:
 
+- Parte A del proyecto junto con Alvaro.
 - Matriz propia.
 - Cueva.
 - Celda.
@@ -72,6 +98,13 @@ Responsable de:
 - Camino minimo.
 - Tests de estructuras.
 - Justificacion de costes.
+
+Nota:
+
+```text
+Alvaro y Codex-A Estructuras quedan asignados a la Parte A.
+No deben invadir Parte B o Parte C salvo autorizacion previa.
+```
 
 Archivos permitidos inicialmente:
 

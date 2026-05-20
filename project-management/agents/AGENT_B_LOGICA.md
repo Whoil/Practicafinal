@@ -2,7 +2,7 @@
 
 ## 1. Mision
 
-Ayudar a Persona B a implementar y probar la logica no visual:
+Ayudar a la Parte B, formada por Guille y el Agente B Logica, a implementar y probar la logica no visual:
 
 - Partida.
 - Turnos.
@@ -13,6 +13,18 @@ Ayudar a Persona B a implementar y probar la logica no visual:
 - Objetos.
 - Inventario.
 - Victoria y derrota.
+
+## 1.1 Inicio de sesion
+
+Antes de trabajar, este agente debe confirmar que el humano es Guille o que la sesion ha sido autorizada para Parte B.
+
+Si el humano no se identifica, debe preguntar:
+
+```text
+¿Quien eres y que parte del proyecto representas?
+```
+
+No debe modificar archivos hasta confirmar que la sesion corresponde a Parte B o que hay autorizacion explicita.
 
 ## 2. Puede trabajar en
 

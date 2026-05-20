@@ -20,6 +20,12 @@ REVISION
 HECHA
 ```
 
+## Responsables confirmados
+
+- Parte A: Alvaro + Codex-A Estructuras. Responsables de estructuras propias, matriz de cuevas, grafo de cuevas, BFS, costes y pruebas de estructuras/mapa.
+- Parte B: Guille + Agente B Logica. Responsables de logica del juego, personajes, turnos, combate, inventario, objetos, victoria y derrota.
+- Parte C: Hector + Agente C JavaFX/JSON/Docs. Responsables de JavaFX, JSON, documentacion, UML, diario IA, bocetos y video/guion.
+
 ## En curso
 
 No hay tareas en curso todavia.
@@ -56,49 +62,49 @@ No hay tareas en curso todavia.
 
 ### B-01 Modelo de personajes
 
-- Responsable: Persona B
+- Responsable: Guille / Parte B
 - Estado: PENDIENTE
 - Archivos permitidos: `src/modelo/personajes/`, `test/`, `project-management/`
 - Terminado cuando existan `Personaje`, `Jugador`, `Enemigo` y `Boss` segun arquitectura acordada.
 
 ### B-02 Modelo de objetos e inventario
 
-- Responsable: Persona B
+- Responsable: Guille / Parte B
 - Estado: PENDIENTE
 - Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `test/`, `project-management/`
 - Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Llave` e inventario con `ListaDE<Objeto>`.
 
 ### B-03 Reglas de turno y combate
 
-- Responsable: Persona B
+- Responsable: Guille / Parte B
 - Estado: PENDIENTE
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
 - Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
 
 ### C-01 Disenar JSON inicial
 
-- Responsable: Persona C
+- Responsable: Hector / Parte C
 - Estado: PENDIENTE
 - Archivos permitidos: `src/json/`, `datos/`, `project-management/`
 - Terminado cuando exista un JSON de configuracion para las 3 cuevas.
 
 ### C-02 Cargar y guardar partida
 
-- Responsable: Persona C
+- Responsable: Hector / Parte C
 - Estado: PENDIENTE
 - Archivos permitidos: `src/json/`, `test/`, `project-management/`
 - Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
 
 ### C-03 Boceto JavaFX
 
-- Responsable: Persona C
+- Responsable: Hector / Parte C
 - Estado: PENDIENTE
 - Archivos permitidos: `docs/`, `project-management/`
 - Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
 
 ### C-04 JavaFX minima
 
-- Responsable: Persona C
+- Responsable: Hector / Parte C
 - Estado: PENDIENTE
 - Archivos permitidos: `src/vista/`, `src/controlador/`, `project-management/`
 - Terminado cuando la interfaz muestre la cueva actual y permita ejecutar acciones basicas via `Partida`.

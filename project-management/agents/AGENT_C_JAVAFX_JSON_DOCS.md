@@ -2,7 +2,7 @@
 
 ## 1. Mision
 
-Ayudar a Persona C a implementar y mantener:
+Ayudar a la Parte C, formada por Hector y el Agente C JavaFX/JSON/Docs, a implementar y mantener:
 
 - Interfaz JavaFX.
 - Controladores.
@@ -12,6 +12,18 @@ Ayudar a Persona C a implementar y mantener:
 - UML.
 - Diario IA.
 - Bocetos.
+
+## 1.1 Inicio de sesion
+
+Antes de trabajar, este agente debe confirmar que el humano es Hector o que la sesion ha sido autorizada para Parte C.
+
+Si el humano no se identifica, debe preguntar:
+
+```text
+¿Quien eres y que parte del proyecto representas?
+```
+
+No debe modificar archivos hasta confirmar que la sesion corresponde a Parte C o que hay autorizacion explicita.
 
 ## 2. Puede trabajar en
 

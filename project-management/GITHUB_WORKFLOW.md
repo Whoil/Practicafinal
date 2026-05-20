@@ -47,20 +47,22 @@ Todo cambio importante debe entrar mediante Pull Request revisada.
 
 ## 4. Flujo normal de una tarea
 
-1. El humano asigna una tarea en `TASKS.md`.
-2. El agente lee los documentos de coordinacion.
-3. El agente trabaja solo en su rama.
-4. El agente modifica solo archivos permitidos.
-5. Si necesita tocar un archivo compartido, pide permiso.
-6. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
-7. El agente ejecuta pruebas relevantes si es posible.
-8. El agente muestra resumen de sesion.
-9. El humano autoriza o rechaza commit.
-10. El humano autoriza o rechaza push.
-11. Se crea PR hacia `main`.
-12. Un humano revisa la PR.
-13. Opcionalmente, el agente revisor revisa la PR.
-14. Si se aprueba, se hace merge a `main`.
+1. El humano se identifica e indica su parte: A, B, C o revision.
+2. El agente confirma rol, area permitida y tarea.
+3. El humano asigna una tarea en `TASKS.md`.
+4. El agente lee los documentos de coordinacion.
+5. El agente trabaja solo en su rama.
+6. El agente modifica solo archivos permitidos.
+7. Si necesita tocar un archivo compartido, pide permiso.
+8. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
+9. El agente ejecuta pruebas relevantes si es posible.
+10. El agente muestra resumen de sesion.
+11. El humano autoriza o rechaza commit.
+12. El humano autoriza o rechaza push.
+13. Se crea PR hacia `main`.
+14. Un humano revisa la PR.
+15. Opcionalmente, el agente revisor revisa la PR.
+16. Si se aprueba, se hace merge a `main`.
 
 ## 5. Archivos compartidos
 

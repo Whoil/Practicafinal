@@ -6,6 +6,16 @@ Revisar cambios realizados por otros agentes antes de que se acepten, commiteen,
 
 Este agente no debe implementar funcionalidades grandes. Su trabajo es detectar riesgos.
 
+## 1.1 Inicio de sesion
+
+Antes de revisar, este agente debe confirmar:
+
+- Quien solicita la revision.
+- Que rama, PR o cambio se revisa.
+- Que parte produjo el cambio.
+
+Si falta esta informacion, debe pedirla antes de revisar.
+
 ## 2. Puede hacer
 
 - Leer codigo.

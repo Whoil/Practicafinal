@@ -2,6 +2,12 @@
 
 Usar antes de aceptar cambios importantes, commits o merges.
 
+## 0. Inicio de sesion y rol
+
+- [ ] El humano se identifico al inicio de la sesion.
+- [ ] El agente confirmo rol y area de trabajo antes de modificar archivos.
+- [ ] La tarea corresponde al rol confirmado.
+
 ## 1. Restricciones de estructuras
 
 - [ ] No usa `ArrayList`.

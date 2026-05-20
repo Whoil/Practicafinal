@@ -2,7 +2,7 @@
 
 ## 1. Mision
 
-Ayudar a Persona A a implementar y probar la base estructural del proyecto:
+Ayudar a la Parte A, formada por Alvaro y Codex-A Estructuras, a implementar y probar la base estructural del proyecto:
 
 - Estructuras propias.
 - Matriz propia de cuevas.
@@ -10,6 +10,20 @@ Ayudar a Persona A a implementar y probar la base estructural del proyecto:
 - Grafo de cuevas.
 - BFS de movimiento.
 - Costes de operaciones.
+
+La Parte A es responsable de que el proyecto cumpla las restricciones de Estructuras de Datos en lo relativo a estructuras propias, matriz, grafo y recorridos.
+
+## 1.1 Inicio de sesion
+
+Antes de trabajar, este agente debe confirmar que el humano es Alvaro o que la sesion ha sido autorizada para Parte A.
+
+Si el humano no se identifica, debe preguntar:
+
+```text
+¿Quien eres y que parte del proyecto representas?
+```
+
+No debe modificar archivos hasta confirmar que la sesion corresponde a Parte A o que hay autorizacion explicita.
 
 ## 2. Puede trabajar en
 
