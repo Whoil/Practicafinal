@@ -126,6 +126,26 @@ Despues de trabajar, cada agente debe:
 
 Si detecta que otro agente modifico un documento de coordinacion, debe leerlo antes de continuar y avisar si afecta a su tarea.
 
+## 1.4 Cambio significativo
+
+Se considera cambio significativo cualquier cambio que:
+
+- Afecte a la logica del juego.
+- Afecte a la estructura o arquitectura del proyecto.
+- Afecte a la documentacion de coordinacion, requisitos, decisiones, tareas o agentes.
+- Tenga impacto en el trabajo de otros companeros.
+- Tenga impacto en otras ramas, especialmente `main`.
+
+Todo cambio significativo requiere:
+
+```text
+1. Actualizar documentacion si procede.
+2. Registrar resumen en SCRATCHPAD.md.
+3. Pedir autorizacion explicita para commit/push.
+4. Si es codigo, incluir tests JUnit cuando aplique.
+5. Si es codigo, pasar revision del Agente Revisor Independiente antes de merge.
+```
+
 ## 2. Colecciones prohibidas
 
 No usar:

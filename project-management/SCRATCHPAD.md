@@ -216,3 +216,39 @@ Documentos leidos/modificados: `AGENTS.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKL
 ### Riesgos
 
 - Actualizar ramas sin revisar conflictos puede romper trabajo de otros agentes. Por eso, la regla exige parar si hay conflictos.
+
+## 2026-05-20 - Plantillas y peticiones urgentes
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Coordinacion global fuera de Parte A
+Agente: Codex
+
+### Contexto
+
+Se pidio reforzar la organizacion antes de empezar implementacion creando plantillas y una zona visible para peticiones urgentes entre partes.
+
+### Sincronizacion
+
+Rama: main
+Cambio remoto revisado: si
+Documentos leidos/modificados: `TASKS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, plantillas.
+
+### Cambios
+
+- Se creo plantilla de Pull Request en `.github/pull_request_template.md`.
+- Se creo plantilla de cierre de sesion en `project-management/templates/SESSION_SUMMARY_TEMPLATE.md`.
+- Se creo plantilla de tarea en `project-management/templates/TASK_TEMPLATE.md`.
+- Se definio que cuenta como cambio significativo.
+- Se anadio seccion de peticiones urgentes entre partes en `TASKS.md`.
+- Se dejo asignada a Parte B la tarea de cerrar el alcance minimo de la logica del juego.
+
+### Pendiente
+
+- Hacer commit/push si Alvaro lo autoriza.
+- Actualizar ramas de trabajo despues del commit global si procede.
+
+### Riesgos
+
+- Si las peticiones urgentes no se mantienen actualizadas, los agentes pueden trabajar bloqueados sin saberlo.

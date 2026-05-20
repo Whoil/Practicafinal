@@ -101,6 +101,18 @@ debe terminar preguntando si se autoriza commit y push.
 
 Tambien debe registrar un cierre de sesion en `SCRATCHPAD.md` antes de terminar.
 
+### Que cuenta como cambio significativo
+
+Cuenta como cambio significativo cualquier cambio que afecte a:
+
+- La logica del juego.
+- La estructura o arquitectura del proyecto.
+- La documentacion.
+- El trabajo de otros companeros.
+- Otras ramas, especialmente `main`.
+
+Estos cambios siempre requieren resumen, documentacion actualizada si procede, y autorizacion explicita para commit/push.
+
 ## 4.2 Actualizacion automatica de ramas
 
 Cada agente debe mantener su rama al dia con `origin/main`.

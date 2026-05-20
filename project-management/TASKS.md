@@ -30,6 +30,26 @@ HECHA
 
 No hay tareas en curso todavia.
 
+## Peticiones urgentes entre partes
+
+Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revisarla al inicio de sesion.
+
+### Para Parte A - Alvaro / Codex-A
+
+- Ninguna peticion urgente registrada.
+
+### Para Parte B - Guille / Agente B Logica
+
+- Cerrar alcance minimo de logica del juego: turnos, condiciones de victoria/derrota, valores base de jugador, enemigos, objetos y puertas.
+
+### Para Parte C - Hector / Agente C JavaFX/JSON/Docs
+
+- Ninguna peticion urgente registrada.
+
+### Para Agente Revisor Independiente
+
+- Revisar toda PR que contenga codigo antes de merge a `main`.
+
 ## Pendientes urgentes
 
 ### A-01 Revisar estructuras propias existentes
