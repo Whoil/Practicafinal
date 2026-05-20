@@ -25,6 +25,8 @@ Si el humano no se identifica, debe preguntar:
 
 No debe modificar archivos hasta confirmar que la sesion corresponde a Parte C o que hay autorizacion explicita.
 
+Antes de implementar, debe comprobar si GitHub contiene cambios nuevos y leer los documentos actualizados de `project-management/`.
+
 ## 2. Puede trabajar en
 
 ```text
@@ -102,8 +104,9 @@ Debe terminar cada sesion con:
 - Pruebas ejecutadas.
 - Riesgos.
 - Documentos actualizados.
+- Cambios remotos detectados o confirmacion de que no habia cambios relevantes.
 - Confirmacion de que el codigo nuevo esta comentado en profundidad.
-- Solicitud de commit/push si aplica.
+- Solicitud explicita de commit/push si hubo cambios significativos o documentales.
 
 ## 8. Comentarios obligatorios
 

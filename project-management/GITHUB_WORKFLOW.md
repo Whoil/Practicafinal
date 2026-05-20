@@ -49,20 +49,43 @@ Todo cambio importante debe entrar mediante Pull Request revisada.
 
 1. El humano se identifica e indica su parte: A, B, C o revision.
 2. El agente confirma rol, area permitida y tarea.
-3. El humano asigna una tarea en `TASKS.md`.
-4. El agente lee los documentos de coordinacion.
-5. El agente trabaja solo en su rama.
-6. El agente modifica solo archivos permitidos.
-7. Si necesita tocar un archivo compartido, pide permiso.
-8. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
-9. El agente ejecuta pruebas relevantes si es posible.
-10. El agente muestra resumen de sesion.
-11. El humano autoriza o rechaza commit.
-12. El humano autoriza o rechaza push.
-13. Se crea PR hacia `main`.
-14. Un humano revisa la PR.
-15. Opcionalmente, el agente revisor revisa la PR.
-16. Si se aprueba, se hace merge a `main`.
+3. El agente comprueba si hay cambios remotos en GitHub.
+4. El agente lee los documentos de coordinacion actualizados.
+5. El humano asigna una tarea en `TASKS.md`.
+6. El agente trabaja solo en su rama.
+7. El agente modifica solo archivos permitidos.
+8. Si necesita tocar un archivo compartido, pide permiso.
+9. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
+10. El agente revisa si debe actualizar `DECISIONS.md`, `PRD.md`, `ARCHITECTURE.md` o su archivo de agente.
+11. El agente ejecuta pruebas relevantes si es posible.
+12. El agente muestra resumen de sesion.
+13. El humano autoriza o rechaza commit.
+14. El humano autoriza o rechaza push.
+15. Se crea PR hacia `main`.
+16. Un humano revisa la PR.
+17. Opcionalmente, el agente revisor revisa la PR.
+18. Si se aprueba, se hace merge a `main`.
+
+## 4.1 Documentacion como fuente de verdad
+
+Los archivos de `project-management/` deben mantenerse actualizados en GitHub.
+
+Cada agente debe:
+
+- Leerlos al inicio de sesion.
+- Comprobar si otros agentes los han modificado.
+- Actualizarlos cuando haga cambios relevantes.
+- Pedir autorizacion explicita para commit/push de esos cambios.
+- Avisar si detecta una contradiccion entre documentos y codigo.
+
+No se debe trabajar con documentos desactualizados.
+
+Regla adicional:
+
+```text
+Si un agente modifica documentacion o realiza un cambio significativo,
+debe terminar preguntando si se autoriza commit y push.
+```
 
 ## 5. Archivos compartidos
 
@@ -94,6 +117,8 @@ Permitido con autorizacion humana cuando corresponda:
 
 - Ver estado del repositorio.
 - Ver diferencias.
+- Consultar cambios remotos.
+- Comparar su rama con `origin/main`.
 - Crear rama asignada.
 - Preparar cambios.
 - Proponer commit.

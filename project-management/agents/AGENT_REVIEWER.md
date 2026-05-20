@@ -13,6 +13,7 @@ Antes de revisar, este agente debe confirmar:
 - Quien solicita la revision.
 - Que rama, PR o cambio se revisa.
 - Que parte produjo el cambio.
+- Si la rama esta actualizada respecto a GitHub.
 
 Si falta esta informacion, debe pedirla antes de revisar.
 
@@ -20,6 +21,7 @@ Si falta esta informacion, debe pedirla antes de revisar.
 
 - Leer codigo.
 - Leer documentos.
+- Comprobar si los documentos de coordinacion estan actualizados respecto a GitHub.
 - Revisar diffs.
 - Revisar PRs.
 - Buscar colecciones prohibidas.

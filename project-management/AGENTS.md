@@ -6,7 +6,10 @@ Todos los agentes deben cumplir:
 
 - Al inicio de cada sesion, pedir o confirmar quien es el humano que esta hablando y que parte del proyecto representa.
 - No empezar a trabajar hasta tener claro si la sesion corresponde a Parte A, Parte B, Parte C o revision.
+- Antes de trabajar, comprobar si GitHub contiene cambios nuevos de otros agentes.
 - Leer `project-management/PRD.md`, `ARCHITECTURE.md`, `TASKS.md` y `DECISIONS.md` antes de proponer cambios.
+- Leer tambien `SCRATCHPAD.md`, `GITHUB_WORKFLOW.md` y el archivo especifico del agente antes de modificar codigo.
+- Comprobar si otros agentes han modificado los documentos de coordinacion desde la ultima sesion.
 - No empezar a programar sin una tarea asignada en `TASKS.md`.
 - No modificar archivos fuera de su area asignada.
 - No modificar archivos compartidos sin autorizacion humana previa.
@@ -18,6 +21,8 @@ Todos los agentes deben cumplir:
 - Actualizar `SCRATCHPAD.md` despues de cualquier cambio relevante.
 - Actualizar `TASKS.md` si completa, bloquea o crea una tarea.
 - Actualizar `IA_DIARY.md` si el cambio se ha producido con ayuda de IA.
+- Mantener los documentos de coordinacion actualizados en GitHub mediante commit/push autorizado cuando haya cambios relevantes.
+- Cada vez que realice un cambio significativo o cualquier cambio de documentacion, debe pedir explicitamente autorizacion humana para hacer commit y push.
 - No hacer commit ni push sin confirmacion humana.
 - Ejecutar pruebas relevantes cuando sea posible.
 - Si una estructura propia necesaria no existe, preguntar antes de crearla.
@@ -67,6 +72,33 @@ Tareas abiertas relevantes: ...
 ```
 
 Si el humano no se identifica, el agente debe preguntarlo antes de hacer cambios.
+
+## 1.3 Sincronizacion de documentacion
+
+Los archivos de `project-management/` son el mecanismo principal para coordinar agentes.
+
+Antes de trabajar, cada agente debe:
+
+```text
+1. Comprobar la rama actual.
+2. Consultar si hay cambios remotos.
+3. Integrar o pedir ayuda humana si hay cambios de otros agentes.
+4. Leer los documentos actualizados.
+5. Confirmar que su tarea sigue vigente.
+```
+
+Despues de trabajar, cada agente debe:
+
+```text
+1. Actualizar SCRATCHPAD.md.
+2. Actualizar TASKS.md.
+3. Actualizar IA_DIARY.md si procede.
+4. Actualizar DECISIONS.md si hubo una decision humana nueva.
+5. Indicar en el resumen si hay documentos pendientes de subir.
+6. Pedir autorizacion humana explicita para commit/push si hubo cambios significativos o documentales.
+```
+
+Si detecta que otro agente modifico un documento de coordinacion, debe leerlo antes de continuar y avisar si afecta a su tarea.
 
 ## 2. Colecciones prohibidas
 
@@ -245,11 +277,14 @@ Los agentes pueden:
 
 - Consultar `git status`.
 - Consultar diferencias con `git diff`.
+- Consultar cambios remotos con `git fetch` o equivalente autorizado.
+- Comparar su rama con `origin/main`.
 - Crear una rama asignada si el humano lo autoriza.
 - Preparar cambios en su rama.
 - Proponer un mensaje de commit.
 - Hacer commit solo con autorizacion humana.
 - Hacer push solo con autorizacion humana.
+- Subir cambios de documentacion solo con autorizacion humana.
 - Preparar un resumen para Pull Request.
 
 Los agentes no pueden sin autorizacion explicita:

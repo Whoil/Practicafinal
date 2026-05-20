@@ -19,6 +19,12 @@ Agente:
 
 Que se intento hacer.
 
+### Sincronizacion
+
+Rama:
+Cambio remoto revisado: si/no
+Documentos leidos:
+
 ### Cambios
 
 - Archivo tocado.
@@ -55,6 +61,7 @@ Se preparan documentos de organizacion antes de dar acceso a GitHub a los agente
 - Reparto real confirmado: Alvaro Parte A, Guille Parte B, Hector Parte C.
 - Confirmar flujo GitHub y ramas.
 - Actualizar `TASKS.md` tras la reunion.
+- Mantener los documentos de coordinacion sincronizados en GitHub despues de cada cambio relevante.
 
 ### Riesgos
 

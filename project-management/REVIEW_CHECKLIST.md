@@ -7,6 +7,8 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] El humano se identifico al inicio de la sesion.
 - [ ] El agente confirmo rol y area de trabajo antes de modificar archivos.
 - [ ] La tarea corresponde al rol confirmado.
+- [ ] El agente comprobo si habia cambios remotos en GitHub.
+- [ ] El agente leyo la documentacion actualizada antes de trabajar.
 
 ## 1. Restricciones de estructuras
 
@@ -53,6 +55,9 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] `DECISIONS.md` actualizado si hubo decision nueva.
 - [ ] `IA_DIARY.md` actualizado si se uso IA para producir el cambio.
 - [ ] UML actualizado si cambia estructura importante.
+- [ ] Los cambios de documentacion necesarios estan listos para commit/push autorizado.
+- [ ] Se comprobo si otros agentes habian cambiado documentos relacionados.
+- [ ] Si hubo cambios significativos o documentales, el agente pidio autorizacion explicita para commit/push.
 
 ## 6. Revision de entrega
 
