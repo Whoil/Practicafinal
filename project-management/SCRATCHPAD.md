@@ -252,3 +252,69 @@ Documentos leidos/modificados: `TASKS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, pl
 ### Riesgos
 
 - Si las peticiones urgentes no se mantienen actualizadas, los agentes pueden trabajar bloqueados sin saberlo.
+
+## 2026-05-20 - Guillermo / Parte B
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B - logica del juego
+Agente: Codex / Agente B Logica
+
+### Contexto
+
+Se realizo la primera sesion de diseno de Parte B antes de implementar codigo. El objetivo fue cerrar una base clara para jugador, enemigos, objetos, inventario, turnos y reglas de combate, respetando que la implementacion empezara despues por las tareas `B-01`, `B-02` y `B-03`.
+
+### Sincronizacion
+
+Rama: `feature/b-logica` en GitHub, actualizada respecto a la documentacion disponible en `origin/main`.
+Cambio remoto revisado: si.
+Documentos leidos: `TASKS.md`, `AGENT_B_LOGICA.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRD.md`, `SCRATCHPAD.md`, `IA_DIARY.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `AGENTS.md`.
+
+### Cambios
+
+- No se modifico codigo del juego.
+- Se confirma que Guillermo representa la Parte B.
+- Se acuerda que al inicio de cada sesion se deben releer los documentos de `project-management` por si han cambiado.
+- Se acuerda que antes de cualquier commit/push se deben leer los archivos actualizados desde GitHub e informar a Guillermo de cambios relevantes.
+- Se define el jugador con vida maxima 100, vida actual 100, ataque base 15, defensa base 5, movimiento 3, 40 turnos iniciales, inventario y objeto equipado.
+- Se definen tipos de enemigo: esqueleto, orco, mago y boss.
+- Se definen valores de enemigos:
+  - Esqueleto: vida 30, ataque 8, defensa 2, movimiento 2.
+  - Orco: vida 50, ataque 12, defensa 4, movimiento 1.
+  - Mago: vida 25, ataque 14, defensa 1, movimiento 2.
+  - Boss: vida 150, ataque 20, defensa 5, movimiento 2.
+- Se definen objetos: pocion, espada, arco, llave y escudo.
+- Se definen pociones:
+  - Pocion de cura: cura 25 puntos y se consume.
+  - Pocion de invisibilidad: dura 2 turnos, evita ataques enemigos mientras dura y se consume.
+- Se definen objetos equipables:
+  - Espada: +12 ataque, cuerpo a cuerpo.
+  - Arco: +7 ataque, ataque a distancia.
+  - Escudo: +5 defensa.
+- Se define que las llaves pueden ser de puerta o de cofre, pueden encontrarse en el suelo o dropearlas enemigos, y no se consumen por defecto.
+- Se define que los drops no seran aleatorios por ahora: cada enemigo puede tener 0 o 1 objeto asignado como drop.
+- Se define que un cofre puede contener 0 o 1 objeto y puede requerir llave.
+- Se define turno basico: maximo 1 movimiento y 1 accion; despues actuan los enemigos; se resta 1 turno.
+- Se define que equipar o cambiar objeto no cuenta como movimiento. Usar un objeto si cuenta como accion.
+- Se define que al bajar al 75% o menos de vida maxima, la defensa baja 2 puntos una sola vez, con defensa minima 0. Esta regla se aplica al jugador y enemigos normales, pero no al boss.
+
+### Tests
+
+Tests JUnit creados o actualizados: ninguno.
+Tests ejecutados: ninguno.
+Resultado: no aplica.
+Si no se ejecutaron, motivo: la sesion fue solo de diseno y documentacion, sin cambios de codigo ejecutable.
+
+### Pendiente
+
+- Confirmar con el grupo si arco, escudo e invisibilidad se aceptan como parte obligatoria o quedan como extras controlados.
+- Pasar el diseno a implementacion empezando por `B-01 Modelo de personajes`.
+- Actualizar `TASKS.md` cuando empiece formalmente una tarea de implementacion.
+- Documentar en `DECISIONS.md` las decisiones nuevas de Parte B cuando el grupo las apruebe como definitivas.
+
+### Riesgos
+
+- Arco, escudo e invisibilidad aparecen como opcionales o extras en los documentos iniciales; conviene validarlo con el grupo antes de implementarlos como imprescindibles.
+- La regla de bajada de defensa al 75% modifica el combate y debe quedar documentada en decisiones cuando el grupo la apruebe.
+- La logica de llaves, cofres y drops tocara coordinacion con mapa y JSON, por lo que Parte B debe exponer reglas claras sin cambiar archivos de otras partes sin permiso.
