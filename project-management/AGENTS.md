@@ -23,6 +23,7 @@ Todos los agentes deben cumplir:
 - Actualizar `IA_DIARY.md` si el cambio se ha producido con ayuda de IA.
 - Mantener los documentos de coordinacion actualizados en GitHub mediante commit/push autorizado cuando haya cambios relevantes.
 - Cada vez que realice un cambio significativo o cualquier cambio de documentacion, debe pedir explicitamente autorizacion humana para hacer commit y push.
+- Antes de cerrar una sesion, registrar un resumen de cierre en `SCRATCHPAD.md`.
 - No hacer commit ni push sin confirmacion humana.
 - Ejecutar pruebas relevantes cuando sea posible.
 - Si una estructura propia necesaria no existe, preguntar antes de crearla.
@@ -352,3 +353,23 @@ project-management/SCRATCHPAD.md
 project-management/TASKS.md
 project-management/IA_DIARY.md
 ```
+
+## 11. Cierre de sesion
+
+Antes de cerrar una sesion, el agente debe anadir un resumen en `SCRATCHPAD.md`.
+
+El resumen de cierre debe incluir:
+
+```text
+- Humano y parte.
+- Rama usada.
+- Tareas trabajadas.
+- Archivos modificados.
+- Cambios realizados.
+- Commits y push realizados, si los hubo.
+- Pruebas ejecutadas o no ejecutadas.
+- Pendiente para la siguiente sesion.
+- Riesgos o avisos.
+```
+
+Si se modifica `SCRATCHPAD.md` para registrar el cierre, el agente debe pedir autorizacion explicita para commit/push.

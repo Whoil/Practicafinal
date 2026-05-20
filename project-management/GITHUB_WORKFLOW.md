@@ -97,6 +97,8 @@ Si un agente modifica documentacion o realiza un cambio significativo,
 debe terminar preguntando si se autoriza commit y push.
 ```
 
+Tambien debe registrar un cierre de sesion en `SCRATCHPAD.md` antes de terminar.
+
 ## 5. Archivos compartidos
 
 Requieren permiso previo:

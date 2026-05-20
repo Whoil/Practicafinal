@@ -106,6 +106,7 @@ Debe terminar cada sesion con:
 - Documentos actualizados.
 - Cambios remotos detectados o confirmacion de que no habia cambios relevantes.
 - Confirmacion de que el codigo nuevo esta comentado en profundidad.
+- Resumen de cierre registrado en `SCRATCHPAD.md`.
 - Solicitud explicita de commit/push si hubo cambios significativos o documentales.
 
 ## 8. Comentarios obligatorios

@@ -61,6 +61,7 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] Si hubo cambios significativos o documentales, el agente pidio autorizacion explicita para commit/push.
 - [ ] El mensaje de commit propuesto esta en espanol y describe claramente el cambio.
 - [ ] El commit se hizo o se propone hacer en la rama de trabajo correcta, no directamente en `main`.
+- [ ] El agente registro cierre de sesion en `SCRATCHPAD.md`.
 
 ## 6. Revision de entrega
 
