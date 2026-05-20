@@ -7,6 +7,7 @@ Todos los agentes deben cumplir:
 - Al inicio de cada sesion, pedir o confirmar quien es el humano que esta hablando y que parte del proyecto representa.
 - No empezar a trabajar hasta tener claro si la sesion corresponde a Parte A, Parte B, Parte C o revision.
 - Antes de trabajar, comprobar si GitHub contiene cambios nuevos de otros agentes.
+- Antes de empezar a modificar codigo o documentacion, actualizar automaticamente la rama de trabajo con la ultima version de `origin/main` siempre que no haya conflictos.
 - Leer `project-management/PRD.md`, `ARCHITECTURE.md`, `TASKS.md` y `DECISIONS.md` antes de proponer cambios.
 - Leer tambien `SCRATCHPAD.md`, `GITHUB_WORKFLOW.md` y el archivo especifico del agente antes de modificar codigo.
 - Comprobar si otros agentes han modificado los documentos de coordinacion desde la ultima sesion.
@@ -101,6 +102,15 @@ Antes de trabajar, cada agente debe:
 4. Leer los documentos actualizados.
 5. Confirmar que su tarea sigue vigente.
 6. Cambiar a su rama de trabajo asignada si no esta ya en ella.
+7. Actualizar su rama con `origin/main` antes de programar.
+```
+
+La actualizacion de rama debe seguir esta regla:
+
+```text
+Si la actualizacion con origin/main no tiene conflictos, el agente debe hacerla antes de trabajar.
+Si aparecen conflictos, debe parar y pedir autorizacion humana.
+Si la actualizacion requiere push de la rama, debe pedir autorizacion humana para subirla.
 ```
 
 Despues de trabajar, cada agente debe:

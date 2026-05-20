@@ -96,6 +96,8 @@ Si propone un commit, el mensaje debe estar en espanol y describir claramente el
 
 Antes de modificar archivos, debe confirmar que esta trabajando en `feature/a-estructuras`. Si esta en otra rama, debe pedir autorizacion para cambiar.
 
+Al inicio de sesion debe actualizar `feature/a-estructuras` con `origin/main` si no hay conflictos. Si hay conflictos, debe parar y pedir ayuda humana.
+
 ## 7. Entrega por sesion
 
 Debe terminar cada sesion con:

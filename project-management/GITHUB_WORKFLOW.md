@@ -61,20 +61,22 @@ Todo cambio importante debe entrar mediante Pull Request revisada.
 4. El agente lee los documentos de coordinacion actualizados.
 5. El agente confirma que esta en la rama correspondiente a su parte.
 6. Si no esta en su rama, pide autorizacion para cambiar a ella.
-7. El humano asigna una tarea en `TASKS.md`.
-8. El agente trabaja solo en su rama.
-9. El agente modifica solo archivos permitidos.
-10. Si necesita tocar un archivo compartido, pide permiso.
-11. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
-12. El agente revisa si debe actualizar `DECISIONS.md`, `PRD.md`, `ARCHITECTURE.md` o su archivo de agente.
-13. El agente ejecuta pruebas relevantes si es posible.
-14. El agente muestra resumen de sesion.
-15. El humano autoriza o rechaza commit.
-16. El humano autoriza o rechaza push.
-17. Se crea PR hacia `main`.
-18. Un humano revisa la PR.
-19. Si la PR contiene codigo, el Agente Revisor independiente la revisa obligatoriamente.
-20. Si se aprueba, se hace merge a `main`.
+7. El agente actualiza su rama con `origin/main` si no hay conflictos.
+8. Si hay conflictos al actualizar, el agente se detiene y pide ayuda humana.
+9. El humano asigna una tarea en `TASKS.md`.
+10. El agente trabaja solo en su rama.
+11. El agente modifica solo archivos permitidos.
+12. Si necesita tocar un archivo compartido, pide permiso.
+13. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
+14. El agente revisa si debe actualizar `DECISIONS.md`, `PRD.md`, `ARCHITECTURE.md` o su archivo de agente.
+15. El agente ejecuta pruebas relevantes si es posible.
+16. El agente muestra resumen de sesion.
+17. El humano autoriza o rechaza commit.
+18. El humano autoriza o rechaza push.
+19. Se crea PR hacia `main`.
+20. Un humano revisa la PR.
+21. Si la PR contiene codigo, el Agente Revisor independiente la revisa obligatoriamente.
+22. Si se aprueba, se hace merge a `main`.
 
 ## 4.1 Documentacion como fuente de verdad
 
@@ -99,7 +101,31 @@ debe terminar preguntando si se autoriza commit y push.
 
 Tambien debe registrar un cierre de sesion en `SCRATCHPAD.md` antes de terminar.
 
-## 4.2 Tests JUnit obligatorios
+## 4.2 Actualizacion automatica de ramas
+
+Cada agente debe mantener su rama al dia con `origin/main`.
+
+Al inicio de sesion:
+
+```text
+1. Hacer fetch de GitHub.
+2. Cambiar a su rama de trabajo.
+3. Integrar la ultima version de origin/main.
+4. Si no hay conflictos, continuar.
+5. Si hay conflictos, parar y pedir ayuda humana.
+```
+
+Si tras actualizar la rama local hace falta subir la rama remota, el agente debe pedir autorizacion explicita antes de hacer push.
+
+Las ramas son:
+
+```text
+Parte A -> feature/a-estructuras
+Parte B -> feature/b-logica
+Parte C -> feature/c-javafx-json-docs
+```
+
+## 4.3 Tests JUnit obligatorios
 
 Todo agente que cree o modifique codigo no visual debe crear o actualizar tests unitarios con JUnit.
 

@@ -182,3 +182,37 @@ Documentos leidos/modificados: `AGENTS.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKL
 
 - Que los agentes implementen codigo sin tests por ir demasiado rapido.
 - Que el revisor independiente se trate como opcional en la practica. La regla actualizada lo hace obligatorio para cambios de codigo.
+
+## 2026-05-20 - Actualizacion automatica de ramas
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Coordinacion global fuera de Parte A
+Agente: Codex
+
+### Contexto
+
+Se pidio que las ramas de trabajo se mantengan actualizadas automaticamente para evitar que los agentes trabajen sobre versiones antiguas.
+
+### Sincronizacion
+
+Rama: main
+Cambio remoto revisado: si
+Documentos leidos/modificados: `AGENTS.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, archivos especificos de agentes.
+
+### Cambios
+
+- Se establecio que cada agente debe actualizar su rama con `origin/main` al inicio de sesion.
+- Si la actualizacion no tiene conflictos, el agente debe hacerla antes de trabajar.
+- Si aparecen conflictos, el agente debe parar y pedir ayuda humana.
+- Si la actualizacion requiere push de la rama, el agente debe pedir autorizacion humana.
+
+### Pendiente
+
+- Hacer commit/push de estos cambios si Alvaro lo autoriza.
+- Actualizar las ramas de Guille y Hector con `main` cuando proceda o cuando lo autoricen.
+
+### Riesgos
+
+- Actualizar ramas sin revisar conflictos puede romper trabajo de otros agentes. Por eso, la regla exige parar si hay conflictos.

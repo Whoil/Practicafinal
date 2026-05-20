@@ -9,6 +9,7 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] La tarea corresponde al rol confirmado.
 - [ ] El agente trabajo en la rama correspondiente a su parte.
 - [ ] El agente comprobo si habia cambios remotos en GitHub.
+- [ ] La rama de trabajo fue actualizada con `origin/main` antes de trabajar, o se explico por que no se pudo.
 - [ ] El agente leyo la documentacion actualizada antes de trabajar.
 
 ## 1. Restricciones de estructuras
