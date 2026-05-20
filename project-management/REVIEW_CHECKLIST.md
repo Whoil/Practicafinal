@@ -7,6 +7,7 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] El humano se identifico al inicio de la sesion.
 - [ ] El agente confirmo rol y area de trabajo antes de modificar archivos.
 - [ ] La tarea corresponde al rol confirmado.
+- [ ] El agente trabajo en la rama correspondiente a su parte.
 - [ ] El agente comprobo si habia cambios remotos en GitHub.
 - [ ] El agente leyo la documentacion actualizada antes de trabajar.
 
@@ -59,6 +60,7 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] Se comprobo si otros agentes habian cambiado documentos relacionados.
 - [ ] Si hubo cambios significativos o documentales, el agente pidio autorizacion explicita para commit/push.
 - [ ] El mensaje de commit propuesto esta en espanol y describe claramente el cambio.
+- [ ] El commit se hizo o se propone hacer en la rama de trabajo correcta, no directamente en `main`.
 
 ## 6. Revision de entrega
 

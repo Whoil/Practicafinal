@@ -73,6 +73,17 @@ Tareas abiertas relevantes: ...
 
 Si el humano no se identifica, el agente debe preguntarlo antes de hacer cambios.
 
+Despues de identificar la parte, el agente debe confirmar la rama de trabajo correspondiente:
+
+```text
+Parte A -> feature/a-estructuras
+Parte B -> feature/b-logica
+Parte C -> feature/c-javafx-json-docs
+Revision -> rama o PR indicada por el humano
+```
+
+El agente no debe modificar archivos ni preparar commits en una rama que no corresponda a la parte identificada, salvo autorizacion humana explicita.
+
 ## 1.3 Sincronizacion de documentacion
 
 Los archivos de `project-management/` son el mecanismo principal para coordinar agentes.
@@ -85,6 +96,7 @@ Antes de trabajar, cada agente debe:
 3. Integrar o pedir ayuda humana si hay cambios de otros agentes.
 4. Leer los documentos actualizados.
 5. Confirmar que su tarea sigue vigente.
+6. Cambiar a su rama de trabajo asignada si no esta ya en ella.
 ```
 
 Despues de trabajar, cada agente debe:
@@ -308,6 +320,13 @@ feature/c-javafx-json-docs
 ```
 
 Cada agente trabaja en su propia rama y no toca ramas de otros agentes.
+
+Regla de commits:
+
+```text
+Los commits de cada parte se hacen en su rama asignada.
+No se hacen commits directamente en main salvo tareas de coordinacion autorizadas.
+```
 
 ## 10. Resumen obligatorio por sesion
 

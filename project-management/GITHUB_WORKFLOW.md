@@ -39,6 +39,14 @@ feature/c-javafx-json-docs
 
 Cada integrante y su agente trabajan en su rama.
 
+Asignacion:
+
+```text
+Alvaro + Codex-A Estructuras -> feature/a-estructuras
+Guille + Agente B Logica -> feature/b-logica
+Hector + Agente C JavaFX/JSON/Docs -> feature/c-javafx-json-docs
+```
+
 ## 3. Regla principal
 
 Nadie, humano o agente, debe hacer push directo a `main`.
@@ -51,20 +59,22 @@ Todo cambio importante debe entrar mediante Pull Request revisada.
 2. El agente confirma rol, area permitida y tarea.
 3. El agente comprueba si hay cambios remotos en GitHub.
 4. El agente lee los documentos de coordinacion actualizados.
-5. El humano asigna una tarea en `TASKS.md`.
-6. El agente trabaja solo en su rama.
-7. El agente modifica solo archivos permitidos.
-8. Si necesita tocar un archivo compartido, pide permiso.
-9. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
-10. El agente revisa si debe actualizar `DECISIONS.md`, `PRD.md`, `ARCHITECTURE.md` o su archivo de agente.
-11. El agente ejecuta pruebas relevantes si es posible.
-12. El agente muestra resumen de sesion.
-13. El humano autoriza o rechaza commit.
-14. El humano autoriza o rechaza push.
-15. Se crea PR hacia `main`.
-16. Un humano revisa la PR.
-17. Opcionalmente, el agente revisor revisa la PR.
-18. Si se aprueba, se hace merge a `main`.
+5. El agente confirma que esta en la rama correspondiente a su parte.
+6. Si no esta en su rama, pide autorizacion para cambiar a ella.
+7. El humano asigna una tarea en `TASKS.md`.
+8. El agente trabaja solo en su rama.
+9. El agente modifica solo archivos permitidos.
+10. Si necesita tocar un archivo compartido, pide permiso.
+11. El agente actualiza `SCRATCHPAD.md`, `TASKS.md` e `IA_DIARY.md`.
+12. El agente revisa si debe actualizar `DECISIONS.md`, `PRD.md`, `ARCHITECTURE.md` o su archivo de agente.
+13. El agente ejecuta pruebas relevantes si es posible.
+14. El agente muestra resumen de sesion.
+15. El humano autoriza o rechaza commit.
+16. El humano autoriza o rechaza push.
+17. Se crea PR hacia `main`.
+18. Un humano revisa la PR.
+19. Opcionalmente, el agente revisor revisa la PR.
+20. Si se aprueba, se hace merge a `main`.
 
 ## 4.1 Documentacion como fuente de verdad
 
@@ -183,6 +193,18 @@ arreglos
 update
 cosas
 ```
+
+## 7.2 Donde se hacen los commits
+
+Los commits deben hacerse en la rama de trabajo de la parte correspondiente:
+
+```text
+Parte A: feature/a-estructuras
+Parte B: feature/b-logica
+Parte C: feature/c-javafx-json-docs
+```
+
+`main` solo debe recibir cambios mediante Pull Request revisada, salvo cambios de coordinacion excepcionalmente autorizados por el grupo.
 
 ## 8. Conflictos
 

@@ -92,6 +92,8 @@ Puede preparar cambios en esa rama. No puede hacer commit, push, PR o merge sin 
 
 Si propone un commit, el mensaje debe estar en espanol y describir claramente el cambio.
 
+Antes de modificar archivos, debe confirmar que esta trabajando en `feature/a-estructuras`. Si esta en otra rama, debe pedir autorizacion para cambiar.
+
 ## 7. Entrega por sesion
 
 Debe terminar cada sesion con:
