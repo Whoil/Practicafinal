@@ -43,7 +43,10 @@ Usar antes de aceptar cambios importantes, commits o merges.
 ## 4. Funcionalidad
 
 - [ ] El cambio cumple el criterio de terminado de `TASKS.md`.
-- [ ] Hay pruebas para logica no visual cuando aplica.
+- [ ] Si hay codigo no visual nuevo o modificado, hay tests unitarios JUnit asociados.
+- [ ] Los tests JUnit cubren casos normales y algun caso limite razonable.
+- [ ] Los tests JUnit se ejecutaron y el resultado queda indicado.
+- [ ] Si no se pudieron ejecutar tests JUnit, el motivo queda explicado.
 - [ ] No rompe tests existentes.
 - [ ] El codigo compila o se indica por que no se pudo comprobar.
 - [ ] El codigo esta comentado en profundidad en metodos, algoritmos y decisiones ya aprobadas por el grupo que no sean evidentes.
@@ -71,3 +74,10 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] JSON de configuracion existe.
 - [ ] Guardar/cargar partida existe.
 - [ ] Hay memoria/UML/diario IA en progreso.
+
+## 7. Revision independiente
+
+- [ ] El cambio de codigo fue revisado por el Agente Revisor independiente.
+- [ ] El revisor no es el mismo agente que implemento el cambio.
+- [ ] El informe del revisor indica si recomienda aceptar o pedir cambios.
+- [ ] Los hallazgos del revisor se resolvieron o quedaron aceptados por un humano.

@@ -111,10 +111,17 @@ No hay tareas en curso todavia.
 
 ### R-01 Revision de restricciones
 
-- Responsable: Agente Revisor
+- Responsable: Agente Revisor Independiente
 - Estado: PENDIENTE
 - Archivos permitidos: todo el repositorio en modo lectura; cambios solo con permiso
 - Terminado cuando se revise que no hay colecciones prohibidas ni arrays para matriz.
+
+### R-02 Revision de codigo y tests
+
+- Responsable: Agente Revisor Independiente
+- Estado: PENDIENTE
+- Archivos permitidos: todo el repositorio en modo lectura; cambios solo con permiso
+- Terminado cuando cada PR con codigo tenga revision independiente, comprobacion de tests JUnit y checklist completado.
 
 ## Hechas
 

@@ -145,3 +145,40 @@ Documentos leidos/modificados: `AGENTS.md`, `GITHUB_WORKFLOW.md`, `TASKS.md`, `S
 - No crear nuevas estructuras de datos sin autorizacion humana.
 - No tocar archivos de Parte B o Parte C sin autorizacion.
 - Mantener `project-management/` sincronizado en GitHub para que los otros agentes lean el estado correcto.
+
+## 2026-05-20 - Reglas globales de revision y tests
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Coordinacion global fuera de Parte A
+Agente: Codex
+
+### Contexto
+
+Se reviso la organizacion general para reforzar dos normas del proyecto: existencia de un agente revisor independiente y obligatoriedad de tests unitarios JUnit para el codigo no visual.
+
+### Sincronizacion
+
+Rama: main
+Cambio remoto revisado: si
+Documentos leidos/modificados: `AGENTS.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `TASKS.md`, archivos especificos de agentes.
+
+### Cambios
+
+- Se reforzo que el Agente Revisor es independiente de los agentes A, B y C.
+- Se establecio que todo cambio de codigo debe pasar por revision independiente antes de merge a `main`.
+- Se establecio que todo codigo no visual nuevo o modificado debe tener tests unitarios JUnit.
+- Se establecio que, si no se pueden ejecutar tests JUnit, el agente debe explicar el motivo.
+- Se anadio tarea `R-02 Revision de codigo y tests`.
+- Se actualizaron los archivos especificos de agentes A, B y C para exigir tests JUnit en su area.
+
+### Pendiente
+
+- Hacer commit/push de estos cambios si Alvaro lo autoriza.
+- Los agentes B y C deberan leer estas reglas al iniciar sus sesiones.
+
+### Riesgos
+
+- Que los agentes implementen codigo sin tests por ir demasiado rapido.
+- Que el revisor independiente se trate como opcional en la practica. La regla actualizada lo hace obligatorio para cambios de codigo.

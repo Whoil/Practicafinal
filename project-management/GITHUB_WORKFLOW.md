@@ -73,7 +73,7 @@ Todo cambio importante debe entrar mediante Pull Request revisada.
 16. El humano autoriza o rechaza push.
 17. Se crea PR hacia `main`.
 18. Un humano revisa la PR.
-19. Opcionalmente, el agente revisor revisa la PR.
+19. Si la PR contiene codigo, el Agente Revisor independiente la revisa obligatoriamente.
 20. Si se aprueba, se hace merge a `main`.
 
 ## 4.1 Documentacion como fuente de verdad
@@ -98,6 +98,34 @@ debe terminar preguntando si se autoriza commit y push.
 ```
 
 Tambien debe registrar un cierre de sesion en `SCRATCHPAD.md` antes de terminar.
+
+## 4.2 Tests JUnit obligatorios
+
+Todo agente que cree o modifique codigo no visual debe crear o actualizar tests unitarios con JUnit.
+
+Aplica especialmente a:
+
+- Estructuras propias.
+- Matriz y celdas.
+- Grafo de cuevas.
+- BFS y caminos minimos.
+- Personajes.
+- Objetos e inventario.
+- Turnos.
+- Combate.
+- Victoria y derrota.
+- Carga y guardado JSON.
+
+No se considera terminada una tarea de codigo no visual si no incluye tests JUnit razonables o una explicacion aprobada de por que no se pueden crear todavia.
+
+Cada resumen de sesion debe indicar:
+
+```text
+Tests creados o actualizados:
+Tests ejecutados:
+Resultado:
+Si no se ejecutaron, motivo:
+```
 
 ## 5. Archivos compartidos
 

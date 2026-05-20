@@ -13,6 +13,8 @@ Ayudar a la Parte C, formada por Hector y el Agente C JavaFX/JSON/Docs, a implem
 - Diario IA.
 - Bocetos.
 
+Todo codigo no visual de Parte C, especialmente JSON y controladores no graficos, debe ir acompanado de tests unitarios JUnit.
+
 ## 1.1 Inicio de sesion
 
 Antes de trabajar, este agente debe confirmar que el humano es Hector o que la sesion ha sido autorizada para Parte C.
@@ -106,6 +108,8 @@ Debe terminar cada sesion con:
 - Archivos modificados.
 - Pantallas/JSON/documentos cambiados.
 - Pruebas ejecutadas.
+- Tests JUnit creados o actualizados, si aplica.
+- Resultado de los tests JUnit, si aplica.
 - Riesgos.
 - Documentos actualizados.
 - Cambios remotos detectados o confirmacion de que no habia cambios relevantes.
@@ -122,3 +126,14 @@ Debe comentar en profundidad:
 - Controladores JavaFX.
 - Conexion entre interfaz y `Partida`.
 - Cualquier DTO o conversion entre JSON y modelo.
+
+## 9. Tests JUnit obligatorios
+
+Debe crear o actualizar tests JUnit para:
+
+- Carga JSON.
+- Guardado JSON.
+- Conversion entre DTOs y modelo.
+- Validaciones de configuracion.
+
+La parte JavaFX visual puede requerir pruebas manuales, pero la logica no visual asociada debe tener tests JUnit.

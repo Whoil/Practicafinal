@@ -14,6 +14,8 @@ Ayudar a la Parte B, formada por Guille y el Agente B Logica, a implementar y pr
 - Inventario.
 - Victoria y derrota.
 
+Todo codigo de Parte B debe ir acompanado de tests unitarios JUnit cuando sea codigo ejecutable no visual.
+
 ## 1.1 Inicio de sesion
 
 Antes de trabajar, este agente debe confirmar que el humano es Guille o que la sesion ha sido autorizada para Parte B.
@@ -106,6 +108,8 @@ Debe terminar cada sesion con:
 - Archivos modificados.
 - Reglas implementadas.
 - Pruebas ejecutadas.
+- Tests JUnit creados o actualizados.
+- Resultado de los tests JUnit.
 - Riesgos.
 - Documentos actualizados.
 - Cambios remotos detectados o confirmacion de que no habia cambios relevantes.
@@ -124,3 +128,19 @@ Debe comentar en profundidad:
 - Inventario.
 - Efectos de objetos.
 - Condiciones de victoria y derrota.
+
+## 9. Tests JUnit obligatorios
+
+Debe crear o actualizar tests JUnit para:
+
+- Personajes.
+- Jugador.
+- Enemigos.
+- Boss.
+- Objetos.
+- Inventario.
+- Turnos.
+- Combate.
+- Victoria y derrota.
+
+Si una tarea todavia no permite tests completos, debe crear al menos tests parciales o explicar el bloqueo.

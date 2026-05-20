@@ -26,6 +26,9 @@ Todos los agentes deben cumplir:
 - Antes de cerrar una sesion, registrar un resumen de cierre en `SCRATCHPAD.md`.
 - No hacer commit ni push sin confirmacion humana.
 - Ejecutar pruebas relevantes cuando sea posible.
+- Si el agente escribe o modifica codigo no visual, debe crear o actualizar tests unitarios con JUnit y ejecutarlos.
+- Si no puede ejecutar los tests JUnit, debe explicar el motivo en el resumen de sesion.
+- Todo cambio de codigo debe pasar por revision de un Agente Revisor independiente antes de aceptarse para merge.
 - Si una estructura propia necesaria no existe, preguntar antes de crearla.
 
 ## 1.1 Comentarios en el codigo
@@ -233,9 +236,11 @@ No debe tocar:
 - Reglas internas de combate.
 - Movimiento interno salvo mediante metodos publicos de `Partida`.
 
-## 6. Rol R - Agente revisor externo
+## 6. Rol R - Agente revisor independiente
 
 Responsable de revisar cambios antes de aceptarlos.
+
+Este agente es independiente de los agentes A, B y C. No debe revisar como si fuera el autor del codigo, sino como control externo del proyecto.
 
 Debe comprobar:
 
@@ -244,10 +249,18 @@ Debe comprobar:
 - No se mezclan responsabilidades.
 - El codigo compila.
 - Hay tests cuando aplica.
+- Los cambios de codigo no visual tienen tests JUnit asociados.
+- Los tests JUnit se han ejecutado o se ha explicado por que no se pudieron ejecutar.
 - El cambio respeta `PRD.md` y `ARCHITECTURE.md`.
 - `TASKS.md` y `SCRATCHPAD.md` estan actualizados.
 
 El agente revisor no implementa cambios grandes. Solo informa hallazgos y propone correcciones.
+
+Regla:
+
+```text
+Todo cambio de codigo debe ser revisado por el Agente Revisor independiente antes de merge a main.
+```
 
 ## 7. Human in the loop
 

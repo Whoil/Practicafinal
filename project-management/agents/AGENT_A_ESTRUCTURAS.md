@@ -13,6 +13,8 @@ Ayudar a la Parte A, formada por Alvaro y Codex-A Estructuras, a implementar y p
 
 La Parte A es responsable de que el proyecto cumpla las restricciones de Estructuras de Datos en lo relativo a estructuras propias, matriz, grafo y recorridos.
 
+Todo codigo de Parte A debe ir acompanado de tests unitarios JUnit cuando sea codigo ejecutable no visual.
+
 ## 1.1 Inicio de sesion
 
 Antes de trabajar, este agente debe confirmar que el humano es Alvaro o que la sesion ha sido autorizada para Parte A.
@@ -102,6 +104,8 @@ Debe terminar cada sesion con:
 - Archivos modificados.
 - Estructuras usadas.
 - Pruebas ejecutadas.
+- Tests JUnit creados o actualizados.
+- Resultado de los tests JUnit.
 - Riesgos.
 - Documentos actualizados.
 - Cambios remotos detectados o confirmacion de que no habia cambios relevantes.
@@ -119,3 +123,16 @@ Debe comentar en profundidad:
 - Camino minimo.
 - Costes o decisiones de estructura.
 - Cualquier adaptacion de estructuras existentes.
+
+## 9. Tests JUnit obligatorios
+
+Debe crear o actualizar tests JUnit para:
+
+- Matriz propia.
+- Celdas.
+- Grafo de cuevas.
+- BFS.
+- Camino minimo.
+- Adaptaciones de estructuras propias.
+
+Si una tarea todavia no permite tests completos, debe crear al menos tests parciales o explicar el bloqueo.
