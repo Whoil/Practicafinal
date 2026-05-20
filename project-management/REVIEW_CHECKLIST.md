@@ -58,6 +58,7 @@ Usar antes de aceptar cambios importantes, commits o merges.
 - [ ] Los cambios de documentacion necesarios estan listos para commit/push autorizado.
 - [ ] Se comprobo si otros agentes habian cambiado documentos relacionados.
 - [ ] Si hubo cambios significativos o documentales, el agente pidio autorizacion explicita para commit/push.
+- [ ] El mensaje de commit propuesto esta en espanol y describe claramente el cambio.
 
 ## 6. Revision de entrega
 

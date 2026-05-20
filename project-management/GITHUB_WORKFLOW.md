@@ -121,7 +121,7 @@ Permitido con autorizacion humana cuando corresponda:
 - Comparar su rama con `origin/main`.
 - Crear rama asignada.
 - Preparar cambios.
-- Proponer commit.
+- Proponer commit con mensaje en espanol, claro y descriptivo.
 - Hacer commit autorizado.
 - Hacer push autorizado.
 - Preparar texto de PR.
@@ -161,6 +161,28 @@ Checklist minimo:
 - [ ] El codigo nuevo esta comentado en profundidad.
 - [ ] Compila o indica por que no se pudo comprobar.
 - [ ] Incluye pruebas si aplica.
+
+## 7.1 Mensajes de commit
+
+A partir de ahora, los mensajes de commit deben estar en espanol y describir claramente el cambio.
+
+Ejemplos validos:
+
+```text
+docs: aclarar reglas de sincronizacion de agentes
+feat: crear matriz propia de cuevas
+test: anadir pruebas de movimiento en cueva
+fix: corregir calculo de celdas alcanzables
+```
+
+Evitar mensajes vagos como:
+
+```text
+cambios
+arreglos
+update
+cosas
+```
 
 ## 8. Conflictos
 

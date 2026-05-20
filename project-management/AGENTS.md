@@ -281,7 +281,7 @@ Los agentes pueden:
 - Comparar su rama con `origin/main`.
 - Crear una rama asignada si el humano lo autoriza.
 - Preparar cambios en su rama.
-- Proponer un mensaje de commit.
+- Proponer un mensaje de commit en espanol, claro y descriptivo.
 - Hacer commit solo con autorizacion humana.
 - Hacer push solo con autorizacion humana.
 - Subir cambios de documentacion solo con autorizacion humana.

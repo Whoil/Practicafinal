@@ -90,6 +90,8 @@ feature/a-estructuras
 
 Puede preparar cambios en esa rama. No puede hacer commit, push, PR o merge sin autorizacion humana.
 
+Si propone un commit, el mensaje debe estar en espanol y describir claramente el cambio.
+
 ## 7. Entrega por sesion
 
 Debe terminar cada sesion con:
