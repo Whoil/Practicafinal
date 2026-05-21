@@ -48,7 +48,8 @@ public class Pila< T extends Comparable<T>>extends ListaDE<T> implements Pilas<T
      */
     @Override
     public void push(T dato) {
-        super.add(dato);
+        // La cima de la pila es "ultimo", igual que en pop().
+        super.addLast(dato);
     }
 
 
@@ -256,4 +257,3 @@ public class Pila< T extends Comparable<T>>extends ListaDE<T> implements Pilas<T
     }
 
 }
-
