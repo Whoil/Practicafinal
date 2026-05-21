@@ -59,13 +59,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/Estructuras/`, `src/ParteA/`, `src/ParteB/Grafo/`, `project-management/`
 - Terminado cuando haya tabla de estructuras disponibles, usos y riesgos.
 
-### B-01 Modelo de personajes
-
-- Responsable: Guille / Parte B
-- Estado: REVISION
-- Archivos permitidos: `src/modelo/personajes/`, `test/`, `project-management/`
-- Terminado cuando existan `Personaje`, `Jugador`, `Enemigo` y `Boss` segun arquitectura acordada.
-
 ### B-02 Modelo de objetos e inventario
 
 - Responsable: Guille / Parte B
@@ -79,13 +72,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Estado: PENDIENTE
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
 - Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
-
-### C-01 Disenar JSON inicial
-
-- Responsable: Hector / Parte C
-- Estado: REVISION
-- Archivos permitidos: `src/json/`, `datos/`, `project-management/`
-- Terminado cuando exista un JSON de configuracion para las 3 cuevas.
 
 ### C-02 Cargar y guardar partida
 
@@ -146,6 +132,22 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/mapa/`, `test/`, `project-management/`
 - Terminado: existe `Grafo<T>` dirigido sin `Comparable`, `Mazmorra` contiene `Grafo<Cueva>`, hay cueva actual, conexiones dirigidas, avance entre cuevas, camino minimo y distancia minima.
 - Verificacion: tests pasados en IntelliJ el 2026-05-21, con cobertura alta en `Estructuras`, `modelo.juego`, `modelo.mapa`, `Grafo`, `Mazmorra`, `Cueva`, `Cola` y `ListaSE`.
+
+### B-01 Modelo de personajes
+
+- Responsable: Guille / Parte B
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/personajes/`, `test/`, `project-management/`
+- Terminado: existen `Personaje`, `Jugador`, `Enemigo` y `Boss` segun arquitectura acordada.
+- Verificacion: PR #4 mergeada en `main` el 2026-05-21; tests JUnit de `modelo.personajes` pasados y cobertura verificada en IntelliJ.
+
+### C-01 Disenar JSON inicial
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/json/`, `datos/`, `project-management/`
+- Terminado: existe un JSON de configuracion para las 3 cuevas, DTOs, cargador Gson y tests de carga.
+- Verificacion: PR #3 mergeada en `main` el 2026-05-21; compilacion manual de `src` y tests correcta.
 
 ### PM-01 Crear documentos de coordinacion
 
