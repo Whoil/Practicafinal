@@ -62,7 +62,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### B-01 Modelo de personajes
 
 - Responsable: Guille / Parte B
-- Estado: PENDIENTE
+- Estado: REVISION
 - Archivos permitidos: `src/modelo/personajes/`, `test/`, `project-management/`
 - Terminado cuando existan `Personaje`, `Jugador`, `Enemigo` y `Boss` segun arquitectura acordada.
 
