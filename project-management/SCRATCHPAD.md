@@ -721,3 +721,78 @@ Ninguno.
 ### Estado de TASKS.md
 
 Sin cambios: C-01 sigue en REVISION.
+
+## 2026-05-21 - Guillermo / Parte B
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B - logica del juego
+Agente: Codex / Agente B Logica
+
+### Contexto
+
+Se implemento `B-01 Modelo de personajes`. Antes de programar se reviso la documentacion actualizada de `project-management`, se comprobo GitHub, se actualizo `feature/b-logica` con `origin/main` y se acordo el alcance exacto: personajes base, contrato mediante `Personaje` abstracto y tests JUnit, sin objetos, inventario, turnos, combate, mapa, JavaFX ni JSON.
+
+Tambien se reviso el PDF de la practica y se localizo el apartado 8.4, que pide declarar contratos. Para B-01 se decidio que el contrato necesario seria la clase abstracta `Personaje`, no una interfaz Java adicional.
+
+### Sincronizacion
+
+Rama: `feature/b-logica`
+Cambio remoto revisado: si.
+Rama actualizada con `origin/main`: si, se incorporaron los cambios recientes de Parte A y Parte C, incluyendo `POST_MORTEM.md`, configuracion JUnit, JSON inicial y configuracion Gson.
+Documentos leidos: `AGENTS.md`, `TASKS.md`, `AGENT_B_LOGICA.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRD.md`, `SCRATCHPAD.md`, `IA_DIARY.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `POST_MORTEM.md`.
+
+### Cambios
+
+- Creado `src/modelo/personajes/Personaje.java`.
+- Creado `src/modelo/personajes/Jugador.java`.
+- Creado `src/modelo/personajes/Enemigo.java`.
+- Creado `src/modelo/personajes/Boss.java`.
+- Creado `src/modelo/personajes/TipoEnemigo.java`.
+- Creado `test/modelo/personajes/PersonajeTest.java`.
+- Creado `test/modelo/personajes/EnemigoTest.java`.
+- `Personaje` queda como clase abstracta y contrato base de B-01.
+- `Jugador` hereda de `Personaje`.
+- `Enemigo` hereda de `Personaje` y guarda `TipoEnemigo`.
+- `Boss` hereda de `Enemigo` y fija `TipoEnemigo.BOSS`.
+- Se implementan vida maxima, vida actual, ataque base, defensa base, movimiento, fila y columna.
+- Se implementan `recibirDano`, `curar`, `estaVivo` y `cambiarPosicion`.
+- No se anadieron setters generales para estadisticas base; queda comentado como decision de encapsulacion.
+- Se deja `B-01` en estado `REVISION` en `TASKS.md`.
+- Se paso revision independiente. El revisor recomendo aceptar sin bloqueos.
+- Se corrigio la nota de compatibilidad Java cambiando `String.isBlank()` por `trim().isEmpty()`.
+- Se ampliaron los tests para mejorar la cobertura de `Jugador`, `Enemigo`, `Boss`, `TipoEnemigo` y ramas de validacion de `Personaje`.
+- Guillermo verifico en IntelliJ cobertura del 100% en el paquete `modelo.personajes`.
+
+### Tests
+
+Tests JUnit creados o actualizados:
+
+- `PersonajeTest`
+- `EnemigoTest`
+
+Tests ejecutados:
+
+- Compilacion de codigo de produccion con `javac`.
+- Compilacion de fuentes de test con JUnit disponible en la configuracion actual del proyecto.
+- Ejecucion de tests JUnit de `modelo.personajes`.
+
+Resultado:
+
+- Codigo de produccion de `modelo.personajes`: compila correctamente.
+- Tests de `modelo.personajes`: 26 tests ejecutados y pasados.
+- Cobertura en IntelliJ: 100% en clases, metodos, lineas y ramas del paquete `modelo.personajes`.
+- Compilacion completa del `src` actualizado, incluyendo Parte A, Parte B y Parte C: correcta.
+- Nota tecnica: `javac` genero clases de test pero mostro un aviso/excepcion interna de permisos al cerrar un jar de JUnit en `.m2`; para verificar comportamiento se ejecutaron los metodos `@Test` compilados mediante reflexion, todos con resultado correcto.
+
+### Pendiente
+
+- Preparar commit, push y Pull Request cuando Guillermo lo autorice.
+- Mantener `B-01` en `REVISION` hasta que el grupo acepte la PR o indique marcarla como `HECHA`.
+- Mantener inventario, objetos, turnos, combate y regla del 75% para `B-02` y `B-03`.
+
+### Riesgos
+
+- `B-01` evita a proposito inventario, objetos, drops, combate, turnos y regla del 75%; esas partes deben mantenerse fuera de esta tarea.
+- Los datos JSON de Parte C ya incluyen enemigos y objetos como configuracion, pero Parte B aun no debe acoplarse a ellos hasta `B-02`/`B-03`.
