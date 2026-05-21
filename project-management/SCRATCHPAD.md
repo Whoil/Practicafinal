@@ -667,3 +667,57 @@ Ninguno dentro del area permitida de Parte C.
 ### Estado de TASKS.md
 
 C-01 pasa a REVISION.
+
+## 2026-05-21 - Hector / Parte C - Resolver merge conflicts PR #3
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Segunda sesion de Parte C. La PR #3 (C-01) tenia conflictos con main en los documentos
+de coordinacion (IA_DIARY.md, SCRATCHPAD.md) y en "Practica final.iml". Se resolvieron
+localmente con `git merge main`.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Conflicto detectado via `gh pr view 3`: mergeable=CONFLICTING, mergeStateStatus=DIRTY.
+
+### Tarea trabajada
+
+Resolver merge conflict de PR #3.
+
+### Cambios
+
+Ningun cambio funcional. Solo resolucion de merge:
+- `Practica final.iml`: keep entrada Gson de HEAD.
+- `IA_DIARY.md`: keep entrada C-01 de HEAD.
+- `SCRATCHPAD.md`: keep entrada C-01 de HEAD (ligeramente simplificada).
+- Commit merge ed1aea7 y push a origin.
+
+### Archivos modificados
+
+- `Practica final.iml` (merge)
+- `project-management/IA_DIARY.md` (merge + entrada sesion 2)
+- `project-management/SCRATCHPAD.md` (merge + entrada sesion 2)
+
+### Pruebas ejecutadas
+
+No aplica (sin cambios de codigo).
+
+### Riesgos
+
+- Si otros companeros modifican los mismos documentos antes de mergear la PR,
+  podrian aparecer nuevos conflictos.
+
+### Archivos compartidos tocados o solicitados
+
+Ninguno.
+
+### Estado de TASKS.md
+
+Sin cambios: C-01 sigue en REVISION.

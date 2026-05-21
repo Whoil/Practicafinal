@@ -220,3 +220,45 @@ Ninguno. Todo el plan se ejecuto segun lo acordado.
 ### Critica
 
 La tarea salio segun lo planeado. La compilacion fue correcta tanto de src como de tests. Los tests no pudieron ejecutarse desde terminal por falta de runner JUnit standalone, pero se dejaron preparados para IntelliJ. Para futuras sesiones, convendria tener los mensajes de commit preparados y pedir autorizacion humana al final de la sesion.
+
+## 2026-05-21 - Hector (sesion 2)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Resolver merge conflicts de la PR #3, actualizar la documentacion y cerrar la sesion.
+
+### Prompt o resumen del prompt
+
+Hector volvio al Agente C pidiendo ayuda para resolver conflictos de merge en la PR #3
+(feature/c-javafx-json-docs -> main). Los conflictos estaban en IA_DIARY.md, SCRATCHPAD.md
+y "Practica final.iml". Tras resolverlos, se pidio actualizar ambos documentos con el registro
+de esta sesion.
+
+### Resultado
+
+- Identificados conflictos en 3 archivos al hacer `git merge main`.
+- Resueltos: se mantuvo la entrada Gson en .iml (HEAD), se conservaron las entradas de sesion
+  C-01 en los diarios (HEAD), se descartaron las versiones vacias de main.
+- Commit del merge y push a origin.
+- PR #3 actualizada: estado OPEN, mergeability en calculo por GitHub.
+- Entradas de esta sesion anadidas a IA_DIARY.md y SCRATCHPAD.md.
+
+### Cambios aceptados
+
+- Merge commit ed1aea7 con la resolucion de conflictos.
+- Ningun cambio funcional en el codigo.
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Los conflictos fueron triviales: main tenia versiones vacias de los documentos de Parte C
+porque la rama feature incorporaba contenido que main aun no tenia. Para evitar estos
+conflictos en el futuro, conviene hacer `git merge main` en la feature branch antes de
+crear la PR, o mantener los documentos sincronizados periodicamente.
