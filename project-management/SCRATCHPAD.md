@@ -477,3 +477,36 @@ Agente: Codex-A Estructuras
 - Cerrar formalmente A-01 con tabla de estructuras disponibles, usos y riesgos.
 - Decidir si se adapta `ListaDE`, `Pila` o `ListaCircular` para necesidades de Parte B.
 - Coordinar con Parte B antes de integrar personajes, objetos, turnos o combate.
+
+## 2026-05-21 - Optimizacion de workflow de agentes
+
+### Identificacion
+
+- Humano: Alvaro.
+- Rol: coordinacion de workflow, sin trabajar en Parte A.
+- Agente: Codex.
+
+### Objetivo
+
+Reducir consumo de tokens manteniendo la estructura existente de `project-management`.
+
+### Cambios realizados
+
+- Se anadio en `AGENTS.md` la seccion `1.5 Modo economico de agentes`.
+- Se creo `templates/AGENT_BRIEF_TEMPLATE.md` para delegar tareas con prompts cortos.
+
+### Criterio acordado
+
+- Mantener `AGENTS.md`, `agents/`, `TASKS.md`, `SCRATCHPAD.md`, `DECISIONS.md`, `IA_DIARY.md` y `templates/` como estructura de coordinacion.
+- Usar lectura escalonada de documentos.
+- Delegar agentes auxiliares solo cuando haya paralelismo real, revision independiente o tarea acotada.
+- Evitar copiar documentos completos en prompts o respuestas.
+
+### Tests
+
+- No aplica; cambio solo documental.
+
+### Pendiente
+
+- Aplicar este modo en las siguientes sesiones de Parte B, Parte C y revision.
+- Pedir autorizacion humana antes de commit/push de estos cambios documentales.
