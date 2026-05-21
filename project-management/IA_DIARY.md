@@ -262,3 +262,57 @@ Los conflictos fueron triviales: main tenia versiones vacias de los documentos d
 porque la rama feature incorporaba contenido que main aun no tenia. Para evitar estos
 conflictos en el futuro, conviene hacer `git merge main` en la feature branch antes de
 crear la PR, o mantener los documentos sincronizados periodicamente.
+
+## 2026-05-21 - Guillermo
+
+### Agente o herramienta
+
+Codex / Agente B Logica.
+
+### Objetivo
+
+Implementar la tarea `B-01 Modelo de personajes` respetando los documentos de coordinacion, el PDF de la practica y el alcance acordado con Guillermo.
+
+### Prompt o resumen del prompt
+
+Guillermo inicio una nueva sesion como responsable de Parte B. Pidio revisar GitHub y releer `project-management` antes de proponer o modificar nada. Despues pidio buscar en el PDF la indicacion sobre contratos/interfaces. Tras confirmar que el PDF exige declarar contratos necesarios, se acordo usar `Personaje` abstracto como contrato base para B-01 y no crear interfaces Java innecesarias.
+
+Tambien se acordo que antes de programar se cerraria el alcance, que la regla del 75% quedaria para combate, que no se incluirian objetos ni inventario en B-01, y que al final se usaria revision independiente. Antes del commit se volvio a actualizar la rama con los cambios de Parte C.
+
+### Resultado
+
+Se implemento el modelo base de personajes:
+
+- `Personaje`
+- `Jugador`
+- `Enemigo`
+- `Boss`
+- `TipoEnemigo`
+
+Se crearon tests JUnit:
+
+- `PersonajeTest`
+- `EnemigoTest`
+
+Guillermo verifico en IntelliJ cobertura del 100% para el paquete `modelo.personajes`. Se dejo `B-01` en estado `REVISION` porque la aceptacion final depende de la PR.
+
+El Agente Revisor Independiente recomendo aceptar sin bloqueos. La nota de compatibilidad Java se corrigio sustituyendo `String.isBlank()` por `trim().isEmpty()`. Tambien se corrigio una errata de comentario en `TipoEnemigo` y se anadieron comentarios a las validaciones privadas de `Personaje`.
+
+### Cambios aceptados
+
+- `Personaje` como clase abstracta y contrato base.
+- Constructores libres para no fijar valores por defecto dentro de las clases.
+- Sin setters generales para estadisticas base.
+- Comentarios en clases y metodos importantes, no en getters.
+- Tests en `test/modelo/personajes/`, aprovechando la configuracion JUnit incorporada desde `main`.
+
+### Cambios rechazados o modificados
+
+- No se implemento `atacar`, porque pertenece a `B-03 Combate y turnos`.
+- No se implemento inventario ni objeto equipado, porque pertenecen a `B-02`.
+- No se implemento regla de bajada de defensa al 75%, porque se acordo dejarla para `B-03`.
+- No se creo una interfaz Java adicional para `Personaje`, porque la clase abstracta ya cubre el contrato necesario de B-01.
+
+### Critica
+
+La sesion fue util para ajustar el trabajo al PDF: primero contratos y alcance, luego implementacion. El principal cuidado fue actualizar la rama con los cambios recientes de Parte A y Parte C antes de preparar la PR, porque `main` habia incorporado JSON, Gson, documentos actualizados y tests de otra parte. Tambien conviene mantener la disciplina de no mezclar B-01 con objetos, combate o turnos aunque parezcan cercanos.
