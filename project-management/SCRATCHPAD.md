@@ -510,3 +510,36 @@ Reducir consumo de tokens manteniendo la estructura existente de `project-manage
 
 - Aplicar este modo en las siguientes sesiones de Parte B, Parte C y revision.
 - Pedir autorizacion humana antes de commit/push de estos cambios documentales.
+
+## 2026-05-21 - Politica de modelos para workflow economico
+
+### Identificacion
+
+- Humano: Alvaro.
+- Rol: coordinacion de workflow, sin trabajar en Parte A.
+- Agente: Codex.
+
+### Objetivo
+
+Definir que modelo conviene usar en este proyecto para ahorrar tokens sin perder coherencia ni calidad.
+
+### Cambios realizados
+
+- Se anadio en `AGENTS.md` la seccion `1.5.6 Politica de modelos`.
+
+### Criterio acordado
+
+- `GPT-5.4` como modelo principal.
+- `GPT-5.4-Mini` para lectura, resumen, busquedas y tareas auxiliares de bajo riesgo.
+- `GPT-5.5` reservado para arquitectura, depuracion dificil y cambios delicados.
+- `GPT-5.3-Codex` util para implementacion mecanica acotada.
+- El mayor ahorro debe venir antes de reducir contexto y delegacion innecesaria que de bajar de modelo.
+
+### Tests
+
+- No aplica; cambio solo documental.
+
+### Pendiente
+
+- Aplicar esta politica cuando se deleguen nuevas tareas en Parte B, Parte C o revision.
+- Pedir autorizacion humana antes de commit/push de este ajuste documental.

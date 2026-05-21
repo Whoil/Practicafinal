@@ -252,6 +252,41 @@ El cierre de sesion mantiene el formato obligatorio, pero debe ser breve:
 - Registrar decisiones nuevas en `DECISIONS.md`, no repetirlas enteras en `SCRATCHPAD.md`.
 - Registrar en `IA_DIARY.md` solo usos relevantes, no cada busqueda trivial.
 
+### 1.5.6 Politica de modelos
+
+Para reducir coste sin perder calidad, los agentes deben elegir el modelo segun complejidad, riesgo y necesidad real de contexto.
+
+Regla principal:
+
+```text
+No usar el modelo mas caro por defecto.
+Usar el modelo minimo suficiente para completar bien la tarea.
+```
+
+Politica recomendada para este proyecto:
+
+- `GPT-5.4` como modelo principal de trabajo y coordinacion.
+- `GPT-5.4-Mini` para agentes auxiliares de lectura, resumen, busqueda acotada y tareas mecanicas de bajo riesgo.
+- `GPT-5.5` solo para arquitectura, depuracion dificil, decisiones delicadas o cambios con alto impacto cruzado.
+- `GPT-5.3-Codex` para implementaciones de codigo acotadas y mecanicas cuando no haga falta una gran capacidad de sintesis.
+
+Aplicacion practica:
+
+```text
+Si la tarea requiere entender varias piezas del proyecto, usar el modelo principal.
+Si la tarea solo requiere localizar, resumir o comprobar algo concreto, preferir un modelo mas ligero.
+Si la tarea es delicada pero pequena, reducir primero el contexto antes de subir de modelo.
+```
+
+La prioridad de ahorro debe seguir este orden:
+
+```text
+1. Reducir contexto innecesario.
+2. Evitar agentes auxiliares innecesarios.
+3. Reutilizar resúmenes existentes en SCRATCHPAD.md.
+4. Solo despues, bajar de modelo si la tarea lo permite.
+```
+
 ## 2. Colecciones prohibidas
 
 No usar:

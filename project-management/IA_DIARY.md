@@ -109,3 +109,37 @@ No se creo una estructura nueva fuera de `project-management`; se adapto el work
 ### Critica
 
 La mejora reduce duplicacion de contexto, pero solo funcionara si los agentes registran buenos resumenes en `SCRATCHPAD.md` y evitan repetir investigaciones ya hechas.
+
+## 2026-05-21 - Alvaro
+
+### Agente o herramienta
+
+Codex.
+
+### Objetivo
+
+Fijar una politica de modelos para el proyecto que reduzca coste sin romper la coordinacion ni la calidad.
+
+### Prompt o resumen del prompt
+
+Alvaro pregunto si convenia usar GPT-5.5 o una version anterior para ahorrar tokens y despues pidio dejar la politica cerrada dentro de `project-management`.
+
+### Resultado
+
+Se documento en `AGENTS.md` una politica de modelos ligada al modo economico de agentes.
+
+### Cambios aceptados
+
+- `GPT-5.4` como modelo principal.
+- `GPT-5.4-Mini` para tareas auxiliares ligeras.
+- `GPT-5.5` solo para tareas dificiles o de alto impacto.
+- `GPT-5.3-Codex` para implementacion mecanica acotada.
+- Priorizar primero ahorro por contexto y workflow antes que por cambio de modelo.
+
+### Cambios rechazados o modificados
+
+No se impuso GPT-5.5 como modelo general del proyecto porque el coste adicional no compensa en el trabajo diario.
+
+### Critica
+
+La politica queda clara y util, pero su efecto real depende mas de la disciplina con el contexto y la delegacion que del nombre del modelo elegido.
