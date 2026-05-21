@@ -146,6 +146,147 @@ Todo cambio significativo requiere:
 5. Si es codigo, pasar revision del Agente Revisor Independiente antes de merge.
 ```
 
+## 1.5 Modo economico de agentes
+
+Para reducir consumo de tokens sin romper la estructura de coordinacion, los agentes deben trabajar con contexto minimo y documentos compartidos como fuente de verdad.
+
+Regla principal:
+
+```text
+No se duplica el contenido completo de project-management en cada prompt.
+El agente lee solo los documentos necesarios para su rol, tarea y riesgo.
+```
+
+El workflow mantiene la estructura existente:
+
+- `AGENTS.md` define reglas globales, roles y limites.
+- `agents/AGENT_*.md` define el contrato especifico de cada agente.
+- `TASKS.md` define que se puede trabajar y cuando termina.
+- `SCRATCHPAD.md` guarda el estado vivo de sesiones y bloqueos.
+- `DECISIONS.md` guarda decisiones humanas aprobadas.
+- `IA_DIARY.md` registra el uso relevante de IA.
+- `templates/` contiene formatos reutilizables para no rehacer prompts largos.
+
+### 1.5.1 Lectura escalonada
+
+Antes de trabajar, el agente debe leer por niveles:
+
+```text
+Nivel 1 obligatorio:
+- AGENTS.md
+- TASKS.md
+- archivo especifico del agente en agents/
+
+Nivel 2 si afecta diseno, arquitectura o alcance:
+- PRD.md
+- ARCHITECTURE.md
+- DECISIONS.md
+
+Nivel 3 si continua una sesion o toca coordinacion:
+- SCRATCHPAD.md
+- IA_DIARY.md
+- GITHUB_WORKFLOW.md
+```
+
+Si la tarea es pequena y no toca codigo ni decisiones compartidas, el agente puede resumir que ha revisado solo el nivel necesario.
+
+### 1.5.2 Uso de agentes auxiliares
+
+El agente principal u orquestador solo debe lanzar agentes auxiliares cuando haya una ventaja clara:
+
+- Dos o mas tareas independientes que puedan avanzar en paralelo.
+- Una revision independiente de codigo ya terminado.
+- Una busqueda acotada que no bloquee el siguiente paso del agente principal.
+- Un cambio con archivos claramente separados por rol.
+
+No debe lanzar un agente auxiliar para:
+
+- Leer uno o dos archivos que puede revisar directamente.
+- Hacer una busqueda simple con `rg`.
+- Repetir una investigacion ya registrada en `SCRATCHPAD.md`.
+- Tocar archivos compartidos sin autorizacion humana.
+
+### 1.5.3 Prompt compacto obligatorio
+
+Cuando se delegue a un agente auxiliar, debe usarse un prompt corto basado en `templates/AGENT_BRIEF_TEMPLATE.md`.
+
+El prompt debe incluir:
+
+- Rol del agente.
+- Tarea concreta.
+- Documentos o archivos que puede leer.
+- Archivos que puede modificar, si procede.
+- Archivos prohibidos.
+- Salida esperada breve.
+
+El agente auxiliar debe responder con:
+
+```text
+Resultado:
+- ...
+
+Archivos relevantes:
+- ruta:linea
+
+Cambios realizados:
+- ...
+
+Riesgos o dudas:
+- ...
+```
+
+No debe copiar documentos completos en su respuesta.
+
+### 1.5.4 Reutilizacion de contexto
+
+Si un agente ya investigo una zona del proyecto, se debe reutilizar su resumen registrado en `SCRATCHPAD.md` antes de lanzar otro agente.
+
+Si se necesita una segunda pregunta al mismo agente, debe enviarse como continuacion breve, no como prompt completo desde cero, siempre que el contexto siga siendo valido.
+
+### 1.5.5 Cierre compacto
+
+El cierre de sesion mantiene el formato obligatorio, pero debe ser breve:
+
+- Solo listar archivos realmente modificados.
+- No pegar salidas completas de tests salvo errores relevantes.
+- Registrar decisiones nuevas en `DECISIONS.md`, no repetirlas enteras en `SCRATCHPAD.md`.
+- Registrar en `IA_DIARY.md` solo usos relevantes, no cada busqueda trivial.
+
+### 1.5.6 Politica de modelos
+
+Para reducir coste sin perder calidad, los agentes deben elegir el modelo segun complejidad, riesgo y necesidad real de contexto.
+
+Regla principal:
+
+```text
+No usar el modelo mas caro por defecto.
+Usar el modelo minimo suficiente para completar bien la tarea.
+```
+
+Politica recomendada para este proyecto:
+
+- `GPT-5.4` como modelo principal de trabajo y coordinacion.
+- `GPT-5.4-Mini` para agentes auxiliares de lectura, resumen, busqueda acotada y tareas mecanicas de bajo riesgo.
+- `GPT-5.5` solo para arquitectura, depuracion dificil, decisiones delicadas o cambios con alto impacto cruzado.
+- `GPT-5.3-Codex` para implementaciones de codigo acotadas y mecanicas cuando no haga falta una gran capacidad de sintesis.
+
+Aplicacion practica:
+
+```text
+Si la tarea requiere entender varias piezas del proyecto, usar el modelo principal.
+Si la tarea solo requiere localizar, resumir o comprobar algo concreto, preferir un modelo mas ligero.
+Si la tarea es delicada pero pequena, reducir primero el contexto antes de subir de modelo.
+```
+
+La prioridad de ahorro debe seguir este orden:
+
+```text
+1. Reducir contexto innecesario.
+2. Evitar agentes auxiliares innecesarios.
+3. Reutilizar resúmenes existentes en SCRATCHPAD.md.
+4. Solo despues, bajar de modelo si la tarea lo permite.
+```
+
 ## 2. Colecciones prohibidas
 
 No usar:

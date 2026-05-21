@@ -623,7 +623,7 @@ Primera sesion de implementacion de Parte C. Se configura Gson en el proyecto y 
 
 ### Sincronizacion
 
-Rama: `feature/c-javafx-json-docs` (pendiente de crear, se trabajara al hacer commit)
+Rama: `feature/c-javafx-json-docs`
 Cambio remoto revisado: si — se detectaron 15 commits nuevos de A y B en `origin/main`.
 Documentos leidos: `PRD.md`, `ARCHITECTURE.md`, `TASKS.md`, `DECISIONS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, `SCRATCHPAD.md`, `AGENT_C_JAVAFX_JSON_DOCS.md`.
 
@@ -643,68 +643,26 @@ C-01 Disenar JSON inicial.
   - Enemigos y objetos definidos por cueva (pendientes de que Parte B los implemente).
   - Conexiones dirigidas del grafo: facil -> media -> dificil.
 - Creados DTOs en `src/json/`:
-  - `ConfiguracionMazmorra.java` (raiz del JSON).
-  - `ConfiguracionCuevaDTO.java` (datos de una cueva).
-  - `ConfiguracionEnemigoDTO.java` (datos de enemigo).
-  - `ConfiguracionObjetoDTO.java` (datos de objeto).
-  - `ConexionDTO.java` (arco entre cuevas).
-- Creado `src/json/CargadorConfiguracion.java`:
-  - Lee JSON con Gson.
-  - Construye objetos Cueva con su matriz de celdas.
-  - Construye Mazmorra con cuevas y conexiones.
-  - Devuelve ResultadoCarga con Mazmorra + listas de enemigos y objetos.
-- Creado `src/json/ResultadoCarga.java` para devolver el resultado completo.
-- Creado test en `test/json/CargadorConfiguracionTest.java` con 10 tests.
-
-### Archivos modificados
-
-- `lib/gson-2.10.1.jar` (nuevo)
-- `.idea/libraries/google_code_gson.xml` (nuevo)
-- `Practica final.iml` (modificado)
-- `datos/cuevas.json` (nuevo)
-- `src/json/ConfiguracionMazmorra.java` (nuevo)
-- `src/json/ConfiguracionCuevaDTO.java` (nuevo)
-- `src/json/ConfiguracionEnemigoDTO.java` (nuevo)
-- `src/json/ConfiguracionObjetoDTO.java` (nuevo)
-- `src/json/ConexionDTO.java` (nuevo)
-- `src/json/CargadorConfiguracion.java` (nuevo)
-- `src/json/ResultadoCarga.java` (nuevo)
-- `test/json/CargadorConfiguracionTest.java` (nuevo)
-- `project-management/SCRATCHPAD.md` (actualizado)
-- `project-management/TASKS.md` (actualizado)
-- `project-management/IA_DIARY.md` (actualizado)
-
-### Estructuras usadas
-
-- `ListaSE<T>` para listas de DTOs en ResultadoCarga.
-- `Cueva`, `Celda`, `TipoCelda`, `Posicion` (de Parte A).
-- `Mazmorra`, `Grafo<Cueva>` (de Parte A).
-- Gson para deserializacion JSON.
+  - `ConfiguracionMazmorra.java`, `ConfiguracionCuevaDTO.java`.
+  - `ConfiguracionEnemigoDTO.java`, `ConfiguracionObjetoDTO.java`.
+  - `ConexionDTO.java`.
+- Creado `src/json/CargadorConfiguracion.java` y `ResultadoCarga.java`.
+- Creado test `test/json/CargadorConfiguracionTest.java` con 10 tests.
 
 ### Pruebas ejecutadas
 
 - Compilacion manual de `src` completo con `javac`: correcta.
-- Compilacion de tests con JUnit en classpath: correcta (warnings menores de API.Status).
-- Tests no ejecutados desde terminal por falta de runner JUnit standalone; pendiente de ejecucion en IntelliJ.
-
-### Pruebas no ejecutadas y motivo
-
-Los tests no se ejecutaron desde terminal porque el proyecto no tiene Maven/Gradle ni JUnit Platform Console standalone. La verificacion se hara en IntelliJ cuando Hector confirme.
+- Compilacion de tests con JUnit: correcta.
+- Tests pendientes de ejecutar en IntelliJ.
 
 ### Riesgos
 
 - El formato JSON de enemigos y objetos puede requerir cambios cuando Parte B implemente sus clases.
-- Gson ya esta en el classpath del proyecto, pero si alguien limpia el proyecto .idea habra que reconfigurarlo.
-- Los DTOs usan arrays de Java (`String[][]`, `ConfiguracionEnemigoDTO[]`, etc.) como formato de intercambio JSON, no como estructura evaluable del juego. Esto es coherente con la arquitectura porque son solo datos de entrada.
+- Gson local; si se limpia .idea habra que reconfigurarlo.
 
 ### Archivos compartidos tocados o solicitados
 
-Ninguno. Todos los archivos creados estan dentro del area permitida de Parte C:
-`src/json/`, `datos/`, `test/`, `project-management/`, `lib/`, `.idea/libraries/`.
-
-### Comentarios de codigo
-
-El codigo nuevo de DTOs, cargador y tests queda comentado en profundidad explicando la intencion de cada clase y metodo.
+Ninguno dentro del area permitida de Parte C.
 
 ### Estado de TASKS.md
 

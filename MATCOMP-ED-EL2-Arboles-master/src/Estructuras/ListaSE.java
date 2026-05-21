@@ -1,8 +1,9 @@
 package Estructuras;
 // Clase genérica de lista simplemente enlazada.
-// T extiende de Comparable para poder comparar elementos con compareTo.
+// No exige Comparable porque una lista no necesita ordenar sus datos.
+// Las busquedas y borrados comparan por igualdad con equals.
 
-public class ListaSE<T extends Comparable<T>> implements Lista<T> {
+public class ListaSE<T> implements Lista<T> {
     protected ElementoSE<T> primero; // Referencia al primer nodo de la lista.
     protected int size;
 
@@ -28,7 +29,7 @@ public class ListaSE<T extends Comparable<T>> implements Lista<T> {
         ElementoSE<T> actual = primero; //Empezamos a recorrer desde el primer nodo
         while (actual != null){
 
-            if (actual.getDato().compareTo(dato) == 0){
+            if (sonIguales(actual.getDato(), dato)){
                 return actual.getDato(); // Devolvemos el dato encontrado
             }
             actual = actual.getSiguiente(); // Avanzamos al siguiente nodo
@@ -42,7 +43,7 @@ public class ListaSE<T extends Comparable<T>> implements Lista<T> {
         ElementoSE<T> anterior = null; // anterior guarda el nodo anterior a actual
         while (actual != null){
 
-            if (actual.getDato().compareTo(dato) == 0){
+            if (sonIguales(actual.getDato(), dato)){
                 if (anterior == null){ // Si anterior es null, significa que actual es el primer nodo
                     primero = actual.getSiguiente();  // El primer nodo pasa a ser el siguiente del actual
                 }else {
@@ -77,6 +78,13 @@ public class ListaSE<T extends Comparable<T>> implements Lista<T> {
     public boolean existeDato(T dato){
         return get(dato) != null;  // Si devuelve algo distinto de null, el dato existe
     }
+    private boolean sonIguales(T actual, T buscado) {
+        if (actual == null) {
+            return buscado == null;
+        }
+        return actual.equals(buscado);
+    }
+
     public void invertir(){ // Invertir una lista, el primero pasa a ser el último, etc.
         ElementoSE<T> anterior = null;
         ElementoSE<T> actual = primero;
