@@ -313,3 +313,66 @@ Hallazgos atendidos:
 - Se restauraron `hashCode()` en `Celda` y `Posicion` con comentario aclarando que no implica uso de `HashMap` o `HashSet`.
 - Se anadieron tests directos de `ListaSE` y `Cola`.
 - Se compilo todo `src` y todos los tests tras las correcciones.
+
+### Actualizacion posterior
+
+- Alvaro confirmo que los tests pasaron en IntelliJ.
+- Se marco A-04 como HECHA en `TASKS.md`.
+- Siguiente decision pendiente: disenar A-03, grafo dirigido de cuevas y `Mazmorra contiene Grafo<Cueva>`.
+
+## 2026-05-21 - Preparacion de Grafo para A-03
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Codex-A Estructuras
+
+### Contexto
+
+Antes de implementar `Mazmorra`, se pidio dejar listo el grafo propio igual que se hizo con `ListaSE`, revisando si era necesario eliminar `Comparable` y anadiendo algoritmos utiles para la futura mazmorra.
+
+### Cambios
+
+- Se creo `Grafo<T>` dirigido en `src/Estructuras`.
+- Se crearon `NodoGrafo<T>`, `ArcoGrafo<T>` e `InterfazGrafo<T>`.
+- Se elimino la necesidad de `Comparable`; el grafo compara nodos con `equals()`.
+- Se anadieron algoritmos de adyacentes, BFS dirigido, existencia de camino, camino minimo y distancia minima.
+- Se hizo que `Cueva` compare por `id` para funcionar correctamente como nodo de `Grafo<Cueva>`.
+- Se anadieron tests de grafo dirigido, duplicados, datos sin orden natural, camino minimo y uso con `Cueva`.
+- Se marco A-03 como EN_CURSO en `TASKS.md`, dejando pendiente la integracion con `Mazmorra`.
+
+### Verificacion
+
+- Compilacion completa de `src`: correcta.
+- Compilacion de tests: correcta.
+- Busqueda de estructuras prohibidas en codigo: sin usos reales, solo menciones en comentarios explicativos.
+
+### Pendiente
+
+- Pensar el diseno de `Mazmorra` antes de crear/modificar archivos compartidos.
+
+### Actualizacion posterior
+
+- Se amplio `InterfazMazmorra` con consultas de existencia, conexion directa, busqueda por id, conteos y cueva actual.
+- Se implemento `Mazmorra` con `Grafo<Cueva>` y `cuevaActual`.
+- Se anadieron tests de `Mazmorra` para cuevas, conexiones dirigidas, avance, busqueda por id, camino minimo y copias defensivas.
+- A-03 queda en REVISION en `TASKS.md` hasta revision final.
+
+### Cierre
+
+- Alvaro confirmo que los tests pasaron en IntelliJ con cobertura alta para `Grafo`, `Mazmorra`, `Cueva`, `Cola` y `ListaSE`.
+- Se marco A-03 como HECHA en `TASKS.md`.
+- Queda pendiente revision independiente antes de commit/push del bloque de grafo y mazmorra.
+
+### Revision independiente
+
+Resultado: revisado por agente independiente.
+
+Hallazgos atendidos:
+
+- `Cueva` ahora rechaza ids nulos, vacios o en blanco.
+- `Grafo` ahora prohibe nodos y arcos con datos null.
+- `Mazmorra` ahora rechaza operaciones con cuevas null y devuelve resultados seguros.
+- Se anadieron tests de ids invalidos, grafo con null y operaciones nulas en mazmorra.
+- Se recompilo `src` completo y todos los tests tras las correcciones.

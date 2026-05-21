@@ -42,10 +42,17 @@ public class Cueva implements InterfazCueva {
     /**
      * Crea una cueva rectangular inicializada con celdas de suelo.
      *
+     * El id es obligatorio porque identifica a la cueva dentro de
+     * Grafo<Cueva> y permite que Mazmorra la busque por texto. Se rechazan ids
+     * nulos o en blanco para evitar nodos imposibles de comparar o recuperar.
+     *
      * Se rechazan dimensiones nulas o negativas porque una cueva sin filas o
      * sin columnas no podria recorrerse con BFS ni representarse en pantalla.
      */
     public Cueva(String id, int filas, int columnas) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("La cueva debe tener un id no vacio");
+        }
         if (filas <= 0 || columnas <= 0) {
             throw new IllegalArgumentException("La cueva debe tener dimensiones positivas");
         }
@@ -361,6 +368,33 @@ public class Cueva implements InterfazCueva {
         if (!estaDentro(fila, columna)) {
             throw new IndexOutOfBoundsException("Posicion fuera de la cueva: " + fila + ", " + columna);
         }
+    }
+
+    /**
+     * Dos cuevas se consideran la misma si tienen el mismo identificador.
+     *
+     * Esta decision es importante para Grafo<Cueva>: la estructura del grafo
+     * usa equals() para evitar nodos duplicados, por lo que el id actua como
+     * clave logica del nivel. No se comparan filas, columnas ni matriz porque
+     * dos referencias al mismo nivel deben identificarse por su id estable.
+     */
+    @Override
+    public boolean equals(Object otro) {
+        if (!(otro instanceof Cueva)) {
+            return false;
+        }
+        Cueva otra = (Cueva) otro;
+        return id.equals(otra.id);
+    }
+
+    /**
+     * Mantiene el contrato de Java junto a equals().
+     *
+     * No implica usar HashMap o HashSet; el grafo propio sigue usando ListaSE.
+     */
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 
     /**

@@ -73,6 +73,23 @@ class CuevaTest {
     }
 
     @Test
+    void rechazaIdNuloOVacio() {
+        assertThrows(IllegalArgumentException.class, () -> new Cueva(null, 2, 2));
+        assertThrows(IllegalArgumentException.class, () -> new Cueva("", 2, 2));
+        assertThrows(IllegalArgumentException.class, () -> new Cueva("   ", 2, 2));
+    }
+
+    @Test
+    void cuevasConMismoIdSonIgualesParaElGrafo() {
+        Cueva original = new Cueva("nivel-1", 2, 2);
+        Cueva misma = new Cueva("nivel-1", 4, 4);
+        Cueva distinta = new Cueva("nivel-2", 2, 2);
+
+        assertEquals(original, misma);
+        assertNotEquals(original, distinta);
+    }
+
+    @Test
     void bfsDevuelveCeldasAlcanzablesSinDiagonales() {
         Cueva cueva = new Cueva("nivel-1", 3, 3);
 

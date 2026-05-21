@@ -28,13 +28,7 @@ HECHA
 
 ## En curso
 
-### A-04 BFS de celdas alcanzables
-
-- Responsable: Alvaro + Codex-A Estructuras
-- Estado: REVISION
-- Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
-- Terminado cuando se puedan obtener celdas alcanzables sin diagonales usando `Cola` propia.
-- Nota 2026-05-21: implementado BFS de celdas alcanzables, camino minimo y distancia minima dentro de `Cueva`; pendiente revision final/commit.
+No hay tareas en curso todavia.
 
 ## Peticiones urgentes entre partes
 
@@ -64,13 +58,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Estado: PENDIENTE
 - Archivos permitidos: `src/Estructuras/`, `src/ParteA/`, `src/ParteB/Grafo/`, `project-management/`
 - Terminado cuando haya tabla de estructuras disponibles, usos y riesgos.
-
-### A-03 Disenar grafo de cuevas
-
-- Responsable: Persona A
-- Estado: PENDIENTE
-- Archivos permitidos: `src/modelo/juego/`, `src/modelo/mapa/`, `test/`, `project-management/`
-- Terminado cuando `Mazmorra` pueda representar 3 cuevas conectadas con `Grafo<Cueva>`.
 
 ### B-01 Modelo de personajes
 
@@ -143,6 +130,22 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Estado: HECHA
 - Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
 - Terminado: existe implementacion de `Cueva` con matriz propia `ListaSE<ListaSE<Celda>>`, clases `Celda`, `Posicion`, `TipoCelda`, interfaces publicas y tests de matriz.
+
+### A-04 BFS de celdas alcanzables
+
+- Responsable: Alvaro + Codex-A Estructuras
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
+- Terminado: se obtienen celdas alcanzables sin diagonales usando `Cola` propia; tambien existen camino minimo y distancia minima.
+- Verificacion: tests pasados en IntelliJ el 2026-05-21, con cobertura alta en `modelo.mapa`, `Cueva`, `Cola` y `ListaSE`.
+
+### A-03 Disenar grafo de cuevas
+
+- Responsable: Alvaro + Codex-A Estructuras
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/`, `src/modelo/mapa/`, `test/`, `project-management/`
+- Terminado: existe `Grafo<T>` dirigido sin `Comparable`, `Mazmorra` contiene `Grafo<Cueva>`, hay cueva actual, conexiones dirigidas, avance entre cuevas, camino minimo y distancia minima.
+- Verificacion: tests pasados en IntelliJ el 2026-05-21, con cobertura alta en `Estructuras`, `modelo.juego`, `modelo.mapa`, `Grafo`, `Mazmorra`, `Cueva`, `Cola` y `ListaSE`.
 
 ### PM-01 Crear documentos de coordinacion
 
