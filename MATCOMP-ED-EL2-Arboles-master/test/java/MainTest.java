@@ -2,9 +2,31 @@ import ParteA.ArbolBinarioDeBusqueda;
 import ParteA.ArbolBinarioDeBusquedaEnteros;
 import ParteA.Nodo;
 import Estructuras.ListaSE;
+import Estructuras.Pila;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 class MainTest {
+    private static class DatoSinOrden {
+        private final String id;
+
+        private DatoSinOrden(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public boolean equals(Object otro) {
+            if (!(otro instanceof DatoSinOrden)) {
+                return false;
+            }
+            return id.equals(((DatoSinOrden) otro).id);
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
+        }
+    }
+
     private ArbolBinarioDeBusqueda<Integer> crearArbol() {
         ArbolBinarioDeBusqueda<Integer> arbol = new ArbolBinarioDeBusqueda<>();
         arbol.add(8);
@@ -210,6 +232,31 @@ class MainTest {
         int sumaTotal = sumaIzquierda + sumaDerecha + arbol.getRaiz().getDato();
 
         assertEquals(arbol.getSuma(), sumaTotal);
+    }
+
+    @Test
+    void listaSENoExigeComparable() {
+        ListaSE<DatoSinOrden> lista = new ListaSE<>();
+        DatoSinOrden entrada = new DatoSinOrden("celda-1");
+
+        lista.addLast(entrada);
+
+        assertSame(entrada, lista.get(new DatoSinOrden("celda-1")));
+        assertTrue(lista.existeDato(new DatoSinOrden("celda-1")));
+    }
+
+    @Test
+    void pilaRespetaOrdenLifo() {
+        Pila<Integer> pila = new Pila<>();
+
+        pila.push(1);
+        pila.push(2);
+        pila.push(3);
+
+        assertEquals(3, pila.pop());
+        assertEquals(2, pila.pop());
+        assertEquals(1, pila.pop());
+        assertTrue(pila.isEmpty());
     }
 
 }
