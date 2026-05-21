@@ -608,3 +608,116 @@ Si no se ejecutaron, motivo: la sesion fue solo de diseno y documentacion, sin c
 - Arco, escudo e invisibilidad aparecen como opcionales o extras en los documentos iniciales; conviene validarlo con el grupo antes de implementarlos como imprescindibles.
 - La regla de bajada de defensa al 75% modifica el combate y debe quedar documentada en decisiones cuando el grupo la apruebe.
 - La logica de llaves, cofres y drops tocara coordinacion con mapa y JSON, por lo que Parte B debe exponer reglas claras sin cambiar archivos de otras partes sin permiso.
+
+## 2026-05-21 - Hector / Parte C - C-01 JSON inicial
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Primera sesion de implementacion de Parte C. Se configura Gson en el proyecto y se crea el fichero JSON de configuracion de las 3 cuevas de la mazmorra, junto con los DTOs y el cargador que construye los objetos del modelo (Cueva, Mazmorra) a partir del JSON.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si — se detectaron 15 commits nuevos de A y B en `origin/main`.
+Documentos leidos: `PRD.md`, `ARCHITECTURE.md`, `TASKS.md`, `DECISIONS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, `SCRATCHPAD.md`, `AGENT_C_JAVAFX_JSON_DOCS.md`.
+
+### Tarea trabajada
+
+C-01 Disenar JSON inicial.
+
+### Cambios
+
+- Configurado Gson 2.10.1 en el proyecto:
+  - `lib/gson-2.10.1.jar` copiado desde MATCOMP.
+  - `.idea/libraries/google_code_gson.xml` creado.
+  - `Practica final.iml` actualizado con entrada de Gson.
+- Creado `datos/cuevas.json` con configuracion de las 3 cuevas:
+  - Cueva Facil 5x5, Cueva Media 6x6, Cueva Dificil 7x7.
+  - Matriz de tipos de celda (MURO, SUELO, INICIO, PUERTA, TESORO, SALIDA).
+  - Enemigos y objetos definidos por cueva (pendientes de que Parte B los implemente).
+  - Conexiones dirigidas del grafo: facil -> media -> dificil.
+- Creados DTOs en `src/json/`:
+  - `ConfiguracionMazmorra.java`, `ConfiguracionCuevaDTO.java`.
+  - `ConfiguracionEnemigoDTO.java`, `ConfiguracionObjetoDTO.java`.
+  - `ConexionDTO.java`.
+- Creado `src/json/CargadorConfiguracion.java` y `ResultadoCarga.java`.
+- Creado test `test/json/CargadorConfiguracionTest.java` con 10 tests.
+
+### Pruebas ejecutadas
+
+- Compilacion manual de `src` completo con `javac`: correcta.
+- Compilacion de tests con JUnit: correcta.
+- Tests pendientes de ejecutar en IntelliJ.
+
+### Riesgos
+
+- El formato JSON de enemigos y objetos puede requerir cambios cuando Parte B implemente sus clases.
+- Gson local; si se limpia .idea habra que reconfigurarlo.
+
+### Archivos compartidos tocados o solicitados
+
+Ninguno dentro del area permitida de Parte C.
+
+### Estado de TASKS.md
+
+C-01 pasa a REVISION.
+
+## 2026-05-21 - Hector / Parte C - Resolver merge conflicts PR #3
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Segunda sesion de Parte C. La PR #3 (C-01) tenia conflictos con main en los documentos
+de coordinacion (IA_DIARY.md, SCRATCHPAD.md) y en "Practica final.iml". Se resolvieron
+localmente con `git merge main`.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Conflicto detectado via `gh pr view 3`: mergeable=CONFLICTING, mergeStateStatus=DIRTY.
+
+### Tarea trabajada
+
+Resolver merge conflict de PR #3.
+
+### Cambios
+
+Ningun cambio funcional. Solo resolucion de merge:
+- `Practica final.iml`: keep entrada Gson de HEAD.
+- `IA_DIARY.md`: keep entrada C-01 de HEAD.
+- `SCRATCHPAD.md`: keep entrada C-01 de HEAD (ligeramente simplificada).
+- Commit merge ed1aea7 y push a origin.
+
+### Archivos modificados
+
+- `Practica final.iml` (merge)
+- `project-management/IA_DIARY.md` (merge + entrada sesion 2)
+- `project-management/SCRATCHPAD.md` (merge + entrada sesion 2)
+
+### Pruebas ejecutadas
+
+No aplica (sin cambios de codigo).
+
+### Riesgos
+
+- Si otros companeros modifican los mismos documentos antes de mergear la PR,
+  podrian aparecer nuevos conflictos.
+
+### Archivos compartidos tocados o solicitados
+
+Ninguno.
+
+### Estado de TASKS.md
+
+Sin cambios: C-01 sigue en REVISION.
