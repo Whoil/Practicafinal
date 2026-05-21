@@ -1,0 +1,141 @@
+{
+  "nombre": "Escape de la Mazmorra",
+  "cuevas": [
+    {
+      "id": "cueva_facil",
+      "nombre": "Cueva Facil",
+      "dificultad": "FACIL",
+      "filas": 5,
+      "columnas": 5,
+      "matriz": [
+        ["MURO", "MURO", "MURO", "MURO", "MURO"],
+        ["MURO", "INICIO", "SUELO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "MURO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "TESORO", "MURO"],
+        ["MURO", "MURO", "MURO", "PUERTA", "MURO"]
+      ],
+      "enemigos": [
+        {
+          "tipo": "NORMAL",
+          "fila": 3,
+          "columna": 1,
+          "vida": 30,
+          "ataque": 8,
+          "defensa": 3,
+          "movimiento": 2
+        }
+      ],
+      "objetos": [
+        {
+          "tipo": "POCION",
+          "fila": 2,
+          "columna": 3,
+          "nombre": "Pocion de vida",
+          "descripcion": "Recupera 25 puntos de vida",
+          "cura": 25
+        }
+      ]
+    },
+    {
+      "id": "cueva_media",
+      "nombre": "Cueva Media",
+      "dificultad": "MEDIA",
+      "filas": 6,
+      "columnas": 6,
+      "matriz": [
+        ["MURO", "MURO", "MURO", "MURO", "MURO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "SUELO", "TESORO", "MURO"],
+        ["MURO", "SUELO", "MURO", "SUELO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "SUELO", "MURO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "SUELO", "SUELO", "MURO"],
+        ["MURO", "MURO", "MURO", "MURO", "PUERTA", "MURO"]
+      ],
+      "enemigos": [
+        {
+          "tipo": "NORMAL",
+          "fila": 1,
+          "columna": 2,
+          "vida": 35,
+          "ataque": 10,
+          "defensa": 4,
+          "movimiento": 2
+        },
+        {
+          "tipo": "NORMAL",
+          "fila": 4,
+          "columna": 3,
+          "vida": 40,
+          "ataque": 12,
+          "defensa": 5,
+          "movimiento": 3
+        }
+      ],
+      "objetos": [
+        {
+          "tipo": "LLAVE",
+          "fila": 3,
+          "columna": 3,
+          "nombre": "Llave de la puerta final",
+          "descripcion": "Abre la puerta de la cueva dificil"
+        }
+      ]
+    },
+    {
+      "id": "cueva_dificil",
+      "nombre": "Cueva Dificil",
+      "dificultad": "DIFICIL",
+      "filas": 7,
+      "columnas": 7,
+      "matriz": [
+        ["MURO", "MURO", "MURO", "MURO", "MURO", "MURO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "SUELO", "SUELO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "MURO", "SUELO", "MURO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "SUELO", "SUELO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "MURO", "SUELO", "MURO", "SUELO", "MURO"],
+        ["MURO", "SUELO", "SUELO", "SUELO", "SUELO", "SALIDA", "MURO"],
+        ["MURO", "MURO", "MURO", "MURO", "MURO", "MURO", "MURO"]
+      ],
+      "enemigos": [
+        {
+          "tipo": "BOSS",
+          "fila": 3,
+          "columna": 3,
+          "vida": 100,
+          "ataque": 20,
+          "defensa": 10,
+          "movimiento": 3
+        }
+      ],
+      "objetos": [
+        {
+          "tipo": "POCION",
+          "fila": 1,
+          "columna": 5,
+          "nombre": "Pocion grande",
+          "descripcion": "Recupera 50 puntos de vida",
+          "cura": 50
+        },
+        {
+          "tipo": "ESCUDO",
+          "fila": 4,
+          "columna": 4,
+          "nombre": "Escudo de madera",
+          "descripcion": "Aumenta la defensa en 8 puntos",
+          "defensa": 8
+        }
+      ]
+    }
+  ],
+  "conexiones": [
+    {
+      "origen": "cueva_facil",
+      "destino": "cueva_media",
+      "etiqueta": "puerta_central"
+    },
+    {
+      "origen": "cueva_media",
+      "destino": "cueva_dificil",
+      "etiqueta": "puerta_final"
+    }
+  ]
+}

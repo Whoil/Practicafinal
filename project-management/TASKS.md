@@ -104,7 +104,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### C-01 Disenar JSON inicial
 
 - Responsable: Hector / Parte C
-- Estado: PENDIENTE
+- Estado: REVISION
 - Archivos permitidos: `src/json/`, `datos/`, `project-management/`
 - Terminado cuando exista un JSON de configuracion para las 3 cuevas.
 

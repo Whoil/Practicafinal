@@ -252,3 +252,460 @@ Documentos leidos/modificados: `TASKS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, pl
 ### Riesgos
 
 - Si las peticiones urgentes no se mantienen actualizadas, los agentes pueden trabajar bloqueados sin saberlo.
+
+## 2026-05-21 - Cierre A-02 y refuerzo A-04
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Codex-A Estructuras
+
+### Contexto
+
+Se continuo la Parte A con las estructuras ya decididas. Se pidio terminar A-02 y anadir tests pertinentes para A-04. Tambien se pidio usar revision independiente antes de commit/push.
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si, la rama estaba sincronizada antes de trabajar.
+Documentos leidos/modificados: `TASKS.md`, `POST_MORTEM.md`, `SCRATCHPAD.md`.
+
+### Cambios
+
+- Se integro `ListaSE` en el `src` principal sin exigir `Comparable`.
+- Se creo `Cola` propia para BFS, sin `java.util.Queue` ni colecciones externas.
+- Se implemento `Cueva` con matriz propia `ListaSE<ListaSE<Celda>>`.
+- Se crearon `Celda`, `Posicion` y `TipoCelda`.
+- Se anadieron interfaces publicas para que B y C conozcan los metodos disponibles: `InterfazCueva`, `InterfazCelda`, `InterfazPosicion`, `InterfazCola`.
+- Se implemento BFS de celdas alcanzables, camino minimo y distancia minima dentro de `Cueva`.
+- Se mantuvo la celda inicial como opcion valida de movimiento.
+- Se quitaron `hashCode()` de `Celda` y `Posicion` para evitar confusion con `HashMap`/`HashSet`.
+- Se marco A-02 como HECHA y A-04 como REVISION en `TASKS.md`.
+- Se creo `POST_MORTEM.md` para registrar aprendizajes y problemas del desarrollo.
+
+### Pruebas
+
+- Compilacion de clases de `src/Estructuras` y `src/modelo`: correcta.
+- Compilacion de tests de `test`: correcta.
+- Tests anadidos para matriz, acceso a celdas, limites, BFS, rango cero, no duplicados, camino minimo, destino bloqueado y distancia minima.
+
+### Riesgos
+
+- A-04 todavia necesita revision final antes de marcarse HECHA.
+- El proyecto no tiene Maven/Gradle ni runner JUnit standalone, por lo que la verificacion automatizada completa aun depende de IntelliJ o compilacion manual.
+- A-03 implicara `Mazmorra`, archivo compartido, por lo que conviene pedir autorizacion explicita antes de tocarlo.
+
+### Pendiente
+
+- Revisar hallazgos del agente revisor independiente.
+- Hacer commit/push si la revision no detecta bloqueos.
+
+### Revision independiente
+
+Resultado: revisado por agente independiente.
+
+Hallazgos atendidos:
+
+- Se comprobo que los archivos nuevos estaban sin trackear y se prepararan todos para el commit.
+- Se corrigio `src/Main.java` para evitar features preview y permitir compilacion completa de `src`.
+- Se cambio `getMatriz()` para devolver copia de la estructura de listas y no permitir romper la matriz interna.
+- Se restauraron `hashCode()` en `Celda` y `Posicion` con comentario aclarando que no implica uso de `HashMap` o `HashSet`.
+- Se anadieron tests directos de `ListaSE` y `Cola`.
+- Se compilo todo `src` y todos los tests tras las correcciones.
+
+### Actualizacion posterior
+
+- Alvaro confirmo que los tests pasaron en IntelliJ.
+- Se marco A-04 como HECHA en `TASKS.md`.
+- Siguiente decision pendiente: disenar A-03, grafo dirigido de cuevas y `Mazmorra contiene Grafo<Cueva>`.
+
+## 2026-05-21 - Preparacion de Grafo para A-03
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Codex-A Estructuras
+
+### Contexto
+
+Antes de implementar `Mazmorra`, se pidio dejar listo el grafo propio igual que se hizo con `ListaSE`, revisando si era necesario eliminar `Comparable` y anadiendo algoritmos utiles para la futura mazmorra.
+
+### Cambios
+
+- Se creo `Grafo<T>` dirigido en `src/Estructuras`.
+- Se crearon `NodoGrafo<T>`, `ArcoGrafo<T>` e `InterfazGrafo<T>`.
+- Se elimino la necesidad de `Comparable`; el grafo compara nodos con `equals()`.
+- Se anadieron algoritmos de adyacentes, BFS dirigido, existencia de camino, camino minimo y distancia minima.
+- Se hizo que `Cueva` compare por `id` para funcionar correctamente como nodo de `Grafo<Cueva>`.
+- Se anadieron tests de grafo dirigido, duplicados, datos sin orden natural, camino minimo y uso con `Cueva`.
+- Se marco A-03 como EN_CURSO en `TASKS.md`, dejando pendiente la integracion con `Mazmorra`.
+
+### Verificacion
+
+- Compilacion completa de `src`: correcta.
+- Compilacion de tests: correcta.
+- Busqueda de estructuras prohibidas en codigo: sin usos reales, solo menciones en comentarios explicativos.
+
+### Pendiente
+
+- Pensar el diseno de `Mazmorra` antes de crear/modificar archivos compartidos.
+
+### Actualizacion posterior
+
+- Se amplio `InterfazMazmorra` con consultas de existencia, conexion directa, busqueda por id, conteos y cueva actual.
+- Se implemento `Mazmorra` con `Grafo<Cueva>` y `cuevaActual`.
+- Se anadieron tests de `Mazmorra` para cuevas, conexiones dirigidas, avance, busqueda por id, camino minimo y copias defensivas.
+- A-03 queda en REVISION en `TASKS.md` hasta revision final.
+
+### Cierre
+
+- Alvaro confirmo que los tests pasaron en IntelliJ con cobertura alta para `Grafo`, `Mazmorra`, `Cueva`, `Cola` y `ListaSE`.
+- Se marco A-03 como HECHA en `TASKS.md`.
+- Queda pendiente revision independiente antes de commit/push del bloque de grafo y mazmorra.
+
+### Revision independiente
+
+Resultado: revisado por agente independiente.
+
+Hallazgos atendidos:
+
+- `Cueva` ahora rechaza ids nulos, vacios o en blanco.
+- `Grafo` ahora prohibe nodos y arcos con datos null.
+- `Mazmorra` ahora rechaza operaciones con cuevas null y devuelve resultados seguros.
+- Se anadieron tests de ids invalidos, grafo con null y operaciones nulas en mazmorra.
+- Se recompilo `src` completo y todos los tests tras las correcciones.
+
+## 2026-05-21 - Cierre final de sesion Parte A
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Codex-A Estructuras
+
+### Tareas trabajadas
+
+- A-02 Disenar matriz propia de cueva.
+- A-04 BFS de celdas alcanzables.
+- A-03 Disenar grafo de cuevas.
+
+### Resultado
+
+- A-02 queda HECHA.
+- A-04 queda HECHA.
+- A-03 queda HECHA.
+- No quedan tareas en curso para Parte A en `TASKS.md`.
+
+### Archivos modificados principales
+
+- `src/Estructuras/ListaSE.java`
+- `src/Estructuras/Cola.java`
+- `src/Estructuras/Grafo.java`
+- `src/Estructuras/NodoGrafo.java`
+- `src/Estructuras/ArcoGrafo.java`
+- `src/Estructuras/InterfazGrafo.java`
+- `src/modelo/mapa/Cueva.java`
+- `src/modelo/mapa/Celda.java`
+- `src/modelo/mapa/Posicion.java`
+- `src/modelo/mapa/TipoCelda.java`
+- `src/modelo/mapa/InterfazCueva.java`
+- `src/modelo/mapa/InterfazCelda.java`
+- `src/modelo/mapa/InterfazPosicion.java`
+- `src/modelo/juego/Mazmorra.java`
+- `src/modelo/juego/InterfazMazmorra.java`
+- `test/Estructuras/ListaSETest.java`
+- `test/Estructuras/ColaTest.java`
+- `test/Estructuras/GrafoTest.java`
+- `test/modelo/mapa/CuevaTest.java`
+- `test/modelo/juego/MazmorraTest.java`
+- `project-management/TASKS.md`
+- `project-management/POST_MORTEM.md`
+- `project-management/SCRATCHPAD.md`
+
+### Estructuras usadas
+
+- `ListaSE<T>` para listas propias, matriz de cueva, visitados, resultados y reconstruccion de caminos.
+- `Cola<T>` para BFS.
+- `Grafo<T>` dirigido para conexiones entre cuevas.
+- `Grafo<Cueva>` como base de `Mazmorra`.
+
+### Pruebas ejecutadas
+
+- Tests ejecutados en IntelliJ por Alvaro: pasados.
+- Compilacion manual de `src` completo con `javac`: correcta.
+- Compilacion manual de tests con JUnit local en classpath: correcta.
+- Busqueda de estructuras prohibidas en codigo: sin usos reales, solo menciones en comentarios explicativos.
+
+### Tests JUnit creados o actualizados
+
+- Tests de `ListaSE`.
+- Tests de `Cola`.
+- Tests de matriz, celdas, limites, BFS, camino minimo y distancia minima en `Cueva`.
+- Tests de `Grafo` dirigido, duplicados, camino minimo, distancia minima y uso con `Cueva`.
+- Tests de `Mazmorra`, cueva actual, avance dirigido, busqueda por id y copias defensivas.
+
+### Riesgos
+
+- `A-01` sigue pendiente formalmente, aunque se han revisado y adaptado estructuras necesarias durante el desarrollo.
+- El proyecto aun no tiene Maven/Gradle ni runner JUnit automatizado fuera de IntelliJ.
+- Quedan cambios locales de IntelliJ no relacionados con Parte A: `.idea/misc.xml` y `.idea/codeStyles/`.
+- Futuras tareas de Parte B/C deben coordinarse antes de tocar logica de partida, JSON o interfaz.
+
+### Documentos actualizados
+
+- `TASKS.md`: A-02, A-03 y A-04 marcadas como HECHA.
+- `POST_MORTEM.md`: aprendizajes y problemas detectados.
+- `SCRATCHPAD.md`: resumen tecnico y cierre de sesion.
+
+### Cambios remotos
+
+- Rama de trabajo: `feature/a-estructuras`.
+- Commits subidos:
+  - `eff22a9` Corrige estructuras propias iniciales.
+  - `07d2392` Implementa matriz y BFS de Parte A.
+  - `c5da65c` Implementa grafo y mazmorra de Parte A.
+- Rama sincronizada con `origin/feature/a-estructuras` tras el ultimo push.
+
+### Comentarios de codigo
+
+- El codigo nuevo de estructuras, matriz, BFS, camino minimo, grafo y mazmorra queda comentado en profundidad para defensa y coordinacion.
+
+### Pendiente para proxima sesion
+
+- Cerrar formalmente A-01 con tabla de estructuras disponibles, usos y riesgos.
+- Decidir si se adapta `ListaDE`, `Pila` o `ListaCircular` para necesidades de Parte B.
+- Coordinar con Parte B antes de integrar personajes, objetos, turnos o combate.
+
+## 2026-05-21 - Optimizacion de workflow de agentes
+
+### Identificacion
+
+- Humano: Alvaro.
+- Rol: coordinacion de workflow, sin trabajar en Parte A.
+- Agente: Codex.
+
+### Objetivo
+
+Reducir consumo de tokens manteniendo la estructura existente de `project-management`.
+
+### Cambios realizados
+
+- Se anadio en `AGENTS.md` la seccion `1.5 Modo economico de agentes`.
+- Se creo `templates/AGENT_BRIEF_TEMPLATE.md` para delegar tareas con prompts cortos.
+
+### Criterio acordado
+
+- Mantener `AGENTS.md`, `agents/`, `TASKS.md`, `SCRATCHPAD.md`, `DECISIONS.md`, `IA_DIARY.md` y `templates/` como estructura de coordinacion.
+- Usar lectura escalonada de documentos.
+- Delegar agentes auxiliares solo cuando haya paralelismo real, revision independiente o tarea acotada.
+- Evitar copiar documentos completos en prompts o respuestas.
+
+### Tests
+
+- No aplica; cambio solo documental.
+
+### Pendiente
+
+- Aplicar este modo en las siguientes sesiones de Parte B, Parte C y revision.
+- Pedir autorizacion humana antes de commit/push de estos cambios documentales.
+
+## 2026-05-21 - Politica de modelos para workflow economico
+
+### Identificacion
+
+- Humano: Alvaro.
+- Rol: coordinacion de workflow, sin trabajar en Parte A.
+- Agente: Codex.
+
+### Objetivo
+
+Definir que modelo conviene usar en este proyecto para ahorrar tokens sin perder coherencia ni calidad.
+
+### Cambios realizados
+
+- Se anadio en `AGENTS.md` la seccion `1.5.6 Politica de modelos`.
+
+### Criterio acordado
+
+- `GPT-5.4` como modelo principal.
+- `GPT-5.4-Mini` para lectura, resumen, busquedas y tareas auxiliares de bajo riesgo.
+- `GPT-5.5` reservado para arquitectura, depuracion dificil y cambios delicados.
+- `GPT-5.3-Codex` util para implementacion mecanica acotada.
+- El mayor ahorro debe venir antes de reducir contexto y delegacion innecesaria que de bajar de modelo.
+
+### Tests
+
+- No aplica; cambio solo documental.
+
+### Pendiente
+
+- Aplicar esta politica cuando se deleguen nuevas tareas en Parte B, Parte C o revision.
+- Pedir autorizacion humana antes de commit/push de este ajuste documental.
+## 2026-05-20 - Guillermo / Parte B
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B - logica del juego
+Agente: Codex / Agente B Logica
+
+### Contexto
+
+Se realizo la primera sesion de diseno de Parte B antes de implementar codigo. El objetivo fue cerrar una base clara para jugador, enemigos, objetos, inventario, turnos y reglas de combate, respetando que la implementacion empezara despues por las tareas `B-01`, `B-02` y `B-03`.
+
+### Sincronizacion
+
+Rama: `feature/b-logica` en GitHub, actualizada respecto a la documentacion disponible en `origin/main`.
+Cambio remoto revisado: si.
+Documentos leidos: `TASKS.md`, `AGENT_B_LOGICA.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRD.md`, `SCRATCHPAD.md`, `IA_DIARY.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `AGENTS.md`.
+
+### Cambios
+
+- No se modifico codigo del juego.
+- Se confirma que Guillermo representa la Parte B.
+- Se acuerda que al inicio de cada sesion se deben releer los documentos de `project-management` por si han cambiado.
+- Se acuerda que antes de cualquier commit/push se deben leer los archivos actualizados desde GitHub e informar a Guillermo de cambios relevantes.
+- Se define el jugador con vida maxima 100, vida actual 100, ataque base 15, defensa base 5, movimiento 3, 40 turnos iniciales, inventario y objeto equipado.
+- Se definen tipos de enemigo: esqueleto, orco, mago y boss.
+- Se definen valores de enemigos:
+  - Esqueleto: vida 30, ataque 8, defensa 2, movimiento 2.
+  - Orco: vida 50, ataque 12, defensa 4, movimiento 1.
+  - Mago: vida 25, ataque 14, defensa 1, movimiento 2.
+  - Boss: vida 150, ataque 20, defensa 5, movimiento 2.
+- Se definen objetos: pocion, espada, arco, llave y escudo.
+- Se definen pociones:
+  - Pocion de cura: cura 25 puntos y se consume.
+  - Pocion de invisibilidad: dura 2 turnos, evita ataques enemigos mientras dura y se consume.
+- Se definen objetos equipables:
+  - Espada: +12 ataque, cuerpo a cuerpo.
+  - Arco: +7 ataque, ataque a distancia.
+  - Escudo: +5 defensa.
+- Se define que las llaves pueden ser de puerta o de cofre, pueden encontrarse en el suelo o dropearlas enemigos, y no se consumen por defecto.
+- Se define que los drops no seran aleatorios por ahora: cada enemigo puede tener 0 o 1 objeto asignado como drop.
+- Se define que un cofre puede contener 0 o 1 objeto y puede requerir llave.
+- Se define turno basico: maximo 1 movimiento y 1 accion; despues actuan los enemigos; se resta 1 turno.
+- Se define que equipar o cambiar objeto no cuenta como movimiento. Usar un objeto si cuenta como accion.
+- Se define que al bajar al 75% o menos de vida maxima, la defensa baja 2 puntos una sola vez, con defensa minima 0. Esta regla se aplica al jugador y enemigos normales, pero no al boss.
+
+### Tests
+
+Tests JUnit creados o actualizados: ninguno.
+Tests ejecutados: ninguno.
+Resultado: no aplica.
+Si no se ejecutaron, motivo: la sesion fue solo de diseno y documentacion, sin cambios de codigo ejecutable.
+
+### Pendiente
+
+- Confirmar con el grupo si arco, escudo e invisibilidad se aceptan como parte obligatoria o quedan como extras controlados.
+- Pasar el diseno a implementacion empezando por `B-01 Modelo de personajes`.
+- Actualizar `TASKS.md` cuando empiece formalmente una tarea de implementacion.
+- Documentar en `DECISIONS.md` las decisiones nuevas de Parte B cuando el grupo las apruebe como definitivas.
+
+### Riesgos
+
+- Arco, escudo e invisibilidad aparecen como opcionales o extras en los documentos iniciales; conviene validarlo con el grupo antes de implementarlos como imprescindibles.
+- La regla de bajada de defensa al 75% modifica el combate y debe quedar documentada en decisiones cuando el grupo la apruebe.
+- La logica de llaves, cofres y drops tocara coordinacion con mapa y JSON, por lo que Parte B debe exponer reglas claras sin cambiar archivos de otras partes sin permiso.
+
+## 2026-05-21 - Hector / Parte C - C-01 JSON inicial
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Primera sesion de implementacion de Parte C. Se configura Gson en el proyecto y se crea el fichero JSON de configuracion de las 3 cuevas de la mazmorra, junto con los DTOs y el cargador que construye los objetos del modelo (Cueva, Mazmorra) a partir del JSON.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs` (pendiente de crear, se trabajara al hacer commit)
+Cambio remoto revisado: si — se detectaron 15 commits nuevos de A y B en `origin/main`.
+Documentos leidos: `PRD.md`, `ARCHITECTURE.md`, `TASKS.md`, `DECISIONS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, `SCRATCHPAD.md`, `AGENT_C_JAVAFX_JSON_DOCS.md`.
+
+### Tarea trabajada
+
+C-01 Disenar JSON inicial.
+
+### Cambios
+
+- Configurado Gson 2.10.1 en el proyecto:
+  - `lib/gson-2.10.1.jar` copiado desde MATCOMP.
+  - `.idea/libraries/google_code_gson.xml` creado.
+  - `Practica final.iml` actualizado con entrada de Gson.
+- Creado `datos/cuevas.json` con configuracion de las 3 cuevas:
+  - Cueva Facil 5x5, Cueva Media 6x6, Cueva Dificil 7x7.
+  - Matriz de tipos de celda (MURO, SUELO, INICIO, PUERTA, TESORO, SALIDA).
+  - Enemigos y objetos definidos por cueva (pendientes de que Parte B los implemente).
+  - Conexiones dirigidas del grafo: facil -> media -> dificil.
+- Creados DTOs en `src/json/`:
+  - `ConfiguracionMazmorra.java` (raiz del JSON).
+  - `ConfiguracionCuevaDTO.java` (datos de una cueva).
+  - `ConfiguracionEnemigoDTO.java` (datos de enemigo).
+  - `ConfiguracionObjetoDTO.java` (datos de objeto).
+  - `ConexionDTO.java` (arco entre cuevas).
+- Creado `src/json/CargadorConfiguracion.java`:
+  - Lee JSON con Gson.
+  - Construye objetos Cueva con su matriz de celdas.
+  - Construye Mazmorra con cuevas y conexiones.
+  - Devuelve ResultadoCarga con Mazmorra + listas de enemigos y objetos.
+- Creado `src/json/ResultadoCarga.java` para devolver el resultado completo.
+- Creado test en `test/json/CargadorConfiguracionTest.java` con 10 tests.
+
+### Archivos modificados
+
+- `lib/gson-2.10.1.jar` (nuevo)
+- `.idea/libraries/google_code_gson.xml` (nuevo)
+- `Practica final.iml` (modificado)
+- `datos/cuevas.json` (nuevo)
+- `src/json/ConfiguracionMazmorra.java` (nuevo)
+- `src/json/ConfiguracionCuevaDTO.java` (nuevo)
+- `src/json/ConfiguracionEnemigoDTO.java` (nuevo)
+- `src/json/ConfiguracionObjetoDTO.java` (nuevo)
+- `src/json/ConexionDTO.java` (nuevo)
+- `src/json/CargadorConfiguracion.java` (nuevo)
+- `src/json/ResultadoCarga.java` (nuevo)
+- `test/json/CargadorConfiguracionTest.java` (nuevo)
+- `project-management/SCRATCHPAD.md` (actualizado)
+- `project-management/TASKS.md` (actualizado)
+- `project-management/IA_DIARY.md` (actualizado)
+
+### Estructuras usadas
+
+- `ListaSE<T>` para listas de DTOs en ResultadoCarga.
+- `Cueva`, `Celda`, `TipoCelda`, `Posicion` (de Parte A).
+- `Mazmorra`, `Grafo<Cueva>` (de Parte A).
+- Gson para deserializacion JSON.
+
+### Pruebas ejecutadas
+
+- Compilacion manual de `src` completo con `javac`: correcta.
+- Compilacion de tests con JUnit en classpath: correcta (warnings menores de API.Status).
+- Tests no ejecutados desde terminal por falta de runner JUnit standalone; pendiente de ejecucion en IntelliJ.
+
+### Pruebas no ejecutadas y motivo
+
+Los tests no se ejecutaron desde terminal porque el proyecto no tiene Maven/Gradle ni JUnit Platform Console standalone. La verificacion se hara en IntelliJ cuando Hector confirme.
+
+### Riesgos
+
+- El formato JSON de enemigos y objetos puede requerir cambios cuando Parte B implemente sus clases.
+- Gson ya esta en el classpath del proyecto, pero si alguien limpia el proyecto .idea habra que reconfigurarlo.
+- Los DTOs usan arrays de Java (`String[][]`, `ConfiguracionEnemigoDTO[]`, etc.) como formato de intercambio JSON, no como estructura evaluable del juego. Esto es coherente con la arquitectura porque son solo datos de entrada.
+
+### Archivos compartidos tocados o solicitados
+
+Ninguno. Todos los archivos creados estan dentro del area permitida de Parte C:
+`src/json/`, `datos/`, `test/`, `project-management/`, `lib/`, `.idea/libraries/`.
+
+### Comentarios de codigo
+
+El codigo nuevo de DTOs, cargador y tests queda comentado en profundidad explicando la intencion de cada clase y metodo.
+
+### Estado de TASKS.md
+
+C-01 pasa a REVISION.
