@@ -28,7 +28,13 @@ HECHA
 
 ## En curso
 
-No hay tareas en curso todavia.
+### A-04 BFS de celdas alcanzables
+
+- Responsable: Alvaro + Codex-A Estructuras
+- Estado: REVISION
+- Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
+- Terminado cuando se puedan obtener celdas alcanzables sin diagonales usando `Cola` propia.
+- Nota 2026-05-21: implementado BFS de celdas alcanzables, camino minimo y distancia minima dentro de `Cueva`; pendiente revision final/commit.
 
 ## Peticiones urgentes entre partes
 
@@ -59,26 +65,12 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/Estructuras/`, `src/ParteA/`, `src/ParteB/Grafo/`, `project-management/`
 - Terminado cuando haya tabla de estructuras disponibles, usos y riesgos.
 
-### A-02 Disenar matriz propia de cueva
-
-- Responsable: Persona A
-- Estado: PENDIENTE
-- Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
-- Terminado cuando exista diseno o implementacion de cueva con `ListaSE<ListaSE<Celda>>`.
-
 ### A-03 Disenar grafo de cuevas
 
 - Responsable: Persona A
 - Estado: PENDIENTE
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/mapa/`, `test/`, `project-management/`
 - Terminado cuando `Mazmorra` pueda representar 3 cuevas conectadas con `Grafo<Cueva>`.
-
-### A-04 BFS de celdas alcanzables
-
-- Responsable: Persona A
-- Estado: PENDIENTE
-- Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
-- Terminado cuando se puedan obtener celdas alcanzables sin diagonales usando `Cola` propia.
 
 ### B-01 Modelo de personajes
 
@@ -144,6 +136,13 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Terminado cuando cada PR con codigo tenga revision independiente, comprobacion de tests JUnit y checklist completado.
 
 ## Hechas
+
+### A-02 Disenar matriz propia de cueva
+
+- Responsable: Alvaro + Codex-A Estructuras
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/mapa/`, `test/`, `project-management/`
+- Terminado: existe implementacion de `Cueva` con matriz propia `ListaSE<ListaSE<Celda>>`, clases `Celda`, `Posicion`, `TipoCelda`, interfaces publicas y tests de matriz.
 
 ### PM-01 Crear documentos de coordinacion
 

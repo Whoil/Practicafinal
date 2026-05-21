@@ -252,3 +252,64 @@ Documentos leidos/modificados: `TASKS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, pl
 ### Riesgos
 
 - Si las peticiones urgentes no se mantienen actualizadas, los agentes pueden trabajar bloqueados sin saberlo.
+
+## 2026-05-21 - Cierre A-02 y refuerzo A-04
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Codex-A Estructuras
+
+### Contexto
+
+Se continuo la Parte A con las estructuras ya decididas. Se pidio terminar A-02 y anadir tests pertinentes para A-04. Tambien se pidio usar revision independiente antes de commit/push.
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si, la rama estaba sincronizada antes de trabajar.
+Documentos leidos/modificados: `TASKS.md`, `POST_MORTEM.md`, `SCRATCHPAD.md`.
+
+### Cambios
+
+- Se integro `ListaSE` en el `src` principal sin exigir `Comparable`.
+- Se creo `Cola` propia para BFS, sin `java.util.Queue` ni colecciones externas.
+- Se implemento `Cueva` con matriz propia `ListaSE<ListaSE<Celda>>`.
+- Se crearon `Celda`, `Posicion` y `TipoCelda`.
+- Se anadieron interfaces publicas para que B y C conozcan los metodos disponibles: `InterfazCueva`, `InterfazCelda`, `InterfazPosicion`, `InterfazCola`.
+- Se implemento BFS de celdas alcanzables, camino minimo y distancia minima dentro de `Cueva`.
+- Se mantuvo la celda inicial como opcion valida de movimiento.
+- Se quitaron `hashCode()` de `Celda` y `Posicion` para evitar confusion con `HashMap`/`HashSet`.
+- Se marco A-02 como HECHA y A-04 como REVISION en `TASKS.md`.
+- Se creo `POST_MORTEM.md` para registrar aprendizajes y problemas del desarrollo.
+
+### Pruebas
+
+- Compilacion de clases de `src/Estructuras` y `src/modelo`: correcta.
+- Compilacion de tests de `test`: correcta.
+- Tests anadidos para matriz, acceso a celdas, limites, BFS, rango cero, no duplicados, camino minimo, destino bloqueado y distancia minima.
+
+### Riesgos
+
+- A-04 todavia necesita revision final antes de marcarse HECHA.
+- El proyecto no tiene Maven/Gradle ni runner JUnit standalone, por lo que la verificacion automatizada completa aun depende de IntelliJ o compilacion manual.
+- A-03 implicara `Mazmorra`, archivo compartido, por lo que conviene pedir autorizacion explicita antes de tocarlo.
+
+### Pendiente
+
+- Revisar hallazgos del agente revisor independiente.
+- Hacer commit/push si la revision no detecta bloqueos.
+
+### Revision independiente
+
+Resultado: revisado por agente independiente.
+
+Hallazgos atendidos:
+
+- Se comprobo que los archivos nuevos estaban sin trackear y se prepararan todos para el commit.
+- Se corrigio `src/Main.java` para evitar features preview y permitir compilacion completa de `src`.
+- Se cambio `getMatriz()` para devolver copia de la estructura de listas y no permitir romper la matriz interna.
+- Se restauraron `hashCode()` en `Celda` y `Posicion` con comentario aclarando que no implica uso de `HashMap` o `HashSet`.
+- Se anadieron tests directos de `ListaSE` y `Cola`.
+- Se compilo todo `src` y todos los tests tras las correcciones.
