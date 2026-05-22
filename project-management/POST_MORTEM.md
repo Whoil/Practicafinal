@@ -56,3 +56,78 @@ Parte responsable: Coordinacion / Parte A
 - Si `ListaDE`, `Cola` y `ListaCircular` tambien deben dejar de exigir `Comparable`.
 - Si el grafo de cuevas debe mantener `Comparable<Cueva>` o pasar a comparar por `equals`.
 - Como ejecutar JUnit de forma sencilla y repetible para todo el equipo.
+
+### 2026-05-22 - Limite entre Mazmorra y Partida
+
+Parte responsable: Parte B / Coordinacion con Parte A
+
+#### Va mal o requiere atencion
+
+- Al definir la primera version de `Partida`, se expuso en su interfaz un metodo para anadir puertas.
+- Aunque no conectaba cuevas en el grafo, podia confundirse con responsabilidad de construir mapa o conectar cuevas.
+
+#### Causa probable
+
+- Se mezclo configuracion inicial de partida con acciones publicas de la partida.
+- La diferencia entre conexion estructural (`Mazmorra`/`Grafo<Cueva>`) y requisito jugable (`Puerta`/llave) necesitaba quedar mas explicita.
+
+#### Accion decidida
+
+- `conectarCuevas` queda exclusivamente en `Mazmorra`.
+- `Partida` no expone metodos publicos para conectar cuevas ni para crear conexiones.
+- Las `Puerta` se pasan como configuracion inicial de `Partida` y se validan contra conexiones ya existentes en `Mazmorra`.
+- `Partida` solo autoriza o rechaza el avance segun llave y estado de juego.
+
+### 2026-05-22 - Integracion parcial de Partida
+
+Parte responsable: Parte B / Coordinacion con Parte A y Parte C
+
+#### Va mal o requiere atencion
+
+- Se creo una primera version de `Partida`, `Puerta` y `ObjetoEnMapa`, pero la integracion no esta cerrada en profundidad.
+- La logica nueva compila y cubre reglas basicas, pero todavia no esta conectada con el cargador JSON para construir partidas completas.
+- JavaFX aun no consume `InterfazPartida`.
+- Los enemigos y objetos por cueva viven en una capa interna de `Partida`, no en `Cueva` ni en una fabrica comun.
+
+#### Causa probable
+
+- Se avanzo la logica de B-03 antes de cerrar del todo la capa de construccion de partida entre B y C.
+- El JSON actual crea configuracion/mazmorra, pero no define todavia el ensamblaje completo de jugador, enemigos, objetos posicionados, puertas y condiciones de victoria.
+
+#### Accion decidida
+
+- Comentar el codigo nuevo dejando claro que es una primera capa funcional y no la integracion final.
+- Mantener `Partida` como nucleo de reglas, pero crear o planificar una fabrica/cargador de partida que conecte JSON con `Partida`.
+- Antes de marcar B-03 como HECHA, revisar con Parte C como se construira `Partida` desde JSON y como JavaFX usara `InterfazPartida`.
+- Evitar presentar esta version como "juego completo"; es base de logica pendiente de conexion final.
+
+### 2026-05-22 - Defectos detectados en revision independiente de Partida
+
+Parte responsable: Parte B / Revision independiente
+
+#### Va mal o requiere atencion
+
+- La primera version de `Partida` permitia estados incoherentes de ocupacion: jugador y enemigos podian acabar en la misma celda.
+- `anadirEnemigo` y `anadirObjetoEnSuelo` estaban en `InterfazPartida`, aunque son metodos de preparacion/fabrica y no acciones de juego.
+- `InterfazPartida` exponia referencias mutables demasiado potentes, como `Jugador`, `Mazmorra` y `Puerta`.
+- La segunda revision detecto que `getCuevaActual()` seguia exponiendo `Cueva` mutable y que `avanzarACueva` podia solapar al jugador con enemigos de la cueva destino.
+- `Puerta.abierta` se marcaba, pero no cambiaba la regla de avance.
+- La llave final podia fallar si ya existia un objeto con id `llave-final` y otro codigo de cerradura.
+- `ObjetoEnMapa.equals()` ignoraba fila y columna, aunque la clase existe para representar posicion.
+
+#### Causa probable
+
+- Se implemento rapido la primera capa funcional de reglas antes de cerrar todos los invariantes del tablero.
+- Se mezclo montaje de partida con contrato publico de juego.
+- Algunas decisiones estaban habladas, pero no se habian convertido aun en comprobaciones concretas de codigo.
+
+#### Accion decidida
+
+- Sacar los metodos de preparacion de `InterfazPartida`; quedan como soporte de montaje en `Partida`.
+- Sacar del contrato publico las referencias directas a `Jugador`, `Mazmorra`, `Cueva`, `Celda` y `Puerta`, y exponer vistas mediante `PersonajeEnMapa`, `CuevaEnMapa` y `CeldaEnMapa`.
+- Bloquear solapes entre jugador y enemigos en colocacion, movimiento de jugador y movimiento enemigo.
+- Bloquear tambien el avance a una cueva destino si la celda de entrada del jugador ya esta ocupada por un enemigo.
+- Hacer que una puerta abierta pueda atravesarse sin volver a exigir llave.
+- Buscar la llave final por codigo, no depender del id fijo, y generar un id alternativo si el id por defecto ya existe.
+- Incluir fila y columna en `ObjetoEnMapa.equals()` y `hashCode()`.
+- Ampliar `PartidaTest` con casos de revision para estos defectos.
