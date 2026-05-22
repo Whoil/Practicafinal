@@ -648,11 +648,11 @@ public class PantallaJuego {
 
         Text btnPuerta = crearBotonTexto("CAMBIAR CUEVA (en PUERTA)");
         btnPuerta.setOnMouseClicked(e -> {
-            String siguienteId = partida.getSiguienteCuevaId();
-            if (siguienteId != null && alCambiarCueva != null) {
+            boolean cambioRealizado = partida.cambiarCueva();
+            if (cambioRealizado && alCambiarCueva != null) {
                 alCambiarCueva.run();
             } else {
-                ejecutarAccion(partida.cambiarCueva(), "No hay puerta accesible");
+                ejecutarAccion(false, "Necesitas estar en la puerta y tener su llave");
             }
         });
         accionesBox.getChildren().add(btnPuerta);

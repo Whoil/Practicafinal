@@ -1447,3 +1447,100 @@ Documentos leidos: AGENTS.md, TASKS.md, PRD.md, ARCHITECTURE.md, DECISIONS.md, S
   cuando se dispara el callback; verificar que no haya race conditions.
 - No se testearon las nuevas pantallas por falta de compilador; revision manual
   de sintaxis realizada.
+
+## 2026-05-22 - Cierre de sesion con Alvaro / Revision e integracion
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Revision e integracion de primera version funcional del juego
+Agente: Codex
+
+### Sincronizacion
+
+Rama: no cambiada durante la sesion
+Cambio remoto revisado: no
+Rama actualizada con `origin/main`: no
+Documentos leidos: `project-management/templates/SESSION_SUMMARY_TEMPLATE.md`, `project-management/AGENTS.md` via busqueda de protocolo, `project-management/SCRATCHPAD.md`
+
+### Tareas trabajadas
+
+- Revision independiente inicial de la version funcional.
+- Tarea 1: hacer que `Main` lance la aplicacion real.
+- Tarea 2: crear scripts reproducibles de compilacion/ejecucion y tests.
+- Tarea 3: ejecutar y clasificar la suite JUnit.
+- Tarea 4: corregir cambio de cueva para exigir PUERTA y llave.
+- Revision independiente final antes del cierre.
+
+### Archivos modificados
+
+- `.gitignore`
+- `README.md`
+- `scripts/run.ps1`
+- `scripts/test.ps1`
+- `src/Main.java`
+- `src/modelo/juego/Partida.java`
+- `src/vista/EscapeMazmorraApp.java`
+- `src/vista/PantallaJuego.java`
+- `test/modelo/juego/PartidaTest.java`
+- `project-management/SCRATCHPAD.md`
+
+### Cambios realizados
+
+- `Main` delega de forma legible en `EscapeMazmorraApp.main(args)`.
+- `scripts/run.ps1` compila y lanza el juego con JDK 21, Gson y JavaFX.
+- `scripts/test.ps1` compila src+test y ejecuta JUnit standalone.
+- `README.md` documenta ejecutar, solo compilar y lanzar tests.
+- `.gitignore` ignora `build/` y `crash.log`.
+- `Partida.cambiarCueva()` y `Partida.avanzarACueva()` exigen estar sobre una celda `PUERTA`.
+- Una puerta abierta ya no permite avanzar sin la llave correspondiente.
+- La UI solo muestra transicion de cueva cuando el modelo ya ha aceptado el cambio.
+- Se anadieron tests para fuera de puerta, puerta sin llave y puerta con llave.
+
+### Tests
+
+Tests JUnit creados o actualizados:
+- `PartidaTest.cambiarCuevaRequiereEstarSobrePuerta`
+- `PartidaTest.cambiarCuevaRequiereLlaveAunqueEsteSobrePuerta`
+- `PartidaTest.cambiarCuevaDesdePuertaConLlaveAvanza`
+- Actualizados tests de `avanzarACueva` para el nuevo contrato de puerta+llave.
+
+Tests ejecutados:
+- `powershell.exe -ExecutionPolicy Bypass -File scripts\test.ps1`
+
+Resultado:
+- 180 tests encontrados.
+- 165 correctos.
+- 15 fallidos.
+- Los 15 fallos fueron clasificados por revision independiente como contratos/datos antiguos frente al nuevo `datos/cuevas.json`, no como regresiones nuevas de la regla de puerta.
+
+Si no se ejecutaron, motivo:
+- No aplica. Se ejecutaron fuera del sandbox porque JavaFX esta en `.m2`, fuera de la carpeta del proyecto.
+
+### Revision independiente
+
+- Revisor inicial: detecto riesgos en `Main`, scripts, cambio de cueva, guardado, victoria y tests.
+- Revisor de cierre: detecto bypass en `avanzarACueva` y caso de puerta abierta sin llave.
+- Revisor final acotado: confirmo que los P1 quedaron resueltos y recomendo cerrar sesion.
+
+### Commits y push
+
+Commit realizado: no
+Hash:
+Push realizado: no
+Rama:
+
+### Pendiente para la siguiente sesion
+
+- Actualizar tests antiguos para los mapas actuales 7x7, 10x10 y 13x13.
+- Revisar balance/contrato de `datos/cuevas.json` contra los tests de fabrica, partida y serializador.
+- Decidir condicion final de victoria: llave final, salida o ambas.
+- Completar o desactivar guardado/carga para no prometer persistencia incompleta.
+- Probar manualmente el flujo completo del juego con JavaFX.
+
+### Riesgos o avisos
+
+- `scripts/run.ps1` y `scripts/test.ps1` dependen de JavaFX 21.0.5 instalado en `.m2`.
+- La suite sigue en rojo por 15 tests desactualizados respecto a los nuevos datos.
+- Hay cambios previos de opencode sin commit en varios archivos de vista, datos y documentacion.
+- No se hizo commit ni push; pedir autorizacion explicita antes de hacerlo.

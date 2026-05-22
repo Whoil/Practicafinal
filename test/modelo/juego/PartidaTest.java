@@ -397,6 +397,7 @@ class PartidaTest {
     @Test
     void avanzarACuevaRequiereLlaveDeLaPuerta() {
         Cueva origen = new Cueva("origen", 2, 2);
+        origen.cambiarTipoCelda(0, 0, TipoCelda.PUERTA);
         Cueva destino = new Cueva("destino", 2, 2);
         Mazmorra mazmorra = new Mazmorra();
         mazmorra.conectarCuevas(origen, destino, "p1");
@@ -415,8 +416,9 @@ class PartidaTest {
     }
 
     @Test
-    void puertaAbiertaPermiteAvanzarSinLlave() {
+    void puertaAbiertaSinLlaveNoPermiteAvanzar() {
         Cueva origen = new Cueva("origen", 2, 2);
+        origen.cambiarTipoCelda(0, 0, TipoCelda.PUERTA);
         Cueva destino = new Cueva("destino", 2, 2);
         Mazmorra mazmorra = new Mazmorra();
         mazmorra.conectarCuevas(origen, destino, "p1");
@@ -427,13 +429,14 @@ class PartidaTest {
         puertas.addLast(puerta);
         Partida partida = new Partida(mazmorra, jugador, 10, puertas);
 
-        assertTrue(partida.avanzarACueva("destino"));
-        assertEquals(destino.getId(), partida.getCuevaActual().getId());
+        assertFalse(partida.avanzarACueva("destino"));
+        assertEquals(origen.getId(), partida.getCuevaActual().getId());
     }
 
     @Test
     void avanzarACuevaEvitaEntrarSobreEnemigo() {
         Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(1, 1, TipoCelda.PUERTA);
         Cueva destino = new Cueva("destino", 3, 3);
         Mazmorra mazmorra = new Mazmorra();
         mazmorra.conectarCuevas(origen, destino, "p1");
@@ -545,6 +548,60 @@ class PartidaTest {
 
         assertEquals(0, enemigo.getFila());
         assertEquals(0, enemigo.getColumna());
+    }
+
+    @Test
+    void cambiarCuevaRequiereEstarSobrePuerta() {
+        Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(2, 2, TipoCelda.PUERTA);
+        Cueva destino = new Cueva("destino", 3, 3);
+        Mazmorra mazmorra = new Mazmorra();
+        mazmorra.conectarCuevas(origen, destino, "p1");
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        jugador.agregarObjeto(new Llave("llave-p1", TipoLlave.PUERTA, "llave-p1"));
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        puertas.addLast(new Puerta("p1", origen, destino, "llave-p1"));
+        Partida partida = new Partida(mazmorra, jugador, 10, puertas);
+
+        assertFalse(partida.puedeCambiarCueva());
+        assertFalse(partida.cambiarCueva());
+        assertEquals("origen", partida.getCuevaActual().getId());
+    }
+
+    @Test
+    void cambiarCuevaRequiereLlaveAunqueEsteSobrePuerta() {
+        Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(1, 1, TipoCelda.PUERTA);
+        Cueva destino = new Cueva("destino", 3, 3);
+        Mazmorra mazmorra = new Mazmorra();
+        mazmorra.conectarCuevas(origen, destino, "p1");
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        puertas.addLast(new Puerta("p1", origen, destino, "llave-p1"));
+        Partida partida = new Partida(mazmorra, jugador, 10, puertas);
+
+        assertFalse(partida.puedeCambiarCueva());
+        assertFalse(partida.cambiarCueva());
+        assertFalse(partida.avanzarACueva("destino"));
+        assertEquals("origen", partida.getCuevaActual().getId());
+    }
+
+    @Test
+    void cambiarCuevaDesdePuertaConLlaveAvanza() {
+        Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(1, 1, TipoCelda.PUERTA);
+        Cueva destino = new Cueva("destino", 3, 3);
+        Mazmorra mazmorra = new Mazmorra();
+        mazmorra.conectarCuevas(origen, destino, "p1");
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        jugador.agregarObjeto(new Llave("llave-p1", TipoLlave.PUERTA, "llave-p1"));
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        puertas.addLast(new Puerta("p1", origen, destino, "llave-p1"));
+        Partida partida = new Partida(mazmorra, jugador, 10, puertas);
+
+        assertTrue(partida.puedeCambiarCueva());
+        assertTrue(partida.cambiarCueva());
+        assertEquals("destino", partida.getCuevaActual().getId());
     }
 
     private Mazmorra mazmorraCon(Cueva cueva) {

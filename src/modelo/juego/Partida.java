@@ -392,6 +392,9 @@ public class Partida implements InterfazPartida {
         if (!puedeAceptarAccion() || accionRealizada || textoVacio(idCuevaDestino)) {
             return false;
         }
+        if (!jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
+            return false;
+        }
 
         Cueva origen = getCuevaActualInterna();
         Cueva destino = mazmorra.getCuevaPorId(idCuevaDestino);
@@ -686,7 +689,7 @@ public class Partida implements InterfazPartida {
     }
 
     private boolean tieneLlaveParaPuerta(Puerta puerta) {
-        return puerta.isAbierta() || buscarLlavePorCodigo(puerta.getCodigoLlave()) != null;
+        return buscarLlavePorCodigo(puerta.getCodigoLlave()) != null;
     }
 
     private void entregarLlaveFinal() {
@@ -757,6 +760,12 @@ public class Partida implements InterfazPartida {
             }
         }
         return null;
+    }
+
+    public boolean hayEnemigoEn(int fila, int columna) {
+        Cueva cueva = getCuevaActualInterna();
+        if (cueva == null) return false;
+        return hayEnemigoEn(cueva, fila, columna);
     }
 
     public boolean hayObjetoEnPosicion() {
@@ -866,11 +875,36 @@ public class Partida implements InterfazPartida {
     }
 
     public boolean cambiarCueva() {
-        Cueva actual = getCuevaActualInterna();
-        ListaSE<Cueva> siguientes = mazmorra.getCuevasSiguientes(actual);
-        if (siguientes == null || siguientes.getSize() == 0) return false;
-        Cueva destino = siguientes.get(0);
+        if (!puedeCambiarCueva()) {
+            return false;
+        }
+        Cueva destino = getSiguienteCuevaInterna();
         return avanzarACueva(destino.getId());
+    }
+
+    public boolean puedeCambiarCueva() {
+        if (!puedeAceptarAccion() || accionRealizada || !jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
+            return false;
+        }
+        Cueva actual = getCuevaActualInterna();
+        Cueva destino = getSiguienteCuevaInterna();
+        if (actual == null || destino == null) {
+            return false;
+        }
+        Puerta puerta = buscarPuerta(actual, destino);
+        return puerta != null && tieneLlaveParaPuerta(puerta);
+    }
+
+    /**
+     * Devuelve el id de la siguiente cueva conectada sin transicionar.
+     *
+     * Permite que la interfaz muestre una pantalla de transicion antes
+     * de llamar a cambiarCueva(). Si no hay siguiente cueva (porque es
+     * la ultima o no hay conexion), devuelve null.
+     */
+    public String getSiguienteCuevaId() {
+        Cueva siguiente = getSiguienteCuevaInterna();
+        return siguiente != null ? siguiente.getId() : null;
     }
 
     public void guardar(String ruta) throws IOException {
@@ -885,6 +919,26 @@ public class Partida implements InterfazPartida {
 
     private boolean estaEnCeldaCercanaAlJugador(int fila, int columna) {
         return estaEnCeldaCercana(jugador.getFila(), jugador.getColumna(), fila, columna);
+    }
+
+    private boolean jugadorEstaSobreTipo(TipoCelda tipo) {
+        Cueva cueva = getCuevaActualInterna();
+        if (cueva == null || tipo == null || !cueva.estaDentro(jugador.getFila(), jugador.getColumna())) {
+            return false;
+        }
+        return cueva.getCelda(jugador.getFila(), jugador.getColumna()).getTipo() == tipo;
+    }
+
+    private Cueva getSiguienteCuevaInterna() {
+        Cueva actual = getCuevaActualInterna();
+        if (actual == null) {
+            return null;
+        }
+        ListaSE<Cueva> siguientes = mazmorra.getCuevasSiguientes(actual);
+        if (siguientes == null || siguientes.getSize() == 0) {
+            return null;
+        }
+        return siguientes.get(0);
     }
 
     private boolean estaEnCeldaCercana(int filaA, int columnaA, int filaB, int columnaB) {

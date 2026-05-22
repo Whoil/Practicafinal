@@ -699,19 +699,10 @@ public class EscapeMazmorraApp extends Application {
 
     /**
      * Muestra la pantalla de transicion correspondiente a una cueva.
-     *
-     * Si es la primera cueva (cueva_facil), al pulsar "Entrar" solo
-     * muestra el juego porque la partida ya esta inicializada con ella.
-     * Para las siguientes, llama a partida.cambiarCueva() antes de
-     * mostrar el juego.
      */
     private void mostrarTransicion(String cuevaId) {
         DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaId);
         PantallaTransicion transicion = new PantallaTransicion(tema, () -> {
-            // Si no es la primera cueva, avanzar la partida
-            if (!"cueva_facil".equals(cuevaId)) {
-                partida.cambiarCueva();
-            }
             mostrarJuego();
         });
         Scene scene = transicion.crearScene();
@@ -729,10 +720,7 @@ public class EscapeMazmorraApp extends Application {
 
         // Callback al cambiar de cueva: mostrar transicion a la siguiente
         pj.setAlCambiarCueva(() -> {
-            String siguienteId = partida.getSiguienteCuevaId();
-            if (siguienteId != null) {
-                mostrarTransicion(siguienteId);
-            }
+            mostrarTransicion(partida.getCuevaActual().getId());
         });
 
         // Callback al terminar la partida: mostrar pantalla final
