@@ -1,0 +1,49 @@
+package json;
+
+/**
+ * Raiz del JSON de guardado de partida.
+ *
+ * Contiene la version del formato, la mazmorra con el estado actual de
+ * todas las cuevas, el jugador con su inventario y equipo, y el estado
+ * global de la partida (en curso, victoria o derrota).
+ */
+public class DatosPartidaDTO {
+    private String version;
+    private DatosMazmorraDTO mazmorra;
+    private DatosJugadorDTO jugador;
+    private String estado;          // EN_CURSO, VICTORIA, DERROTA
+    private int turnosRestantes;
+
+    public DatosPartidaDTO() {
+    }
+
+    public DatosPartidaDTO(String version, DatosMazmorraDTO mazmorra,
+                           DatosJugadorDTO jugador, String estado,
+                           int turnosRestantes) {
+        this.version = version;
+        this.mazmorra = mazmorra;
+        this.jugador = jugador;
+        this.estado = estado;
+        this.turnosRestantes = turnosRestantes;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public DatosMazmorraDTO getMazmorra() {
+        return mazmorra;
+    }
+
+    public DatosJugadorDTO getJugador() {
+        return jugador;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public int getTurnosRestantes() {
+        return turnosRestantes;
+    }
+}

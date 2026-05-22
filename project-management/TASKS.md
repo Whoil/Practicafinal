@@ -28,8 +28,6 @@ HECHA
 
 ## En curso
 
-No hay tareas en curso todavia.
-
 ## Peticiones urgentes entre partes
 
 Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revisarla al inicio de sesion.
@@ -67,6 +65,20 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`.
 - Nota de alcance: Guillermo autoriza traer `ListaDE`, `ElementoDE` e `IteradorDE` desde las estructuras del grupo y adaptar `ListaDE` para no exigir `Comparable`, porque el inventario necesita guardar objetos sin orden natural.
 
+### B-03 Reglas de turno y combate
+
+- Responsable: Guille / Parte B
+- Estado: PENDIENTE
+- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
+- Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
+
+### C-02 Cargar y guardar partida
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/json/`, `test/`, `project-management/`
+- Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
+- Verificacion: 19 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, equipo, estado, errores, conversion DTO<->modelo).
 ### B-03 Reglas de turno y combate
 
 - Responsable: Guille / Parte B
@@ -135,16 +147,26 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### C-03 Boceto JavaFX
 
 - Responsable: Hector / Parte C
-- Estado: PENDIENTE
+- Estado: REVISION
 - Archivos permitidos: `docs/`, `project-management/`
 - Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
+- Verificacion: documento `docs/BOCETO_JAVAFX.md` (234 lineas) con layout ASCII, 5 zonas detalladas, tabla de colores, mapeo JavaFX, flujo de datos, estructura de clases para C-04, contrato minimo de Partida, estrategia mock y checklist.
 
-### C-04 JavaFX minima
+### C-04 Menu principal JavaFX
 
 - Responsable: Hector / Parte C
-- Estado: PENDIENTE
+- Estado: HECHA
 - Archivos permitidos: `src/vista/`, `src/controlador/`, `project-management/`
-- Terminado cuando la interfaz muestre la cueva actual y permita ejecutar acciones basicas via `Partida`.
+- Terminado cuando exista ventana 1280x720 con fondo cueva, antorchas animadas, tesoro decorativo, pantalla Inicio -> Opciones navegable con FadeTransition.
+- Verificacion: `EscapeMazmorraApp.java` compila con JavaFX 23 (2026-05-22).
+
+### C-05 Partida jugable (integracion juego + UI)
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/Partida.java`, `src/vista/PantallaJuego.java`, `src/vista/EscapeMazmorraApp.java`, `test/`, `project-management/`
+- Terminado cuando exista Partida que cargue JSON, maneje movimiento, combate, objetos, turnos, condiciones de victoria/derrota, guardado/carga, y PantallaJuego que muestre grid coloreado con jugador/enemigos/objetos, panel de stats, inventario, acciones, log, teclado WASD/flechas y atajos SPACE/R/T.
+- Verificacion: 148 tests JUnit pasados el 2026-05-22 (24 tests de Partida + 124 existentes). Demo jugable confirmada por Hector.
 
 ### R-01 Revision de restricciones
 

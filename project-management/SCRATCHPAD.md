@@ -871,6 +871,327 @@ Hallazgos:
 - La ejecucion de tests fuera de IntelliJ sigue teniendo la limitacion del aviso interno de `javac` al cerrar el jar de JUnit, aunque los tests se ejecutaron correctamente por reflexion.
 - La integracion futura con JSON debera mapear las configuraciones de objetos a estas clases sin mezclar reglas de juego en `src/json`.
 
+## 2026-05-22 - Hector / Parte C - C-02 Cargar y guardar partida
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Parte B ya implemento Personaje, Jugador, Enemigo, Boss y todos los objetos
+del juego (B-01 y B-02). Se hace merge de origin/main a la rama feature.
+Se implementa C-02: guardado y carga de partida en JSON.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si — Part B ha avanzado con B-01 y B-02.
+Merge con origin/main: sin conflictos (fast-forward).
+
+### Tarea trabajada
+
+C-02 Cargar y guardar partida.
+
+### Cambios
+
+- Creados 6 DTOs en `src/json/` para el formato de guardado:
+  - `DatosPartidaDTO` (raiz: version, estado, turnos)
+  - `DatosMazmorraDTO` (cueva actual, cuevas, conexiones)
+  - `DatosCuevaDTO` (matriz actual, enemigos vivos, objetos en mapa)
+  - `DatosJugadorDTO` (atributos, equipo, inventario)
+  - `DatosEnemigoDTO` (tipo, vida, posicion, vivo)
+  - `DatosObjetoDTO` (id, tipo, atributos por subtipo)
+- Ampliado `ConexionDTO` con constructores para poder crearlo en tests.
+- Creado `SerializadorPartida.java` con metodos estaticos:
+  - `guardar(DatosPartidaDTO, ruta)` — escribe JSON con pretty printing
+  - `cargar(ruta)` — lee JSON y devuelve DatosPartidaDTO
+- Creado `test/json/SerializadorPartidaTest.java` con 10 tests.
+
+### Archivos modificados
+
+- `src/json/DatosPartidaDTO.java` (nuevo)
+- `src/json/DatosMazmorraDTO.java` (nuevo)
+- `src/json/DatosCuevaDTO.java` (nuevo)
+- `src/json/DatosJugadorDTO.java` (nuevo)
+- `src/json/DatosEnemigoDTO.java` (nuevo)
+- `src/json/DatosObjetoDTO.java` (nuevo)
+- `src/json/SerializadorPartida.java` (nuevo)
+- `src/json/ConexionDTO.java` (ampliado con constructores)
+- `test/json/SerializadorPartidaTest.java` (nuevo)
+- `project-management/TASKS.md` (C-02 -> REVISION)
+- `project-management/SCRATCHPAD.md` (actualizado)
+- `project-management/IA_DIARY.md` (actualizado)
+
+### Pruebas ejecutadas
+
+- Compilacion de src/ completa: correcta.
+- 10/10 tests de SerializadorPartida pasados desde terminal con JUnit standalone + Gson.
+- 10/10 tests de CargadorConfiguracion existentes siguen pasando.
+
+### Riesgos
+
+- Los DTOs de guardado no tienen metodos para convertir desde/hacia las
+  clases del modelo (Jugador, Enemigo, Objeto, etc.). Esa conversion
+  corresponde a Parte B cuando implemente Partida (B-03) o a una futura
+  integracion. Los DTOs definen el formato de intercambio JSON.
+- El formato es compatible hacia atras (version 1.0).
+
+### Estado de TASKS.md
+
+C-02 pasa a REVISION.
+
+## 2026-05-22 - Hector / Parte C - Planificar C-03 Boceto JavaFX
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Sesion de planificacion de C-03. Se revisan todos los documentos del proyecto
+(PRD, ARCHITECTURE, DECISIONS, AGENTS, GITHUB_WORKFLOW, TASKS) y las clases
+del modelo existentes para disenar el boceto de la interfaz JavaFX.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: ningun cambio nuevo en origin/main.
+Rama al dia con origin/main.
+
+### Tarea trabajada
+
+C-03 Boceto JavaFX (planificacion).
+
+### Cambios
+
+- Creado `docs/BOCETO_JAVAFX.md` con:
+  - Layout ASCII de la ventana completa con 5 zonas.
+  - Tabla de colores por TipoCelda para la matriz.
+  - Descripcion detallada de cada zona: matriz (GridPane), estado, inventario, acciones, log.
+  - Flujo de datos desde Partida hasta cada panel.
+  - Estructura de clases propuesta para C-04 (6 clases en src/vista/, 1 en src/controlador/).
+  - Contrato minimo que Partida (B-03) debe exponer para que JavaFX funcione.
+  - Estrategia de mock para C-04 si B-03 no esta listo.
+  - Checklist de verificacion.
+- Actualizado TASKS.md: C-03 -> EN_CURSO.
+
+### Archivos modificados
+
+- `docs/BOCETO_JAVAFX.md` (nuevo)
+- `project-management/TASKS.md` (C-03 -> EN_CURSO)
+- `project-management/SCRATCHPAD.md` (actualizado)
+- `project-management/IA_DIARY.md` (pendiente)
+
+### Pruebas ejecutadas
+
+No aplica (solo documentacion).
+
+### Riesgos
+
+- C-03 es solo un boceto. C-04 implementara el codigo JavaFX real.
+- La implementacion de C-04 puede necesitar ajustes cuando B-03 implemente
+  Partida, especialmente en los nombres y parametros de los metodos.
+- Si B-03 no esta listo para C-04, se usara un PartidaMock con datos fijos.
+- JavaFX no esta en el JDK 25; habra que descargar las librerias JavaFX
+  (openjfx) cuando se implemente C-04.
+
+### Estado de TASKS.md
+
+C-03 pasa a EN_CURSO.
+
+## 2026-05-22 - Hector / Parte C - C-04 Menu principal JavaFX
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Sesion de implementacion del menu principal JavaFX (C-04). C-03 estaba en REVISION.
+Se descarta el enfoque anterior de C-04 (layout 5-panel con matriz, estado, inventario,
+acciones, log). Hector pide un menu limpio con:
+
+- Ventana 1280x720 redimensionable, fondo de cueva con gradiente radial.
+- Dos antorchas animadas (llamas tricolor rojo-naranja-amarillo que vibran y oscilan con Timeline).
+- Tesoro decorativo (monedas + cofre abierto) en la parte inferior central.
+- Pantalla Inicio: titulo "ESCAPE DE LA MAZMORRA" en 3 lineas, boton Inicio con globo terraqueo.
+- Pantalla Opciones: titulo reducido, botones PARTIDA NUEVA / ESTADISTICAS / AJUSTES.
+- Transicion FadeTransition entre pantallas (300ms salida + 300ms entrada).
+- Boton AJUSTES vuelve a la pantalla de inicio (placeholder).
+- Efectos hover en botones (escala 1.05-1.06 y brillo).
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si.
+Merge con origin/main: sin conflictos.
+
+### Cambios
+
+- Creado `src/vista/EscapeMazmorraApp.java` (58 lines aprox):
+  - Application con Stage 1280x720, StackPane raiz con fondo compartido + antorchas + tesoro + contenido intercambiable.
+  - `crearFondoCueva()` — gradiente radial (bordes #1A1A1A -> centro #3A3A3A).
+  - `crearLlama()` — Polygon de 7 puntos con LinearGradient rojo-naranja-amarillo.
+  - `animarLlamas()` — Timeline 30 frames (60ms cada uno) con escala X/Y, opacidad y desplazamiento Y sobre 3 capas de llama, usando seno.
+  - `crearTesoro()` — monton de 4 filas de monedas + cofre abierto (cuerpo + tapa inclinada + cerradura).
+  - `crearPantallaInicio()` — titulo 3 lineas (Georgia 52px, #6E4720) + boton Inicio amarillo con globo (circulo azul + continente verde).
+  - `crearPantallaOpciones()` — titulo reducido 38px + 3 botones (Partida Nueva, Estadisticas, Ajustes) con hover.
+  - `cambiarAPantallaOpciones()` / `cambiarAPantallaInicio()` — FadeTransition 300ms.
+- Limpiados archivos viejos de intentos anteriores (src/vista/*.java).
+
+### Archivos modificados
+
+- `src/vista/EscapeMazmorraApp.java` (nuevo)
+- `project-management/TASKS.md` (pendiente)
+- `project-management/SCRATCHPAD.md` (actualizado)
+- `project-management/IA_DIARY.md` (pendiente)
+
+### Pruebas ejecutadas
+
+- Compilacion de src/vista/EscapeMazmorraApp.java con javac + JavaFX 23: correcta (sin errores).
+- Compilacion de src/ completo: fallos solo en src/json/SerializadorPartida.java y CargadorConfiguracion.java por falta de Gson en classpath (pre-existente, no relacionado).
+
+### Riesgos
+
+- Los botones PARTIDA NUEVA y ESTADISTICAS son placeholder (System.out.println). Cuando exista Partida (B-03) habra que conectarlos.
+- La animacion de antorchas usa Timeline con frames precalculados; si se quiere mas suavidad convendra AnimationTimer o Interpolator.
+- El proyecto necesita JavaFX 23 en runtime para lanzar la aplicacion. Aun no hay script de lanzamiento.
+
+### Estado de TASKS.md
+
+C-04 EN_CURSO.
+
+## 2026-05-22 - Hector / Parte C - Cerrar C-02
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Hector pide terminar C-02. Se revisa el codigo existente: SerializadorPartida ya
+tiene todos los metodos de conversion modelo<->DTO implementados desde la sesion
+anterior. Se verifica compilacion y tests.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si (ningun cambio nuevo en origin/main).
+
+### Tareas
+
+C-02 pasa a HECHA.
+
+### Verificacion
+
+- Compilacion de src/json/ completo con Gson y JavaFX en classpath: correcta.
+- Compilacion de test/json/SerializadorPartidaTest.java con JUnit 5: correcta.
+- 19/19 tests JUnit pasados:
+  - Guardado/carga basico, mazmorra, jugador, enemigos, objetos en mapa, estado, partida completa.
+  - Errores de ruta invalida (lectura y escritura).
+  - Conversion modelo->DTO y DTO->modelo para: Mazmorra real (desde cuevas.json),
+    Jugador completo (con arma equipada, inventario, vida parcial), Enemigo,
+    Pocion, Espada, Llave, Escudo.
+  - Round-trip de matriz de cueva (5x5 facil).
+  - Guardado y recuperacion con Mazmorra real + Jugador real.
+
+### Cambios en TASKS.md
+
+C-02: REVISION -> HECHA.
+
+## 2026-05-22 - Hector / Parte C - C-04 y C-05 Partida jugable
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+El menu principal (C-04) existia pero no estaba conectado a la logica del juego.
+Hector pidio crear una partida jugable completa: Partida (motor de juego),
+PantallaJuego (UI con grid, stats, inventario, acciones, log), y conectar
+todo desde el boton "Iniciar partida".
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si.
+Merge con origin/main: previo de la sesion.
+
+### Cambios
+
+- Creado `src/modelo/juego/Partida.java` (571 lineas):
+  - `crearPartidaNueva()` que carga `datos/cuevas.json` con Gson y construye
+    mazmorra, cuevas, enemigos, objetos, conexiones y jugador.
+  - Movimiento basico (arriba, abajo, izquierda, derecha, y mover a celda destino).
+  - Combate: atacar enemigo adyacente con calculo de dano.
+  - Objetos: recoger objeto del suelo, usar pocion, equipar arma/escudo.
+  - Turnos: terminar turno, actuar enemigos, condiciones de victoria (SALIDA
+    en cueva_dificil sin enemigos) y derrota (vida <= 0 o turnos <= 0).
+  - Navegacion entre cuevas (puertas).
+  - Guardar/cargar partida via SerializadorPartida.
+- Creado `src/vista/PantallaJuego.java` (425 lineas):
+  - Layout BorderPane con grid de cueva (StackPane + GridPane + overlay).
+  - Celdas coloreadas por TipoCelda (MURO gris, SUELO marron, INICIO verde,
+    PUERTA amarillo, TESORO morado, SALIDA rojo, TRAMPA naranja).
+  - Jugador (circulo azul), enemigos (rojo), objetos (amarillo) en overlay.
+  - Panel derecho con estadisticas, inventario (con botones USAR/EQUIPAR),
+    acciones (movimiento, atacar, recoger, terminar turno, cambiar cueva,
+    guardar, volver al menu) y log de mensajes.
+  - Teclado WASD/flechas para movimiento + SPACE(atacar), R(recoger),
+    T(terminar turno). Clic en celda para mover. Clic en root devuelve foco.
+- Modificado `src/vista/EscapeMazmorraApp.java`:
+  - "Iniciar partida" ahora crea Partida y cambia a PantallaJuego.
+  - Nueva `volverAlMenu()` que reconstruye la escena del menu.
+  - Guardado de referencia al Stage.
+- Modificado `src/json/SerializadorPartida.java`:
+  - Anadidos metodos de conversion modelo<->DTO:
+    `desdeMazmorraJugador()`, `mazmorraADTO()`, `dtoAMazmorra()`,
+    `jugadorADTO()`, `dtoAJugador()`, `cuevaADTO()`, `dtoACueva()`,
+    `enemigoADTO()`, `dtoAEnemigo()`, `objetoADTO()`, `dtoAObjeto()`.
+- Creado `test/modelo/juego/PartidaTest.java` (24 tests):
+  - Creacion, movimiento (valido, muro, fuera de mapa, distancia > 1).
+  - Combate (sin enemigo, reduce vida, mata enemigo tras varios golpes).
+  - Objetos (recoger en misma casilla, sin objeto no hace nada).
+  - Turnos (reduce contador, agotar turnos -> derrota, muerte -> derrota).
+  - Puertas/cueva (detectar puerta, cambiar sin estar en puerta).
+  - Guardado/carga (round-trip, ruta invalida lanza excepcion).
+  - Estado inicial, movimiento bloqueado en estado no EN_CURSO.
+
+### Pruebas ejecutadas
+
+- Compilacion completa de `src/` con javac + Gson + JavaFX 23: correcta.
+- 148/148 tests JUnit pasados (24 nuevos de Partida + 124 existentes).
+
+### Hallazgos del revisor independiente
+
+- IMPORTANTE: Partida.java no tenia tests JUnit. Se crearon 24 tests.
+- MENOR: volverAlMenu() no detiene las Timeline previas (leak menor).
+- MENOR: Documentacion no reflejaba los cambios. Se actualiza ahora.
+
+### Riesgos
+
+- El guardado/carga de partida con Partida.cargar() no restaura los
+  enemigos ni objetos del mapa (cuevasData se crea vacio). Queda como
+  limitacion conocida para futura iteracion.
+- La demo se probo y funciona, pero el usuario reporto inicialmente
+  que "no deja hacer nada". Se corrigio anadiendo atajos SPACE/R/T
+  y gestion de foco del teclado.
+
+### Pendiente
+
+- Hacer commit, push y Pull Request cuando Hector lo autorice.
 ## 2026-05-22 - Alvaro / Parte A con apoyo en logica de Partida
 
 ### Identificacion de sesion
