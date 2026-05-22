@@ -38,7 +38,7 @@ HECHA
 ### C-03 Boceto JavaFX
 
 - Responsable: Hector / Parte C
-- Estado: EN_CURSO
+- Estado: REVISION
 - Archivos permitidos: `docs/`, `project-management/`
 - Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
 - Verificacion: documento `docs/BOCETO_JAVAFX.md` creado con layout, zonas, mapeo de componentes, flujo de datos y contrato con Partida.
@@ -98,10 +98,10 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### C-03 Boceto JavaFX
 
 - Responsable: Hector / Parte C
-- Estado: EN_CURSO
+- Estado: REVISION
 - Archivos permitidos: `docs/`, `project-management/`
 - Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
-- Verificacion: documento `docs/BOCETO_JAVAFX.md` con layout ASCII, zonas detalladas, mapeo a componentes JavaFX, flujo de datos y contrato minimo de Partida.
+- Verificacion: documento `docs/BOCETO_JAVAFX.md` (234 lineas) con layout ASCII, 5 zonas detalladas, tabla de colores, mapeo JavaFX, flujo de datos, estructura de clases para C-04, contrato minimo de Partida, estrategia mock y checklist.
 
 ### C-04 JavaFX minima
 
