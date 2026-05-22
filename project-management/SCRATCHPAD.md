@@ -870,3 +870,87 @@ Hallazgos:
 - `build/` quedo generado localmente por las compilaciones y no debe incluirse en commit.
 - La ejecucion de tests fuera de IntelliJ sigue teniendo la limitacion del aviso interno de `javac` al cerrar el jar de JUnit, aunque los tests se ejecutaron correctamente por reflexion.
 - La integracion futura con JSON debera mapear las configuraciones de objetos a estas clases sin mezclar reglas de juego en `src/json`.
+
+## 2026-05-22 - Alvaro / Parte A con apoyo en logica de Partida
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A, coordinacion con logica de juego
+Agente: Codex-A Estructuras
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si
+Rama actualizada con `origin/main`: si, se incorporaron los cambios de personajes, objetos e inventario antes de trabajar sobre `Partida`.
+Documentos leidos: `TASKS.md`, `DECISIONS.md`, `POST_MORTEM.md`, `SCRATCHPAD.md` y clases nuevas de personajes, objetos e inventario.
+
+### Tareas trabajadas
+
+- Planificacion e implementacion inicial de `B-03 Reglas de turno y combate` desde la rama de Alvaro, por peticion expresa de coordinacion.
+- Revision de responsabilidad entre `Mazmorra` y `Partida`.
+- Correccion de problemas detectados por revision independiente.
+- Ampliacion de tests JUnit de la nueva capa `modelo.juego`.
+
+### Archivos modificados
+
+- `src/modelo/juego/EstadoPartida.java`
+- `src/modelo/juego/InterfazPartida.java`
+- `src/modelo/juego/Partida.java`
+- `src/modelo/juego/Puerta.java`
+- `src/modelo/juego/ObjetoEnMapa.java`
+- `src/modelo/juego/PersonajeEnMapa.java`
+- `src/modelo/juego/CuevaEnMapa.java`
+- `src/modelo/juego/CeldaEnMapa.java`
+- `test/modelo/juego/PartidaTest.java`
+- `project-management/TASKS.md`
+- `project-management/DECISIONS.md`
+- `project-management/POST_MORTEM.md`
+- `project-management/SCRATCHPAD.md`
+- `project-management/IA_DIARY.md`
+
+### Cambios realizados
+
+- Se creo la primera version de `InterfazPartida` como fachada publica de la logica de juego.
+- Se implemento `Partida` con turnos, movimiento, accion, combate, recogida de objetos adyacentes, uso/equipamiento de objetos, avance entre cuevas con puertas y condicion de victoria por llave final.
+- Se creo `Puerta` como regla jugable sobre conexiones ya existentes en `Mazmorra`.
+- Se corrigio el diseno inicial para que `Partida` no conecte cuevas: esa responsabilidad queda en `Mazmorra`.
+- Se anadieron vistas inmutables para no exponer referencias mutables principales desde la interfaz: `PersonajeEnMapa`, `CuevaEnMapa` y `CeldaEnMapa`.
+- Se bloqueo que jugador y enemigos vivos compartan celda, incluyendo movimiento, colocacion de enemigos y avance a cueva destino.
+- Se corrigio la entrega de llave final para no depender de un id fijo que pudiera chocar con otros objetos.
+- Se saco de `InterfazPartida` la preparacion interna de enemigos y objetos, dejandola como soporte de montaje package-private.
+- Se documento en `DECISIONS.md` la responsabilidad de `Partida`, puertas, ocupacion, combate, turnos y log.
+- Se documento en `POST_MORTEM.md` el error de limite entre `Mazmorra` y `Partida`, la integracion parcial y los defectos detectados por revision independiente.
+- Se actualizaron pendientes y mejoras futuras en `TASKS.md`.
+
+### Tests
+
+Tests JUnit creados o actualizados: `test/modelo/juego/PartidaTest.java`.
+Tests ejecutados: compilacion manual de `src` con `javac`; cobertura ejecutada por Alvaro desde IntelliJ.
+Resultado: `src` compila correctamente; cobertura visual mostrada por Alvaro para `modelo.juego` con 100% clases, 89% metodos, 79% lineas y 58% ramas tras ampliar tests.
+Si no se ejecutaron por terminal todos los JUnit, motivo: el proyecto no tiene runner Maven/Gradle ni dependencia JUnit standalone estable fuera de IntelliJ en esta rama.
+
+### Commits y push
+
+Commit realizado: pendiente al redactar esta entrada, se prepara justo despues del cierre.
+Hash: pendiente.
+Push realizado: pendiente al redactar esta entrada, se prepara justo despues del commit.
+Rama: `feature/a-estructuras`
+
+### Pendiente para la siguiente sesion
+
+- Confirmar con Parte B y Parte C si `InterfazPartida` cubre las necesidades de JavaFX y JSON.
+- Confirmar si `ALCANCE_ARCO = 3` queda como valor definitivo.
+- Decidir si avanzar de cueva debe consumir solo accion, tambien movimiento o terminar turno.
+- Mejorar en una iteracion posterior el movimiento largo para no atravesar enemigos.
+- Mejorar la IA enemiga para buscar ruta alternativa si el primer paso esta ocupado.
+- Sustituir los metodos package-private de preparacion por una fabrica o builder formal de `Partida`.
+- Sustituir `ObjetoEnMapa.getCueva()` por id o vista inmutable cuando se cierre la integracion con JSON/JavaFX.
+
+### Riesgos o avisos
+
+- La capa nueva esta implementada y testeada como primera version funcional, pero todavia no esta conectada en profundidad con JavaFX ni con el cargador JSON.
+- Enemigos y objetos por cueva viven de momento en `Partida`, no dentro de `Cueva`.
+- La cobertura de ramas queda por debajo de lineas porque hay bastantes validaciones defensivas y caminos de error.
+- La rama contiene cambios compartidos de logica, por lo que debe entrar por PR y revision independiente antes de `main`.

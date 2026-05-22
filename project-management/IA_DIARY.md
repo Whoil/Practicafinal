@@ -365,3 +365,65 @@ Se implemento la base de B-02:
 ### Critica
 
 La sesion fue util para frenar antes de programar y cerrar decisiones pequenas pero importantes: especialmente equipo por ranuras, arco a dos manos y llaves sin equipar. El principal ajuste fue traer `ListaDE` desde las estructuras del grupo sin mantener `Comparable`, porque exigir orden natural a `Objeto` habria sido artificial. Para futuras sesiones conviene mantener esta misma disciplina: decidir primero, implementar despues, y documentar cualquier excepcion de alcance compartido antes del commit.
+
+## 2026-05-22 - Alvaro
+
+### Agente o herramienta
+
+Codex-A Estructuras, trabajando con permiso de coordinacion sobre la primera version de `Partida`.
+
+### Objetivo
+
+Planificar y dejar implementada una primera version funcional de la interfaz y la logica de partida, despues de integrar desde `main` la parte ya terminada de personajes, objetos e inventario.
+
+### Prompt o resumen del prompt
+
+Alvaro pidio actualizar la rama con `main`, releer `TASKS.md` y revisar las nuevas clases de personajes, objetos e inventario. Despues se decidio planificar antes de implementar: `Partida` debia ser la clase que coordina la logica del juego, pero no la responsable de conectar cuevas ni de crear la mazmorra desde cero.
+
+Durante la sesion se cerraron reglas de movimiento, recogida, combate, turnos, puertas, llave final, victoria y log. Alvaro detecto un error importante de diseno: metodos como `conectarCuevas` no debian estar en `Partida`, porque pertenecen a `Mazmorra`. Ese error se corrigio y se registro en el postmortem. Tambien se pidio revision independiente sobre las clases nuevas, se corrigieron los problemas importantes y se dejaron mejoras futuras en `TASKS.md`.
+
+### Resultado
+
+Se implemento una primera capa de logica de partida:
+
+- `InterfazPartida`
+- `EstadoPartida`
+- `Partida`
+- `Puerta`
+- `ObjetoEnMapa`
+- `PersonajeEnMapa`
+- `CuevaEnMapa`
+- `CeldaEnMapa`
+
+La partida coordina jugador, mazmorra, enemigos, objetos en suelo, puertas, acciones, turnos, combate, victoria, derrota y log. La interfaz publica evita exponer referencias mutables principales mediante vistas para personaje, cueva y celda.
+
+Se anadieron tests JUnit en `PartidaTest` y Alvaro mostro cobertura de IntelliJ para `modelo.juego`: 100% de clases, 89% de metodos, 79% de lineas y 58% de ramas.
+
+### Cambios aceptados
+
+- `Partida` recibe una `Mazmorra` ya creada; no la construye desde cero.
+- `Mazmorra` conecta cuevas; `Partida` solo valida avance segun puertas y llaves.
+- Las puertas son configuracion inicial de partida sobre conexiones ya existentes.
+- El jugador puede recoger objetos en celdas adyacentes.
+- El ataque cuerpo a cuerpo permite diagonales.
+- El arco permite atacar a distancia.
+- El dano se calcula como ataque menos defensa, con minimo 1.
+- Enemigos adyacentes atacan; si no estan adyacentes, se acercan usando camino minimo.
+- El turno termina cuando el jugador llama a `pasarTurno()`.
+- Para avanzar entre cuevas hace falta llave, salvo que la puerta ya este abierta.
+- Para ganar hace falta la llave final obtenida al derrotar al boss final.
+- El log vive de momento en `Partida`.
+- Jugador y enemigos vivos no pueden compartir celda.
+
+### Cambios rechazados o modificados
+
+- Se elimino del diseno la idea de que `Partida` conecte cuevas.
+- Se sacaron de `InterfazPartida` metodos de preparacion como anadir enemigos u objetos.
+- Se dejo como mejora futura mover enemigos y objetos a una estructura mas definitiva si el diseno final lo pide.
+- Se dejo como mejora futura impedir que el movimiento largo atraviese enemigos.
+- Se dejo como mejora futura que la IA busque rutas alternativas si el primer paso esta ocupado.
+- Se dejo como mejora futura sustituir referencias a `Cueva` en `ObjetoEnMapa` por id o vista inmutable.
+
+### Critica
+
+La sesion corrigio una frontera de responsabilidades a tiempo: `Partida` estaba creciendo hacia tareas estructurales que ya pertenecian a `Mazmorra`. La revision independiente tambien fue util porque detecto riesgos de mutabilidad y ocupacion que podian romper la primera version jugable. Queda como aviso que esta capa todavia no esta conectada en profundidad con JSON ni JavaFX, asi que debe presentarse como base funcional de logica, no como juego cerrado.

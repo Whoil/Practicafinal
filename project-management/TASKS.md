@@ -70,9 +70,57 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### B-03 Reglas de turno y combate
 
 - Responsable: Guille / Parte B
-- Estado: PENDIENTE
+- Estado: REVISION
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
 - Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
+- Avance actual: creada la primera version del contrato publico `InterfazPartida`, el enum `EstadoPartida`, `Partida`, `Puerta`, `ObjetoEnMapa`, `PersonajeEnMapa`, `CuevaEnMapa`, `CeldaEnMapa` y tests JUnit basicos de logica de partida.
+- Decisiones de diseno para implementar `Partida`:
+  - `Partida` gestionara inicialmente los enemigos y objetos por cueva, sin meter esa responsabilidad dentro de `Cueva`.
+  - La estructura elegida debe permitir que en una iteracion futura cada cueva tenga sus propios enemigos y objetos de forma directa.
+  - Los objetos tendran posicion en el mapa para poder recogerlos desde celdas cercanas.
+  - Se creara una clase `Puerta` para representar conexiones con requisito de llave.
+  - `Partida` no conectara cuevas; las conexiones pertenecen a `Mazmorra`.
+  - Las puertas se cargaran como configuracion inicial de `Partida` y solo podran referirse a conexiones ya existentes en `Mazmorra`.
+  - Una puerta ya abierta podra atravesarse sin volver a exigir la llave.
+  - Jugador y enemigos no podran compartir celda; `Partida` validara solapes mientras `Cueva` no gestione ocupantes.
+  - El jugador podra recoger objetos en celdas adyacentes.
+  - El jugador podra atacar enemigos adyacentes, incluyendo diagonales.
+  - Si el jugador tiene arco equipado, podra atacar a distancia.
+  - Formula de dano: ataque menos defensa, con dano minimo 1 cuando el ataque sea valido.
+  - En el turno enemigo, cada enemigo atacara si esta adyacente al jugador; si no, se acercara usando camino minimo.
+  - El turno del jugador terminara solo cuando pulse `pasarTurno()`, no automaticamente tras moverse o actuar.
+  - Para avanzar entre cuevas, el jugador necesitara la llave de la puerta correspondiente.
+  - Para ganar, el jugador debera conseguir la llave final, que solo se obtiene derrotando al boss final.
+  - El log de eventos vivira de momento en `Partida` como estructura propia simple.
+- Revision independiente:
+  - Pasada el 2026-05-22 sobre las clases nuevas.
+  - Corregidos los problemas detectados sobre exposicion mutable principal, ocupacion de celdas, avance a cueva destino ocupada, llave final con id conflictivo, semantica de puerta abierta, `ObjetoEnMapa.equals()` y metodos de preparacion fuera de `InterfazPartida`.
+- Pendiente antes de marcar como HECHA:
+  - Ejecutar tests JUnit completos en IntelliJ.
+  - Confirmar con Parte B y Parte C que el contrato de `InterfazPartida` cubre lo necesario para JavaFX y JSON.
+  - Revisar si `ALCANCE_ARCO = 3` es el alcance definitivo para la primera version.
+  - Revisar si avanzar de cueva debe consumir accion pero no finalizar automaticamente el turno, como queda implementado.
+
+### B-04 Mejoras de logica para iteraciones posteriores
+
+- Responsable: Guille / Parte B
+- Estado: PENDIENTE
+- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `src/modelo/mapa/`, `test/`, `project-management/`
+- Terminado cuando se revisen y se implementen las mejoras aprobadas despues de la primera version funcional.
+- Tareas propuestas:
+  - Mover la gestion de enemigos y objetos para que cada `Cueva` tenga directamente sus propios contenidos si el diseno final lo pide.
+  - Crear enemigos con ataque a distancia.
+  - Evitar que el jugador atraviese enemigos durante un movimiento largo, no solo que termine en una celda ocupada.
+  - Hacer que la IA enemiga busque una ruta alternativa si el primer paso del camino minimo esta ocupado.
+  - Quitar la referencia mutable a `Cueva` de `ObjetoEnMapa` o sustituirla por id/vista inmutable cuando JavaFX y JSON esten conectados.
+  - Sustituir los metodos package-private de preparacion en `Partida` por una fabrica/builder formal de partida.
+  - Anadir tests de derrota por turnos, derrota por muerte, uso de pociones, equipamiento y enemigo acercandose desde distancia.
+  - Afinar el alcance real del arco y posibles lineas de vision.
+  - Anadir cofres con llave y objetos dentro.
+  - Anadir trampas con dano o efectos simples.
+  - Anadir drops especificos de enemigos, incluyendo la llave final del boss.
+  - Mejorar IA enemiga con reglas distintas por tipo de enemigo.
+  - Revisar si el log necesita pasar de `ListaSE<String>` a una clase `LogJuego`.
 
 ### C-02 Cargar y guardar partida
 
