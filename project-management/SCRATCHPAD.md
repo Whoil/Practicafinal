@@ -796,3 +796,77 @@ Resultado:
 
 - `B-01` evita a proposito inventario, objetos, drops, combate, turnos y regla del 75%; esas partes deben mantenerse fuera de esta tarea.
 - Los datos JSON de Parte C ya incluyen enemigos y objetos como configuracion, pero Parte B aun no debe acoplarse a ellos hasta `B-02`/`B-03`.
+
+## 2026-05-22 - Guillermo / Parte B
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B - logica del juego
+Agente: Codex / Agente B Logica
+
+### Contexto
+
+Se inicio la tarea `B-02 Modelo de objetos e inventario`. Antes de programar se revisaron GitHub y los documentos actualizados de `project-management` desde `main`, se confirmo que PR #5 estaba mergeada y se leyeron los dos PDF del proyecto para comprobar que B-01 no tenia huecos y que B-02 debia centrarse en objetos, inventario y equipo.
+
+Antes de cerrar el alcance, Guillermo pidio decidir punto por punto. Se acordo incluir `Arco` y `Escudo`, permitir objetos repetidos por tipo pero no duplicar el mismo `id`, usar ranuras separadas de arma y escudo, hacer que el arco ocupe las dos manos y desequipe/bloquee escudo, dejar llaves sin equipar, implementar solo pocion de cura y dejar invisibilidad, drops, cofres, recoger del suelo, mapa, JSON, turnos, combate y regla del 75% fuera de B-02.
+
+### Sincronizacion
+
+Rama: `feature/b-logica`
+Cambio remoto revisado: si.
+Rama local: limpia al inicio pero por delante de `origin/feature/b-logica` por commits locales de merge/documentacion de la sesion anterior.
+Limitacion tecnica: el entorno de Codex no pudo ejecutar `git fetch` local por permisos en `.git/FETCH_HEAD`; se contrasto GitHub con el conector y se leyeron documentos desde `main`.
+Documentos leidos: `TASKS.md`, `AGENT_B_LOGICA.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRD.md`, `SCRATCHPAD.md`, `IA_DIARY.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `POST_MORTEM.md` y los dos PDF del proyecto.
+
+### Cambios
+
+- `TASKS.md`: B-02 queda en `REVISION` y se documenta la autorizacion de Guillermo para traer `ListaDE`, `ElementoDE` e `IteradorDE`.
+- `src/Estructuras/ElementoDE.java`, `IteradorDE.java`, `ListaDE.java`: se traen desde las estructuras del grupo.
+- `ListaDE` se adapta para no exigir `Comparable`, usando igualdad por `equals`, porque el inventario debe guardar objetos sin orden natural.
+- `src/modelo/objetos/Objeto.java`: clase base de objetos con `id`, nombre, descripcion, igualdad por `id` y marcas de equipable/consumible.
+- `src/modelo/objetos/Arma.java`, `Espada.java`, `Arco.java`: armas equipables con bonificacion de ataque; espada +12 y arco +7.
+- `src/modelo/objetos/Escudo.java`: equipable con +5 defensa.
+- `src/modelo/objetos/Llave.java`, `TipoLlave.java`: llaves de puerta o cofre con codigo de cerradura; no se equipan en B-02.
+- `src/modelo/objetos/Pocion.java`: pocion de cura, cura 25 y se consume.
+- `Jugador`: inventario con `ListaDE<Objeto>`, rechazo de ids duplicados, copia defensiva de inventario, equipo de arma y escudo, regla de arco a dos manos, uso de pocion de cura y calculo de ataque/defensa total.
+- Tests nuevos: `ListaDETest`, `ObjetoTest`, `JugadorInventarioTest`.
+
+### Tests
+
+Tests JUnit creados o actualizados:
+
+- `test/Estructuras/ListaDETest.java`
+- `test/modelo/objetos/ObjetoTest.java`
+- `test/modelo/personajes/JugadorInventarioTest.java`
+
+Pruebas ejecutadas:
+
+- Compilacion completa de `src` con `javac`: correcta.
+- Compilacion de tests con JUnit en classpath: genero clases correctamente, aunque `javac` volvio a mostrar una excepcion interna de permisos al cerrar el jar de JUnit en `.m2`.
+- Ejecucion por reflexion de todos los tests compilados tras ampliar cobertura de objetos: 105 tests ejecutados, 0 fallos.
+- Busqueda de colecciones prohibidas: sin usos reales nuevos; solo menciones en comentarios existentes.
+
+### Revision independiente
+
+Resultado: revisado por agente independiente.
+
+Hallazgos:
+
+- El revisor marco que `src/Estructuras/` estaba fuera del alcance estandar de B-02.
+- Se resolvio documentando en `TASKS.md` la autorizacion explicita de Guillermo para traer y adaptar `ListaDE`, `ElementoDE` e `IteradorDE`.
+- No se detectaron bugs funcionales ni uso de colecciones prohibidas.
+- El revisor considero funcionalmente aceptable la implementacion de inventario, objetos, equipo, copia defensiva y colisiones de id con tipo distinto.
+
+### Pendiente
+
+- B-02 queda pendiente de revision de PR antes de marcarla como `HECHA`.
+- Ejecutar/confirmar tests en IntelliJ si se quiere cobertura visual.
+- Preparar commit, push y PR solo con autorizacion humana.
+- Mantener para B-03: turnos, combate, invisibilidad por turnos, drops, cofres, recoger objetos del mapa, integracion con JSON/JavaFX y regla del 75%.
+
+### Riesgos
+
+- `build/` quedo generado localmente por las compilaciones y no debe incluirse en commit.
+- La ejecucion de tests fuera de IntelliJ sigue teniendo la limitacion del aviso interno de `javac` al cerrar el jar de JUnit, aunque los tests se ejecutaron correctamente por reflexion.
+- La integracion futura con JSON debera mapear las configuraciones de objetos a estas clases sin mezclar reglas de juego en `src/json`.

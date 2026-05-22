@@ -62,9 +62,10 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### B-02 Modelo de objetos e inventario
 
 - Responsable: Guille / Parte B
-- Estado: PENDIENTE
-- Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `test/`, `project-management/`
-- Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Llave` e inventario con `ListaDE<Objeto>`.
+- Estado: REVISION
+- Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
+- Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`.
+- Nota de alcance: Guillermo autoriza traer `ListaDE`, `ElementoDE` e `IteradorDE` desde las estructuras del grupo y adaptar `ListaDE` para no exigir `Comparable`, porque el inventario necesita guardar objetos sin orden natural.
 
 ### B-03 Reglas de turno y combate
 
