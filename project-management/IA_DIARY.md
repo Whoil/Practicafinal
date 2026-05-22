@@ -365,3 +365,50 @@ Se implemento la base de B-02:
 ### Critica
 
 La sesion fue util para frenar antes de programar y cerrar decisiones pequenas pero importantes: especialmente equipo por ranuras, arco a dos manos y llaves sin equipar. El principal ajuste fue traer `ListaDE` desde las estructuras del grupo sin mantener `Comparable`, porque exigir orden natural a `Objeto` habria sido artificial. Para futuras sesiones conviene mantener esta misma disciplina: decidir primero, implementar despues, y documentar cualquier excepcion de alcance compartido antes del commit.
+
+## 2026-05-22 - Hector (sesion 3)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Implementar C-02: guardado y carga de partida en JSON.
+
+### Prompt o resumen del prompt
+
+Hector inicio sesion pidiendo trabajar en C-02. Se analizo primero el proyecto
+(que ya incluye B-01 y B-02 de Parte B: personajes, enemigos, objetos,
+inventario). Se disenaron DTOs para el formato de guardado y un serializador
+con Gson.
+
+### Resultado
+
+- Creados 6 DTOs de guardado y SerializadorPartida con guardar/cargar.
+- Ampliado ConexionDTO con constructores.
+- 10 tests JUnit de guardado/carga: round-trip, matriz, enemigos, objetos,
+  inventario, equipo, estado, errores de ruta.
+- Tests compilados y ejecutados desde terminal (0 fallos).
+- Tests existentes de CargadorConfiguracion siguen pasando.
+
+### Cambios aceptados
+
+- Formato de guardado version 1.0 con estructura completa de mazmorra,
+  jugador, enemigos y objetos.
+- Uso de arrays Java en DTOs (misma justificacion que C-01: estructuras
+  temporales de serializacion, no evaluables).
+- SerializadorPartida como clase de metodos estaticos (no requiere instancia).
+
+### Cambios rechazados o modificados
+
+- No se implementa conversion DTO <-> modelo (Jugador, Enemigo, Objeto, etc.)
+  porque Partida aun no existe (B-03). Los DTOs definen el formato; la
+  integracion se hara cuando Parte B tenga Partida lista.
+
+### Critica
+
+La tarea salio segun lo planeado. El haber descargado JUNIT standalone
+permitio ejecutar tests desde terminal, lo que no se pudo en C-01. Para
+proximas sesiones, mantener el standalone en lib/ para poder seguir
+ejecutando tests sin IntelliJ.

@@ -10,6 +10,21 @@ public class ConexionDTO {
     private String destino;
     private String etiqueta;
 
+    /**
+     * Constructor sin argumentos requerido por Gson.
+     */
+    public ConexionDTO() {
+    }
+
+    /**
+     * Constructor completo para crear conexiones en pruebas.
+     */
+    public ConexionDTO(String origen, String destino, String etiqueta) {
+        this.origen = origen;
+        this.destino = destino;
+        this.etiqueta = etiqueta;
+    }
+
     public String getOrigen() {
         return origen;
     }

@@ -28,7 +28,12 @@ HECHA
 
 ## En curso
 
-No hay tareas en curso todavia.
+### C-02 Cargar y guardar partida
+
+- Responsable: Hector / Parte C
+- Estado: REVISION
+- Archivos permitidos: `src/json/`, `test/`, `project-management/`
+- Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
 
 ## Peticiones urgentes entre partes
 
@@ -77,9 +82,10 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### C-02 Cargar y guardar partida
 
 - Responsable: Hector / Parte C
-- Estado: PENDIENTE
+- Estado: REVISION
 - Archivos permitidos: `src/json/`, `test/`, `project-management/`
 - Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
+- Verificacion: 10 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, errores).
 
 ### C-03 Boceto JavaFX
 

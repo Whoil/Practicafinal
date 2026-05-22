@@ -870,3 +870,75 @@ Hallazgos:
 - `build/` quedo generado localmente por las compilaciones y no debe incluirse en commit.
 - La ejecucion de tests fuera de IntelliJ sigue teniendo la limitacion del aviso interno de `javac` al cerrar el jar de JUnit, aunque los tests se ejecutaron correctamente por reflexion.
 - La integracion futura con JSON debera mapear las configuraciones de objetos a estas clases sin mezclar reglas de juego en `src/json`.
+
+## 2026-05-22 - Hector / Parte C - C-02 Cargar y guardar partida
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Parte B ya implemento Personaje, Jugador, Enemigo, Boss y todos los objetos
+del juego (B-01 y B-02). Se hace merge de origin/main a la rama feature.
+Se implementa C-02: guardado y carga de partida en JSON.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si — Part B ha avanzado con B-01 y B-02.
+Merge con origin/main: sin conflictos (fast-forward).
+
+### Tarea trabajada
+
+C-02 Cargar y guardar partida.
+
+### Cambios
+
+- Creados 6 DTOs en `src/json/` para el formato de guardado:
+  - `DatosPartidaDTO` (raiz: version, estado, turnos)
+  - `DatosMazmorraDTO` (cueva actual, cuevas, conexiones)
+  - `DatosCuevaDTO` (matriz actual, enemigos vivos, objetos en mapa)
+  - `DatosJugadorDTO` (atributos, equipo, inventario)
+  - `DatosEnemigoDTO` (tipo, vida, posicion, vivo)
+  - `DatosObjetoDTO` (id, tipo, atributos por subtipo)
+- Ampliado `ConexionDTO` con constructores para poder crearlo en tests.
+- Creado `SerializadorPartida.java` con metodos estaticos:
+  - `guardar(DatosPartidaDTO, ruta)` — escribe JSON con pretty printing
+  - `cargar(ruta)` — lee JSON y devuelve DatosPartidaDTO
+- Creado `test/json/SerializadorPartidaTest.java` con 10 tests.
+
+### Archivos modificados
+
+- `src/json/DatosPartidaDTO.java` (nuevo)
+- `src/json/DatosMazmorraDTO.java` (nuevo)
+- `src/json/DatosCuevaDTO.java` (nuevo)
+- `src/json/DatosJugadorDTO.java` (nuevo)
+- `src/json/DatosEnemigoDTO.java` (nuevo)
+- `src/json/DatosObjetoDTO.java` (nuevo)
+- `src/json/SerializadorPartida.java` (nuevo)
+- `src/json/ConexionDTO.java` (ampliado con constructores)
+- `test/json/SerializadorPartidaTest.java` (nuevo)
+- `project-management/TASKS.md` (C-02 -> REVISION)
+- `project-management/SCRATCHPAD.md` (actualizado)
+- `project-management/IA_DIARY.md` (actualizado)
+
+### Pruebas ejecutadas
+
+- Compilacion de src/ completa: correcta.
+- 10/10 tests de SerializadorPartida pasados desde terminal con JUnit standalone + Gson.
+- 10/10 tests de CargadorConfiguracion existentes siguen pasando.
+
+### Riesgos
+
+- Los DTOs de guardado no tienen metodos para convertir desde/hacia las
+  clases del modelo (Jugador, Enemigo, Objeto, etc.). Esa conversion
+  corresponde a Parte B cuando implemente Partida (B-03) o a una futura
+  integracion. Los DTOs definen el formato de intercambio JSON.
+- El formato es compatible hacia atras (version 1.0).
+
+### Estado de TASKS.md
+
+C-02 pasa a REVISION.
