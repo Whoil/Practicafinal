@@ -28,21 +28,6 @@ HECHA
 
 ## En curso
 
-### C-02 Cargar y guardar partida
-
-- Responsable: Hector / Parte C
-- Estado: REVISION
-- Archivos permitidos: `src/json/`, `test/`, `project-management/`
-- Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
-
-### C-03 Boceto JavaFX
-
-- Responsable: Hector / Parte C
-- Estado: REVISION
-- Archivos permitidos: `docs/`, `project-management/`
-- Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
-- Verificacion: documento `docs/BOCETO_JAVAFX.md` creado con layout, zonas, mapeo de componentes, flujo de datos y contrato con Partida.
-
 ## Peticiones urgentes entre partes
 
 Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revisarla al inicio de sesion.
@@ -90,10 +75,10 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### C-02 Cargar y guardar partida
 
 - Responsable: Hector / Parte C
-- Estado: REVISION
+- Estado: HECHA
 - Archivos permitidos: `src/json/`, `test/`, `project-management/`
 - Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
-- Verificacion: 10 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, errores).
+- Verificacion: 19 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, equipo, estado, errores, conversion DTO<->modelo).
 
 ### C-03 Boceto JavaFX
 
@@ -103,12 +88,21 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
 - Verificacion: documento `docs/BOCETO_JAVAFX.md` (234 lineas) con layout ASCII, 5 zonas detalladas, tabla de colores, mapeo JavaFX, flujo de datos, estructura de clases para C-04, contrato minimo de Partida, estrategia mock y checklist.
 
-### C-04 JavaFX minima
+### C-04 Menu principal JavaFX
 
 - Responsable: Hector / Parte C
-- Estado: PENDIENTE
+- Estado: HECHA
 - Archivos permitidos: `src/vista/`, `src/controlador/`, `project-management/`
-- Terminado cuando la interfaz muestre la cueva actual y permita ejecutar acciones basicas via `Partida`.
+- Terminado cuando exista ventana 1280x720 con fondo cueva, antorchas animadas, tesoro decorativo, pantalla Inicio -> Opciones navegable con FadeTransition.
+- Verificacion: `EscapeMazmorraApp.java` compila con JavaFX 23 (2026-05-22).
+
+### C-05 Partida jugable (integracion juego + UI)
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/Partida.java`, `src/vista/PantallaJuego.java`, `src/vista/EscapeMazmorraApp.java`, `test/`, `project-management/`
+- Terminado cuando exista Partida que cargue JSON, maneje movimiento, combate, objetos, turnos, condiciones de victoria/derrota, guardado/carga, y PantallaJuego que muestre grid coloreado con jugador/enemigos/objetos, panel de stats, inventario, acciones, log, teclado WASD/flechas y atajos SPACE/R/T.
+- Verificacion: 148 tests JUnit pasados el 2026-05-22 (24 tests de Partida + 124 existentes). Demo jugable confirmada por Hector.
 
 ### R-01 Revision de restricciones
 

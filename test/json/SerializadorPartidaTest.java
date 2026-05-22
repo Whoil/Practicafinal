@@ -6,7 +6,21 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import Estructuras.ListaDE;
+import Estructuras.MiIterador;
+import modelo.juego.Mazmorra;
+import modelo.mapa.Cueva;
 import modelo.mapa.TipoCelda;
+import modelo.objetos.Arma;
+import modelo.objetos.Escudo;
+import modelo.objetos.Espada;
+import modelo.objetos.Llave;
+import modelo.objetos.Objeto;
+import modelo.objetos.Pocion;
+import modelo.objetos.TipoLlave;
+import modelo.personajes.Enemigo;
+import modelo.personajes.Jugador;
+import modelo.personajes.TipoEnemigo;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -275,6 +289,201 @@ class SerializadorPartidaTest {
         assertEquals(85, rec.getJugador().getVidaActual());
         assertEquals(1, rec.getJugador().getInventario().length);
         assertEquals("obj_espada", rec.getJugador().getArmaEquipadaId());
+    }
+
+    // ---------------------------------------------------------------
+    // Tests de conversion modelo <-> DTO
+    // ---------------------------------------------------------------
+
+    @Test
+    void convertirMazmorraRealADTOyRecuperar() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar("datos/cuevas.json");
+        Mazmorra original = resultado.getMazmorra();
+
+        DatosMazmorraDTO dto = SerializadorPartida.mazmorraADTO(original);
+        assertNotNull(dto);
+        assertEquals(3, dto.getCuevas().length);
+        assertEquals("cueva_facil", dto.getCuevas()[0].getId());
+        assertEquals(5, dto.getCuevas()[0].getFilas());
+        assertEquals(5, dto.getCuevas()[0].getColumnas());
+
+        Mazmorra recuperada = SerializadorPartida.dtoAMazmorra(dto);
+        assertNotNull(recuperada);
+        assertEquals(3, recuperada.getNumeroCuevas());
+        assertEquals("cueva_facil", recuperada.getCuevaActual().getId());
+        assertEquals("INICIO",
+                dto.getCuevas()[0].getMatriz()[1][1]);
+    }
+
+    @Test
+    void convertirJugadorCompletoADTOyRecuperar() {
+        Jugador original = new Jugador("Heroe", 100, 15, 5, 3, 1, 1);
+        original.recibirDano(25);
+
+        Pocion pocion = new Pocion("obj_pocion");
+        Espada espada = new Espada("obj_espada");
+        original.agregarObjeto(pocion);
+        original.agregarObjeto(espada);
+        original.equiparArma(espada);
+
+        DatosJugadorDTO dto = SerializadorPartida.jugadorADTO(original);
+        assertEquals("Heroe", dto.getNombre());
+        assertEquals(75, dto.getVidaActual());
+        assertEquals(100, dto.getVidaMaxima());
+        assertEquals(15, dto.getAtaqueBase());
+        assertEquals(5, dto.getDefensaBase());
+        assertEquals(3, dto.getMovimiento());
+        assertEquals(1, dto.getFila());
+        assertEquals(1, dto.getColumna());
+        assertEquals("obj_espada", dto.getArmaEquipadaId());
+        assertNull(dto.getEscudoEquipadoId());
+        assertEquals(2, dto.getInventario().length);
+
+        Jugador recuperado = SerializadorPartida.dtoAJugador(dto);
+        assertEquals(original.getNombre(), recuperado.getNombre());
+        assertEquals(original.getVidaActual(), recuperado.getVidaActual());
+        assertEquals(original.getVidaMaxima(), recuperado.getVidaMaxima());
+        assertEquals(original.getAtaqueBase(), recuperado.getAtaqueBase());
+        assertEquals(original.getDefensaBase(), recuperado.getDefensaBase());
+        assertEquals(original.getFila(), recuperado.getFila());
+        assertEquals(original.getColumna(), recuperado.getColumna());
+        assertNotNull(recuperado.getArmaEquipada());
+        assertEquals("obj_espada", recuperado.getArmaEquipada().getId());
+        assertEquals(2, recuperado.getCantidadObjetosInventario());
+    }
+
+    @Test
+    void convertirEnemigoADTOyRecuperar() {
+        Enemigo original = new Enemigo("Goblin", TipoEnemigo.ORCO,
+                30, 10, 3, 2, 2, 2);
+        original.recibirDano(5);
+
+        DatosEnemigoDTO dto = SerializadorPartida.enemigoADTO(original);
+        assertEquals("ORCO", dto.getTipo());
+        assertEquals("Goblin", dto.getNombre());
+        assertEquals(25, dto.getVidaActual());
+        assertEquals(30, dto.getVidaMaxima());
+        assertEquals(10, dto.getAtaqueBase());
+        assertEquals(3, dto.getDefensaBase());
+        assertEquals(2, dto.getMovimiento());
+        assertEquals(2, dto.getFila());
+        assertEquals(2, dto.getColumna());
+        assertTrue(dto.isVivo());
+
+        Enemigo recuperado = SerializadorPartida.dtoAEnemigo(dto);
+        assertEquals(original.getNombre(), recuperado.getNombre());
+        assertEquals(original.getTipoEnemigo(), recuperado.getTipoEnemigo());
+        assertEquals(original.getVidaActual(), recuperado.getVidaActual());
+        assertEquals(original.getVidaMaxima(), recuperado.getVidaMaxima());
+        assertEquals(original.getFila(), recuperado.getFila());
+        assertEquals(original.estaVivo(), recuperado.estaVivo());
+    }
+
+    @Test
+    void convertirObjetoPocionADTOyRecuperar() {
+        Pocion original = new Pocion("obj_pocion", 35);
+        DatosObjetoDTO dto = SerializadorPartida.objetoADTO(original, 1, 3);
+        assertEquals("POCION", dto.getTipo());
+        assertEquals(35, dto.getCura());
+        assertEquals(1, dto.getFila());
+        assertEquals(3, dto.getColumna());
+
+        Objeto recuperado = SerializadorPartida.dtoAObjeto(dto);
+        assertTrue(recuperado instanceof Pocion);
+        assertEquals(35, ((Pocion) recuperado).getPuntosCuracion());
+    }
+
+    @Test
+    void convertirObjetoEspadaADTOyRecuperar() {
+        Espada original = new Espada("obj_espada");
+        DatosObjetoDTO dto = SerializadorPartida.objetoADTO(original, -1, -1);
+        assertEquals("ESPADA", dto.getTipo());
+        assertEquals(Espada.ATAQUE_EXTRA, dto.getBonificacionAtaque());
+
+        Objeto recuperado = SerializadorPartida.dtoAObjeto(dto);
+        assertTrue(recuperado instanceof Espada);
+    }
+
+    @Test
+    void convertirObjetoLlaveADTOyRecuperar() {
+        Llave original = new Llave("obj_llave", TipoLlave.PUERTA, "puerta_1");
+        DatosObjetoDTO dto = SerializadorPartida.objetoADTO(original, 4, 4);
+        assertEquals("LLAVE", dto.getTipo());
+        assertEquals("PUERTA", dto.getTipoLlave());
+
+        Objeto recuperado = SerializadorPartida.dtoAObjeto(dto);
+        assertTrue(recuperado instanceof Llave);
+    }
+
+    @Test
+    void convertirObjetoEscudoADTOyRecuperar() {
+        Escudo original = new Escudo("obj_escudo");
+        DatosObjetoDTO dto = SerializadorPartida.objetoADTO(original, 2, 2);
+        assertEquals("ESCUDO", dto.getTipo());
+        assertEquals(Escudo.DEFENSA_EXTRA, dto.getBonificacionDefensa());
+
+        Objeto recuperado = SerializadorPartida.dtoAObjeto(dto);
+        assertTrue(recuperado instanceof Escudo);
+    }
+
+    @Test
+    void guardarYRecargarConMazmorraYJugadorReales() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar("datos/cuevas.json");
+        Mazmorra mazmorra = resultado.getMazmorra();
+
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 3, 1, 1);
+        jugador.recibirDano(20);
+        Pocion pocion = new Pocion("obj_pocion");
+        Llave llave = new Llave("obj_llave", TipoLlave.PUERTA, "puerta_boss");
+        jugador.agregarObjeto(pocion);
+        jugador.agregarObjeto(llave);
+
+        DatosPartidaDTO partidaDTO = SerializadorPartida.desdeMazmorraJugador(
+                mazmorra, jugador, "EN_CURSO", 35);
+
+        String ruta = tempDir.resolve("partida_real.json").toString();
+        SerializadorPartida.guardar(partidaDTO, ruta);
+        DatosPartidaDTO cargada = SerializadorPartida.cargar(ruta);
+
+        assertEquals("1.0", cargada.getVersion());
+        assertEquals("EN_CURSO", cargada.getEstado());
+        assertEquals(35, cargada.getTurnosRestantes());
+        assertEquals(3, cargada.getMazmorra().getCuevas().length);
+        assertEquals("Heroe", cargada.getJugador().getNombre());
+        assertEquals(80, cargada.getJugador().getVidaActual());
+        assertEquals(2, cargada.getJugador().getInventario().length);
+
+        Mazmorra mRec = SerializadorPartida.dtoAMazmorra(cargada.getMazmorra());
+        assertEquals(3, mRec.getNumeroCuevas());
+        assertEquals("cueva_facil", mRec.getCuevaActual().getId());
+
+        Jugador jRec = SerializadorPartida.dtoAJugador(cargada.getJugador());
+        assertEquals(80, jRec.getVidaActual());
+        assertEquals(2, jRec.getCantidadObjetosInventario());
+    }
+
+    @Test
+    void matrizDeCuevaSeConservaEnRoundTrip() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar("datos/cuevas.json");
+        Cueva facil = resultado.getMazmorra().getCuevaPorId("cueva_facil");
+
+        DatosCuevaDTO dto = SerializadorPartida.cuevaADTO(facil);
+        assertEquals(5, dto.getFilas());
+        assertEquals(5, dto.getColumnas());
+        assertEquals("MURO", dto.getMatriz()[0][0]);
+        assertEquals("INICIO", dto.getMatriz()[1][1]);
+
+        Cueva recuperada = SerializadorPartida.dtoACueva(dto);
+        assertEquals(facil.getId(), recuperada.getId());
+        assertEquals(facil.getFilas(), recuperada.getFilas());
+        assertEquals(facil.getColumnas(), recuperada.getColumnas());
+        assertEquals(facil.getCelda(0, 0).getTipo(),
+                recuperada.getCelda(0, 0).getTipo());
+        assertEquals(facil.getCelda(1, 1).getTipo(),
+                recuperada.getCelda(1, 1).getTipo());
     }
 
     private DatosPartidaDTO crearPartidaMinima() {

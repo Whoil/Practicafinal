@@ -464,3 +464,146 @@ de implementar. El contrato con Partida queda explicito, lo que deberia
 facilitar la coordinacion con Parte B. Para la siguiente sesion (C-04)
 habra que descargar las librerias JavaFX (openjfx) para el JDK 25 y
 verificar que el mock de Partida es suficiente para probar la interfaz.
+
+## 2026-05-22 - Hector (sesion 6)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Cerrar formalmente C-02: verificar que todo el codigo de guardado/carga existe,
+compila y pasa tests, y marcar la tarea como HECHA en TASKS.md.
+
+### Prompt o resumen del prompt
+
+Hector volvio como Parte C y pidio terminar C-02. Se verifico que SerializadorPartida
+ya tenia todos los metodos de conversion modelo<->DTO (implementados en sesiones
+anteriores). Se compilo y ejecutaron los 19 tests JUnit desde terminal.
+
+### Resultado
+
+- 19/19 tests pasados (0 fallos, 81 ms).
+- C-02 marcada como HECHA en TASKS.md.
+- SCRATCHPAD.md actualizado.
+
+### Cambios aceptados
+
+Todo el codigo de C-02 existente se acepta como final: DTOs, SerializadorPartida
+con metodos de E/S y conversion, y sus tests.
+
+### Cambios rechazados o modificados
+
+Ninguno. No se modifico codigo fuente, solo documentacion de coordinacion.
+
+### Critica
+
+C-02 estaba esencialmente terminado desde la sesion del 2026-05-22. Solo faltaba
+la verificacion formal y el cambio de estado. La cobertura de tests es buena
+(19 tests cubren guardado, carga, errores y conversion bidireccional de todos
+los tipos del modelo).
+
+## 2026-05-22 - Hector (sesion 5)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Implementar el menu principal JavaFX (C-04) con fondo de cueva, antorchas animadas, tesoro decorativo, transiciones FadeTransition y dos pantallas navegables (Inicio -> Opciones -> Inicio).
+
+### Prompt o resumen del prompt
+
+Hector inicio sesion pidiendo comprobar GitHub y docs de `project-management`. C-03 estaba en REVISION. Hector rechazo el enfoque anterior de C-04 (layout 5-panel con matriz) y pidio disenar desde cero un menu principal con criterios concretos: ventana 1280x720, gradiente radial de cueva, antorchas animadas con Timeline, tesoro de monedas y cofre, titulo "ESCAPE DE LA MAZMORRA", boton Inicio con globo terraqueo, pantalla de opciones con 3 botones, fade transitions y hover effects.
+
+### Resultado
+
+- Creado `src/vista/EscapeMazmorraApp.java` como unico archivo.
+- `crearFondoCueva()` con RadialGradient.
+- `crearLlama()` con Polygon 7 puntos + LinearGradient tricolor.
+- `animarLlamas()` con Timeline de 20 KeyFrames (80ms c/u) oscilando escala y posicion Y.
+- `crearTesoro()` con 4 filas de monedas + cofre abierto (cuerpo, tapa, cerradura).
+- `crearPantallaInicio()` con titulo 3 lineas + boton Inicio + globo terraqueo.
+- `crearPantallaOpciones()` con titulo 38px + 3 botones con hover.
+- `cambiarAPantallaOpciones/inicio()` con FadeTransition 300ms.
+- Compilacion correcta con JavaFX 23.
+
+### Cambios aceptados
+
+- Un solo archivo `EscapeMazmorraApp.java` con ambas pantallas como metodos internos.
+- Fondo compartido (capa inferior del StackPane) que se mantiene al cambiar de pantalla.
+- Timeline de 20 frames con valores calculados trigonometricamente para animacion determinista.
+- Botones con efecto hover (escala 1.05-1.06 + aclarado de color).
+- Transition Fade 300ms salida + 300ms entrada.
+
+### Cambios rechazados o modificados
+
+- No se crean archivos separados PantallaInicio.java ni PantallaOpciones.java (se prefirio mantenerlo en un unico archivo porque los metodos son simples y comparten acceso a los metodos de navegacion privados).
+- No se usa Random en la animacion de llamas (se usa Math.sin para mantenerla determinista).
+
+### Critica
+
+La sesion fue productiva porque el prompt estaba muy detallado, lo que evito idas y vueltas. Mantener todo en un solo archivo simplifica la navegacion inicial, pero si mas adelante se anaden pantallas o logica compleja habra que separarlo. Pendiente: conectar PARTIDA NUEVA y ESTADISTICAS cuando exista Partida (B-03), y crear script de lanzamiento con JavaFX.
+
+## 2026-05-22 - Hector (sesion 7)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Crear Partida (motor de juego), PantallaJuego (UI del juego) y conectar el boton
+"Iniciar partida" del menu para tener una partida jugable completa.
+
+### Prompt o resumen del prompt
+
+Hector pidio construir el juego jugable: que el boton "Iniciar partida" del menu
+cree una partida cargando datos/cuevas.json y muestre la pantalla de juego con
+grid, jugador, enemigos, objetos, stats, inventario, acciones y log. Tambien pidio
+que el teclado funcione (WASD para mover) y que se pueda atacar, recoger objetos,
+cambiar de cueva, guardar/cargar y volver al menu.
+
+### Resultado
+
+- Partida.java: motor completo con carga JSON, movimiento, combate, objetos,
+  turnos, condiciones de victoria/derrota, navegacion entre cuevas y guardado/carga.
+- PantallaJuego.java: interfaz con grid coloreado, overlay de entidades,
+  panel de estadisticas, inventario con botones USAR/EQUIPAR, panel de acciones
+  y log de eventos. Teclado WASD + SPACE/R/T. Clic en celdas para moverse.
+- EscapeMazmorraApp.java: "Iniciar partida" conectado a Partida+PantallaJuego.
+  Nuevo metodo volverAlMenu().
+- SerializadorPartida.java: ampliado con metodos de conversion modelo<->DTO
+  para que Partida pueda guardar y cargar.
+- PartidaTest.java: 24 tests de creacion, movimiento, combate, objetos,
+  turnos, puertas, guardado/carga y estados.
+
+### Cambios aceptados
+
+- Partida como unica clase de motor de juego con responsabilidad clara.
+- PantallaJuego separada de EscapeMazmorraApp (no mezclan responsabilidades).
+- Atajos de teclado SPACE (atacar), R (recoger), T (terminar turno).
+- 24 tests unitarios para Partida (movimiento, combate, objetos, turnos,
+  condiciones de victoria/derrota, guardado/carga).
+- Focus management para que el teclado funcione tras clics en UI.
+
+### Cambios rechazados o modificados
+
+- No se implemento pathfinding para clic en celdas lejanas (el movimiento
+  sigue siendo de 1 paso, usando teclado/botones direccionales).
+- No se implemento animacion de transicion entre cuevas (solo cambio
+  instantaneo de grid).
+- No se implementaron drops de enemigos al morir (los objetos solo se
+  recogen del suelo).
+
+### Critica
+
+La sesion fue la mas larga del proyecto y produjo tres archivos grandes
+(Partida.java 571 ln, PantallaJuego.java 425 ln, PartidaTest.java ~200 ln).
+El revisor independiente detecto que Partida no tenia tests, lo que se
+corrigio antes del commit. La demo revelo que los atajos de teclado SPACE, R y T
+estaban anunciados en la UI pero no implementados, y que el foco del teclado
+se perdia al hacer clic en la UI. Ambos problemas se corrigieron.
+Para futuras sesiones: probar la demo uno mismo antes de entregarla al usuario.
