@@ -1,6 +1,8 @@
 package vista;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -8,7 +10,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -26,10 +31,10 @@ import javafx.util.Duration;
 import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import Estructuras.MiIterador;
+import modelo.juego.CeldaEnMapa;
+import modelo.juego.CuevaEnMapa;
+import modelo.juego.ObjetoEnMapa;
 import modelo.juego.Partida;
-import modelo.juego.Partida.ObjetoEnMapa;
-import modelo.mapa.Celda;
-import modelo.mapa.Cueva;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Objeto;
 import modelo.objetos.Pocion;
@@ -68,6 +73,11 @@ public class PantallaJuego {
     // Acciones desactivables
     private VBox accionesBox;
 
+    // Feedback visual
+    private Text txtFeedback;
+    private StackPane feedbackPane;
+    private Timeline feedbackTimer;
+
     public PantallaJuego(Partida partida, Stage stage, Runnable volverAlMenu) {
         this.partida = partida;
         this.stage = stage;
@@ -92,6 +102,19 @@ public class PantallaJuego {
         gridOverlay = new Pane();
         gridOverlay.setMouseTransparent(true);
         gridLayer.getChildren().addAll(gridCeldas, gridOverlay);
+
+        txtFeedback = new Text("");
+        txtFeedback.setFont(Font.font(FONT, FontWeight.BOLD, 18));
+        txtFeedback.setFill(Color.WHITE);
+        feedbackPane = new StackPane(txtFeedback);
+        feedbackPane.setBackground(new Background(new BackgroundFill(
+                Color.rgb(0, 0, 0, 0.7), new CornerRadii(8), Insets.EMPTY)));
+        feedbackPane.setStyle("-fx-padding: 8 16; -fx-border-color: #888; -fx-border-radius: 8; -fx-border-width: 1;");
+        feedbackPane.setVisible(false);
+        feedbackPane.setUserData(txtFeedback);
+        StackPane.setAlignment(feedbackPane, Pos.TOP_CENTER);
+        StackPane.setMargin(feedbackPane, new Insets(10, 0, 0, 0));
+        gridLayer.getChildren().add(feedbackPane);
         gridConLog.getChildren().add(gridLayer);
 
         // --- Log (debajo del grid) ---
@@ -168,13 +191,19 @@ public class PantallaJuego {
         Scene scene = new Scene(root, ANCHO, ALTO);
         scene.setOnKeyPressed(e -> {
             KeyCode k = e.getCode();
-            if (k == KeyCode.W || k == KeyCode.UP) { partida.moverJugadorArriba(); actualizar(); }
-            else if (k == KeyCode.S || k == KeyCode.DOWN) { partida.moverJugadorAbajo(); actualizar(); }
-            else if (k == KeyCode.A || k == KeyCode.LEFT) { partida.moverJugadorIzquierda(); actualizar(); }
-            else if (k == KeyCode.D || k == KeyCode.RIGHT) { partida.moverJugadorDerecha(); actualizar(); }
-            else if (k == KeyCode.SPACE) { partida.atacar(); actualizar(); }
-            else if (k == KeyCode.R) { partida.recogerObjeto(); actualizar(); }
-            else if (k == KeyCode.T) { partida.terminarTurno(); actualizar(); }
+            boolean ok = true;
+            String msg = null;
+            if (k == KeyCode.W || k == KeyCode.UP) { ok = partida.moverJugadorArriba(); if (!ok) msg = "No puedes moverte mas este turno"; }
+            else if (k == KeyCode.S || k == KeyCode.DOWN) { ok = partida.moverJugadorAbajo(); if (!ok) msg = "No puedes moverte mas este turno"; }
+            else if (k == KeyCode.A || k == KeyCode.LEFT) { ok = partida.moverJugadorIzquierda(); if (!ok) msg = "No puedes moverte mas este turno"; }
+            else if (k == KeyCode.D || k == KeyCode.RIGHT) { ok = partida.moverJugadorDerecha(); if (!ok) msg = "No puedes moverte mas este turno"; }
+            else if (k == KeyCode.SPACE) { ok = partida.atacar(); if (!ok) msg = "No hay enemigo para atacar"; }
+            else if (k == KeyCode.R) { ok = partida.recogerObjeto(); if (!ok) msg = "No hay objeto que recoger aqui"; }
+            else if (k == KeyCode.T) { ok = partida.terminarTurno(); if (ok) msg = "Turno terminado"; else msg = "No puedes terminar el turno ahora"; }
+            actualizar();
+            if (msg != null) {
+                mostrarFeedback(msg, ok ? Color.LIGHTGREEN : Color.rgb(255, 120, 100));
+            }
         });
 
         // Que el clic en cualquier parte devuelva el foco al root (teclado)
@@ -198,7 +227,7 @@ public class PantallaJuego {
         gridCeldas.setHgap(1);
         gridCeldas.setVgap(1);
 
-        Cueva cueva = partida.getCuevaActual();
+        CuevaEnMapa cueva = partida.getCuevaActual();
         if (cueva == null) return;
 
         int filas = cueva.getFilas();
@@ -208,7 +237,7 @@ public class PantallaJuego {
 
         for (int f = 0; f < filas; f++) {
             for (int c = 0; c < cols; c++) {
-                Celda celda = cueva.getCelda(f, c);
+                CeldaEnMapa celda = cueva.getCelda(f, c);
                 Rectangle rect = new Rectangle(cellSize - 1, cellSize - 1);
                 rect.setFill(colorParaTipo(celda.getTipo()));
                 rect.setStroke(Color.rgb(60, 60, 60));
@@ -218,8 +247,9 @@ public class PantallaJuego {
                 // Click para moverse
                 final int ff = f, cc = c;
                 cellPane.setOnMouseClicked(e -> {
-                    partida.moverJugador(ff, cc);
+                    boolean ok = partida.moverJugador(ff, cc);
                     actualizar();
+                    if (!ok) mostrarFeedback("No puedes moverte alli", Color.rgb(255, 120, 100));
                 });
                 cellPane.setCursor(Cursor.HAND);
                 gridCeldas.add(cellPane, c, f);
@@ -236,7 +266,7 @@ public class PantallaJuego {
     private void actualizar() {
         // Overlay de entidades (jugador, enemigos, objetos)
         gridOverlay.getChildren().clear();
-        Cueva cueva = partida.getCuevaActual();
+        CuevaEnMapa cueva = partida.getCuevaActual();
         if (cueva == null) return;
 
         int filas = cueva.getFilas();
@@ -312,18 +342,12 @@ public class PantallaJuego {
 
             if (obj instanceof Pocion) {
                 Text btnUsar = crearBotonTexto("[USAR]");
-                btnUsar.setOnMouseClicked(e -> {
-                    partida.usarPocion(obj.getId());
-                    actualizar();
-                });
+                btnUsar.setOnMouseClicked(e -> ejecutarAccion(partida.usarPocion(obj.getId()), "No puedes usar esto ahora"));
                 itemRow.getChildren().add(btnUsar);
             }
             if (obj.esEquipable()) {
                 Text btnEquip = crearBotonTexto("[EQUIPAR]");
-                btnEquip.setOnMouseClicked(e -> {
-                    partida.equiparItem(obj.getId());
-                    actualizar();
-                });
+                btnEquip.setOnMouseClicked(e -> ejecutarAccion(partida.equiparItem(obj.getId()), "No puedes equipar esto ahora"));
                 itemRow.getChildren().add(btnEquip);
             }
 
@@ -338,23 +362,34 @@ public class PantallaJuego {
 
         // Acciones
         accionesBox.getChildren().clear();
-        agregarBotonAccion("ARRIBA [W]", () -> { partida.moverJugadorArriba(); actualizar(); });
+        agregarBotonAccion("ARRIBA [W]", () -> ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno"));
         HBox movHoriz = new HBox(4);
         movHoriz.setAlignment(Pos.CENTER);
         Text btnIzq = crearBotonTexto("< IZQ [A]");
-        btnIzq.setOnMouseClicked(e -> { partida.moverJugadorIzquierda(); actualizar(); });
+        btnIzq.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno"));
         Text btnDer = crearBotonTexto("DER [D] >");
-        btnDer.setOnMouseClicked(e -> { partida.moverJugadorDerecha(); actualizar(); });
+        btnDer.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno"));
         movHoriz.getChildren().addAll(btnIzq, btnDer);
         accionesBox.getChildren().add(movHoriz);
-        agregarBotonAccion("ABAJO [S]", () -> { partida.moverJugadorAbajo(); actualizar(); });
+        agregarBotonAccion("ABAJO [S]", () -> ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno"));
 
-        agregarBotonAccion("ATACAR [ESPACIO]", () -> { partida.atacar(); actualizar(); });
-        agregarBotonAccion("RECOGER [R]", () -> { partida.recogerObjeto(); actualizar(); });
-        agregarBotonAccion("TERMINAR TURNO [T]", () -> { partida.terminarTurno(); actualizar(); });
+        agregarBotonAccion("ATACAR [ESPACIO]", () -> ejecutarAccion(partida.atacar(), "No hay enemigo para atacar"));
+        agregarBotonAccion("RECOGER [R]", () -> ejecutarAccion(partida.recogerObjeto(), "No hay objeto que recoger"));
+
+        // Boton Terminar Turno destacado
+        Text btnTurno = crearBotonTexto("=== TERMINAR TURNO [T] ===");
+        btnTurno.setFill(Color.web("#FFD700"));
+        btnTurno.setStyle("-fx-background-color: rgba(200,150,50,0.3); -fx-padding: 4 8; -fx-border-color: #FFD700; -fx-border-width: 1; -fx-border-radius: 4;");
+        btnTurno.setOnMouseClicked(e -> {
+            boolean ok = partida.terminarTurno();
+            if (ok) mostrarFeedback("Turno terminado", Color.LIGHTGREEN);
+            else mostrarFeedback("No puedes terminar el turno ahora", Color.rgb(255, 120, 100));
+            actualizar();
+        });
+        accionesBox.getChildren().add(btnTurno);
 
         Text btnPuerta = crearBotonTexto("CAMBIAR CUEVA (en PUERTA)");
-        btnPuerta.setOnMouseClicked(e -> { partida.cambiarCueva(); actualizar(); });
+        btnPuerta.setOnMouseClicked(e -> ejecutarAccion(partida.cambiarCueva(), "No hay puerta accesible"));
         accionesBox.getChildren().add(btnPuerta);
 
         Text btnGuardar = crearBotonTexto("GUARDAR PARTIDA");
@@ -362,8 +397,10 @@ public class PantallaJuego {
             try {
                 partida.guardar("datos/partida_guardada.json");
                 partida.getMensajes().addLast("Partida guardada.");
+                mostrarFeedback("Partida guardada", Color.LIGHTGREEN);
             } catch (Exception ex) {
                 partida.getMensajes().addLast("Error al guardar: " + ex.getMessage());
+                mostrarFeedback("Error al guardar", Color.rgb(255, 120, 100));
             }
             actualizar();
         });
@@ -391,6 +428,27 @@ public class PantallaJuego {
     // ---------------------------------------------------------------
     // Helpers de UI
     // ---------------------------------------------------------------
+
+    private void ejecutarAccion(boolean ok, String mensajeError) {
+        if (!ok) {
+            mostrarFeedback(mensajeError, Color.rgb(255, 120, 100));
+        }
+        actualizar();
+    }
+
+    private void mostrarFeedback(String mensaje, Color color) {
+        txtFeedback.setText(mensaje);
+        txtFeedback.setFill(color);
+        feedbackPane.setVisible(true);
+        if (feedbackTimer != null) {
+            feedbackTimer.stop();
+        }
+        feedbackTimer = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
+            feedbackPane.setVisible(false);
+        }));
+        feedbackTimer.setCycleCount(1);
+        feedbackTimer.play();
+    }
 
     private Text labelStats(String nombre) {
         Text t = new Text(nombre + ": ");
