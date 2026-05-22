@@ -5,6 +5,7 @@ package json;
  * Parte B decidira como convertir estos datos en objetos Enemigo o Boss.
  */
 public class ConfiguracionEnemigoDTO {
+    private String idCueva;
     private String tipo;
     private int fila;
     private int columna;
@@ -15,6 +16,14 @@ public class ConfiguracionEnemigoDTO {
 
     public String getTipo() {
         return tipo;
+    }
+
+    public String getIdCueva() {
+        return idCueva;
+    }
+
+    void setIdCueva(String idCueva) {
+        this.idCueva = idCueva;
     }
 
     public int getFila() {

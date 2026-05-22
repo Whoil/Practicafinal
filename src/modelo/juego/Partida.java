@@ -4,6 +4,7 @@ import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import modelo.mapa.Celda;
 import modelo.mapa.Cueva;
+import modelo.mapa.TipoCelda;
 import modelo.objetos.Arco;
 import modelo.objetos.Arma;
 import modelo.objetos.Escudo;
@@ -389,13 +390,15 @@ public class Partida implements InterfazPartida {
         if (puerta == null || !tieneLlaveParaPuerta(puerta)) {
             return false;
         }
-        if (hayEnemigoEn(destino, jugador.getFila(), jugador.getColumna())) {
+        Celda celdaEntrada = buscarCeldaEntradaLibre(destino);
+        if (celdaEntrada == null) {
             return false;
         }
 
         puerta.abrir();
         boolean avanzado = mazmorra.avanzarACueva(destino);
         if (avanzado) {
+            jugador.cambiarPosicion(celdaEntrada.getFila(), celdaEntrada.getColumna());
             accionRealizada = true;
             registrarLog("Jugador avanza a la cueva " + destino.getId());
         }
@@ -536,6 +539,40 @@ public class Partida implements InterfazPartida {
 
     private CeldaEnMapa crearVistaCelda(Celda celda) {
         return new CeldaEnMapa(celda.getFila(), celda.getColumna(), celda.getTipo());
+    }
+
+    private Celda buscarCeldaEntradaLibre(Cueva cueva) {
+        Celda inicio = buscarCeldaLibrePorTipo(cueva, TipoCelda.INICIO);
+        if (inicio != null) {
+            return inicio;
+        }
+
+        Celda puerta = buscarCeldaLibrePorTipo(cueva, TipoCelda.PUERTA);
+        if (puerta != null) {
+            return puerta;
+        }
+
+        for (int fila = 0; fila < cueva.getFilas(); fila++) {
+            for (int columna = 0; columna < cueva.getColumnas(); columna++) {
+                if (cueva.esTransitable(fila, columna) && !hayEnemigoEn(cueva, fila, columna)) {
+                    return cueva.getCelda(fila, columna);
+                }
+            }
+        }
+        return null;
+    }
+
+    private Celda buscarCeldaLibrePorTipo(Cueva cueva, TipoCelda tipo) {
+        for (int fila = 0; fila < cueva.getFilas(); fila++) {
+            for (int columna = 0; columna < cueva.getColumnas(); columna++) {
+                Celda celda = cueva.getCelda(fila, columna);
+                if (celda.getTipo() == tipo && celda.esTransitable()
+                        && !hayEnemigoEn(cueva, fila, columna)) {
+                    return celda;
+                }
+            }
+        }
+        return null;
     }
 
     private int calcularDano(int ataque, int defensa) {

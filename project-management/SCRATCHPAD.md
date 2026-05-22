@@ -954,3 +954,54 @@ Rama: `feature/a-estructuras`
 - Enemigos y objetos por cueva viven de momento en `Partida`, no dentro de `Cueva`.
 - La cobertura de ramas queda por debajo de lineas porque hay bastantes validaciones defensivas y caminos de error.
 - La rama contiene cambios compartidos de logica, por lo que debe entrar por PR y revision independiente antes de `main`.
+
+## 2026-05-22 - Guillermo / Parte B - puente JSON-Partida
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B
+Agente: Codex-B Logica
+
+### Sincronizacion
+
+Rama de trabajo: `feature/b-json-partida`
+Base: `main` actualizado con B-02 y la primera version de B-03 mergeadas.
+Modo economico aplicado: lectura escalonada, uso de `SCRATCHPAD.md` como memoria, sin releer PDFs completos y sin busquedas globales salvo las necesarias para comprobar referencias.
+
+### Alcance acordado
+
+- Preparar una version simple para que Parte C pueda arrancar una `Partida` desde JSON.
+- No implementar todavia regla del 75%, pocion de invisibilidad ni mejoras extra de combate.
+- Mantener la responsabilidad de `src/json` limitada a leer datos; la creacion jugable queda en Parte B.
+- Usar valores iniciales fijos para jugador: vida 100, ataque 15, defensa 5, movimiento 3 y 40 turnos.
+
+### Cambios realizados
+
+- Creada `src/modelo/juego/FabricaPartida.java` como puente desde `ResultadoCarga` hasta `Partida`.
+- `ResultadoCarga` conserva ahora tambien las conexiones leidas del JSON para poder crear puertas.
+- Los DTO de enemigos y objetos conservan `idCueva` internamente para colocar cada elemento en su cueva.
+- Los objetos JSON admiten `id`, `tipoLlave` y `codigoCerradura`.
+- `datos/cuevas.json` se adapto a los tipos reales de Parte B: enemigos `ESQUELETO`, `ORCO`, `MAGO` o `BOSS`, y objetos `POCION`, `ESPADA`, `ARCO`, `ESCUDO` o `LLAVE`.
+- Las conexiones JSON se traducen a puertas con codigo de llave `llave-` + id de la cueva destino.
+
+### Tests y comprobaciones
+
+- Compilacion manual de `src` correcta con Gson.
+- Compilacion manual de tests correcta.
+- Ejecutados por runner de reflexion los tests `json.CargadorConfiguracionTest` y `modelo.juego.FabricaPartidaTest`.
+- Resultado: 21 tests ejecutados, 0 fallos.
+- Correcciones tras revision: las conexiones JSON invalidas fallan con error claro, el jugador se recoloca al avanzar de cueva y el boss respeta las estadisticas acordadas.
+
+### Pendiente
+
+- Revision independiente sobre el puente JSON-Partida realizada y correcciones aplicadas.
+- Confirmar con Hector si `FabricaPartida` le basta para continuar C-02/C-04.
+- Ejecutar tests desde IntelliJ si el grupo quiere registrar cobertura visual.
+- Mantener fuera de esta version la regla del 75%, invisibilidad y guardado/carga de estado.
+
+### Riesgos
+
+- `FabricaPartida` acopla de forma explicita JSON con la logica de partida; se acepta como puente minimo para desbloquear a Parte C, pero puede evolucionar despues a builder o adaptador mas formal.
+- Los atributos JSON `nombre`, `descripcion`, `ataque` y `defensa` de objetos no se usan todavia para crear objetos parametrizables, porque las clases de B-02 tienen valores fijos por tipo.
+- `build/` puede quedar generado localmente por pruebas manuales y no debe subirse.

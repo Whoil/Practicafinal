@@ -74,6 +74,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
 - Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
 - Avance actual: creada la primera version del contrato publico `InterfazPartida`, el enum `EstadoPartida`, `Partida`, `Puerta`, `ObjetoEnMapa`, `PersonajeEnMapa`, `CuevaEnMapa`, `CeldaEnMapa` y tests JUnit basicos de logica de partida.
+- Avance de integracion JSON-Partida: anadida `FabricaPartida` para crear una `Partida` desde `ResultadoCarga`, conservando `idCueva` en enemigos/objetos, usando conexiones JSON como puertas y permitiendo objetos con `id`, `tipoLlave` y `codigoCerradura`.
 - Decisiones de diseno para implementar `Partida`:
   - `Partida` gestionara inicialmente los enemigos y objetos por cueva, sin meter esa responsabilidad dentro de `Cueva`.
   - La estructura elegida debe permitir que en una iteracion futura cada cueva tenga sus propios enemigos y objetos de forma directa.
@@ -95,9 +96,10 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Revision independiente:
   - Pasada el 2026-05-22 sobre las clases nuevas.
   - Corregidos los problemas detectados sobre exposicion mutable principal, ocupacion de celdas, avance a cueva destino ocupada, llave final con id conflictivo, semantica de puerta abierta, `ObjetoEnMapa.equals()` y metodos de preparacion fuera de `InterfazPartida`.
+  - Pasada revision independiente adicional sobre el puente JSON-Partida; corregidos conexion JSON invalida ignorada, recolocacion del jugador al cambiar de cueva y estadisticas del boss en `datos/cuevas.json`.
 - Pendiente antes de marcar como HECHA:
   - Ejecutar tests JUnit completos en IntelliJ.
-  - Confirmar con Parte B y Parte C que el contrato de `InterfazPartida` cubre lo necesario para JavaFX y JSON.
+  - Confirmar con Parte C si `FabricaPartida` cubre lo necesario para la carga inicial desde JSON y para el arranque de JavaFX.
   - Revisar si `ALCANCE_ARCO = 3` es el alcance definitivo para la primera version.
   - Revisar si avanzar de cueva debe consumir accion pero no finalizar automaticamente el turno, como queda implementado.
 
@@ -113,7 +115,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
   - Evitar que el jugador atraviese enemigos durante un movimiento largo, no solo que termine en una celda ocupada.
   - Hacer que la IA enemiga busque una ruta alternativa si el primer paso del camino minimo esta ocupado.
   - Quitar la referencia mutable a `Cueva` de `ObjetoEnMapa` o sustituirla por id/vista inmutable cuando JavaFX y JSON esten conectados.
-  - Sustituir los metodos package-private de preparacion en `Partida` por una fabrica/builder formal de partida.
+  - Revisar si la `FabricaPartida` actual debe evolucionar a builder formal cuando JavaFX y guardado/carga de estado esten cerrados.
   - Anadir tests de derrota por turnos, derrota por muerte, uso de pociones, equipamiento y enemigo acercandose desde distancia.
   - Afinar el alcance real del arco y posibles lineas de vision.
   - Anadir cofres con llave y objetos dentro.
@@ -128,6 +130,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Estado: PENDIENTE
 - Archivos permitidos: `src/json/`, `test/`, `project-management/`
 - Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
+- Nota de coordinacion: Parte B deja `FabricaPartida` como puente inicial para convertir `ResultadoCarga` en `Partida`; el guardado/carga de estado completo sigue siendo alcance de C-02.
 
 ### C-03 Boceto JavaFX
 
