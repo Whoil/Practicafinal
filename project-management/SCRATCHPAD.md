@@ -1326,3 +1326,221 @@ Modo economico aplicado: lectura escalonada, uso de `SCRATCHPAD.md` como memoria
 - `FabricaPartida` acopla de forma explicita JSON con la logica de partida; se acepta como puente minimo para desbloquear a Parte C, pero puede evolucionar despues a builder o adaptador mas formal.
 - Los atributos JSON `nombre`, `descripcion`, `ataque` y `defensa` de objetos no se usan todavia para crear objetos parametrizables, porque las clases de B-02 tienen valores fijos por tipo.
 - `build/` puede quedar generado localmente por pruebas manuales y no debe subirse.
+
+## 2026-05-22 - Alvaro / Bloque narrativo y visual
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Visual / Narrativo (coordinacion transversal)
+Agente: Codex (big-pickle)
+
+### Contexto
+
+Integracion del bloque narrativo y visual del juego: pantallas de introduccion,
+transicion por cueva, final (victoria/derrota), emojis tematicos, muros
+coloreados por cueva, rediseno de mapas con progresion 7x7→10x10→13x13.
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si
+Documentos leidos: `tareas.md`, `PantallaJuego.java`, `EscapeMazmorraApp.java`,
+`Partida.java`, `Cueva.java`, `CuevaEnMapa.java`, `Mazmorra.java`,
+`project-management/DECISIONS.md`, `project-management/AGENTS.md`,
+`project-management/TASKS.md`
+
+### Cambios
+
+Archivos nuevos:
+- `src/vista/DatosTemaCueva.java` — enum con datos estaticos por cueva
+  (titulo, texto narrativo, fondoCSS, colorMuro, emojis)
+- `src/vista/PantallaIntroduccion.java` — pantalla de historia inicial
+- `src/vista/PantallaTransicion.java` — pantalla reutilizable de transicion
+- `src/vista/PantallaFinal.java` — pantalla de victoria/derrota
+
+Archivos modificados:
+- `src/vista/PantallaJuego.java`:
+  - Anadidos callbacks `setAlCambiarCueva()` y `setAlTerminarPartida()`
+  - Sustituidos circulos de colores por emojis (tarea 8)
+  - Muros coloreados segun tematica de cueva via `DatosTemaCueva` (tarea 9b)
+  - Deteccion de cambio de cueva para reconstruir grid
+  - Deteccion de fin de partida para disparar pantalla final
+- `src/vista/EscapeMazmorraApp.java`:
+  - Nuevo flujo narrativo: Intro → Transicion(CuevaI) → Juego → Transicion(CuevaII) → ...
+  - Nuevos metodos: `mostrarIntroduccion()`, `mostrarTransicion()`, `mostrarJuego()`, `mostrarFinal()`
+- `src/modelo/juego/Partida.java`:
+  - Anadido `getSiguienteCuevaId()` para inspeccionar siguiente cueva sin transicionar
+- `datos/cuevas.json`: mapas redisenados a 7x7, 10x10 y 13x13 con nuevas
+  disposiciones de muros, enemigos y objetos
+- `tareas.md`: actualizados estados (tareas 4-8, 9b)
+- `project-management/DECISIONS.md`: anadidas decisiones D-20 a D-24
+
+### Datos de cueva
+
+| Cueva | Nombre | Tamano | Color muro | Emoji enemigo | Emoji boss |
+|---|---|---|---|---|---|
+| facil | Las Criptas de Marfil | 7×7 | #d2cdc3 hueso | 💀 | ☠️ |
+| media | El Paramo Putrefacto | 10×10 | #468246 verde | 🧟 | 🧌 |
+| dificil | El Abismo de Malakor | 13×13 | #aa2d2d rojo | 👹 | 😈 |
+
+### Pruebas
+
+No se pudieron ejecutar tests JUnit por falta de JDK/JDK con javac en PATH.
+El proyecto requiere JavaFX 23 y Gson en classpath para compilar y ejecutar.
+No hay script de compilacion automatizado disponible.
+
+### Pendiente
+
+- Probar la aplicacion completa en IntelliJ.
+- Verificar que los emojis se renderizan correctamente con la fuente "Segoe UI Emoji".
+- Tarea 9 (Mejora general UI) pendiente para futura sesion.
+- Tarea 10-12 pendientes.
+
+## 2026-05-22 - Hector / Parte C
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C
+Agente: opencode (big-pickle)
+
+### Contexto
+
+Sesion de cierre. Se corrigieron los 3 problemas reportados por el usuario al final de la sesion anterior: titulos descentrados en pantallas de inicio, retardo en auto-turno y ausencia de flash visual cuando un enemigo ataca al jugador.
+
+### Sincronizacion
+
+Rama: feature/a-estructuras (usada para cambios de JavaFX; no se cambio a feature/c-javafx-json-docs)
+Cambio remoto revisado: no
+Documentos leidos: AGENTS.md, TASKS.md, PRD.md, ARCHITECTURE.md, DECISIONS.md, SCRATCHPAD.md, IA_DIARY.md, templates/SESSION_SUMMARY_TEMPLATE.md
+
+### Cambios
+
+- `src/vista/EscapeMazmorraApp.java`:
+  - ESCAPE: eliminado arco senoidal, rotacion y desviacion X — ahora letras rectas, mismas Y y espaciado uniforme.
+  - PantallaInicio: "DE LA" y "MAZMORRA" centrados dinamicamente con `getLayoutBounds().getWidth()`.
+  - PantallaOpciones: revertido de StackPane a Pane con titulo centrado por `getLayoutBounds().getWidth()` y VBox de botones en posicion absoluta original (ANCHO/2-130, 240).
+- `src/vista/PantallaJuego.java`:
+  - Auto-turno: suprimido mensaje "No puedes moverte mas este turno" cuando auto-turn se dispara, para que no aparezca feedback erroneo tras el cambio de turno.
+  - Anadido `recibirAtaqueFila/Col` y `recibirAtaqueTimer` para flash rojo cuando enemigo dania al jugador.
+  - Flash rojo se activa en cualquier `terminarTurno()` (tecla T, auto-turn, click, boton) comparando vida antes/despues.
+  - Click handler: movido feedback para que no se solape con auto-turn.
+- `datos/cuevas.json`: sin cambios en esta sesion.
+
+### Pendiente
+
+- Probar que los titulos quedan centrados en ambas pantallas.
+- Probar que el flash de ataque enemigo se ve correctamente.
+- Los cambios estan sin commit ni push.
+
+### Riesgos
+
+- `getLayoutBounds().getWidth()` podria dar 0 si la fuente (Georgia) no esta disponible, derivando en `setX(ANCHO/2)` en vez de centrado real. Sin embargo, Georgia es serif comun y el proyecto ya la usaba sin problemas.
+- Los cambios estan en rama `feature/a-estructuras`, no en `feature/c-javafx-json-docs`. Conviene moverlos a la rama correcta al hacer commit.
+
+### Riesgos
+
+- Los emojis requieren "Segoe UI Emoji" en el sistema; funciona en Windows pero
+  puede no renderizarse igual en otros SO.
+- La deteccion de fin de partida en `actualizar()` detiene el refresco visual
+  cuando se dispara el callback; verificar que no haya race conditions.
+- No se testearon las nuevas pantallas por falta de compilador; revision manual
+  de sintaxis realizada.
+
+## 2026-05-22 - Cierre de sesion con Alvaro / Revision e integracion
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Revision e integracion de primera version funcional del juego
+Agente: Codex
+
+### Sincronizacion
+
+Rama: no cambiada durante la sesion
+Cambio remoto revisado: no
+Rama actualizada con `origin/main`: no
+Documentos leidos: `project-management/templates/SESSION_SUMMARY_TEMPLATE.md`, `project-management/AGENTS.md` via busqueda de protocolo, `project-management/SCRATCHPAD.md`
+
+### Tareas trabajadas
+
+- Revision independiente inicial de la version funcional.
+- Tarea 1: hacer que `Main` lance la aplicacion real.
+- Tarea 2: crear scripts reproducibles de compilacion/ejecucion y tests.
+- Tarea 3: ejecutar y clasificar la suite JUnit.
+- Tarea 4: corregir cambio de cueva para exigir PUERTA y llave.
+- Revision independiente final antes del cierre.
+
+### Archivos modificados
+
+- `.gitignore`
+- `README.md`
+- `scripts/run.ps1`
+- `scripts/test.ps1`
+- `src/Main.java`
+- `src/modelo/juego/Partida.java`
+- `src/vista/EscapeMazmorraApp.java`
+- `src/vista/PantallaJuego.java`
+- `test/modelo/juego/PartidaTest.java`
+- `project-management/SCRATCHPAD.md`
+
+### Cambios realizados
+
+- `Main` delega de forma legible en `EscapeMazmorraApp.main(args)`.
+- `scripts/run.ps1` compila y lanza el juego con JDK 21, Gson y JavaFX.
+- `scripts/test.ps1` compila src+test y ejecuta JUnit standalone.
+- `README.md` documenta ejecutar, solo compilar y lanzar tests.
+- `.gitignore` ignora `build/` y `crash.log`.
+- `Partida.cambiarCueva()` y `Partida.avanzarACueva()` exigen estar sobre una celda `PUERTA`.
+- Una puerta abierta ya no permite avanzar sin la llave correspondiente.
+- La UI solo muestra transicion de cueva cuando el modelo ya ha aceptado el cambio.
+- Se anadieron tests para fuera de puerta, puerta sin llave y puerta con llave.
+
+### Tests
+
+Tests JUnit creados o actualizados:
+- `PartidaTest.cambiarCuevaRequiereEstarSobrePuerta`
+- `PartidaTest.cambiarCuevaRequiereLlaveAunqueEsteSobrePuerta`
+- `PartidaTest.cambiarCuevaDesdePuertaConLlaveAvanza`
+- Actualizados tests de `avanzarACueva` para el nuevo contrato de puerta+llave.
+
+Tests ejecutados:
+- `powershell.exe -ExecutionPolicy Bypass -File scripts\test.ps1`
+
+Resultado:
+- 180 tests encontrados.
+- 165 correctos.
+- 15 fallidos.
+- Los 15 fallos fueron clasificados por revision independiente como contratos/datos antiguos frente al nuevo `datos/cuevas.json`, no como regresiones nuevas de la regla de puerta.
+
+Si no se ejecutaron, motivo:
+- No aplica. Se ejecutaron fuera del sandbox porque JavaFX esta en `.m2`, fuera de la carpeta del proyecto.
+
+### Revision independiente
+
+- Revisor inicial: detecto riesgos en `Main`, scripts, cambio de cueva, guardado, victoria y tests.
+- Revisor de cierre: detecto bypass en `avanzarACueva` y caso de puerta abierta sin llave.
+- Revisor final acotado: confirmo que los P1 quedaron resueltos y recomendo cerrar sesion.
+
+### Commits y push
+
+Commit realizado: no
+Hash:
+Push realizado: no
+Rama:
+
+### Pendiente para la siguiente sesion
+
+- Actualizar tests antiguos para los mapas actuales 7x7, 10x10 y 13x13.
+- Revisar balance/contrato de `datos/cuevas.json` contra los tests de fabrica, partida y serializador.
+- Decidir condicion final de victoria: llave final, salida o ambas.
+- Completar o desactivar guardado/carga para no prometer persistencia incompleta.
+- Probar manualmente el flujo completo del juego con JavaFX.
+
+### Riesgos o avisos
+
+- `scripts/run.ps1` y `scripts/test.ps1` dependen de JavaFX 21.0.5 instalado en `.m2`.
+- La suite sigue en rojo por 15 tests desactualizados respecto a los nuevos datos.
+- Hay cambios previos de opencode sin commit en varios archivos de vista, datos y documentacion.
+- No se hizo commit ni push; pedir autorizacion explicita antes de hacerlo.

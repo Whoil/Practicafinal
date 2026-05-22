@@ -16,6 +16,10 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### Build artifacts ###
+build/
+crash.log
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

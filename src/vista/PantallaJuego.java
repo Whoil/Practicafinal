@@ -1,6 +1,8 @@
 package vista;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -8,7 +10,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -26,10 +31,10 @@ import javafx.util.Duration;
 import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import Estructuras.MiIterador;
+import modelo.juego.CeldaEnMapa;
+import modelo.juego.CuevaEnMapa;
+import modelo.juego.ObjetoEnMapa;
 import modelo.juego.Partida;
-import modelo.juego.Partida.ObjetoEnMapa;
-import modelo.mapa.Celda;
-import modelo.mapa.Cueva;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Objeto;
 import modelo.objetos.Pocion;
@@ -59,7 +64,9 @@ public class PantallaJuego {
     // Nodos JavaFX que se actualizan dinamicamente
     private Pane gridLayer;
     private GridPane gridCeldas;
+    private Pane gridWalls;
     private Pane gridOverlay;
+    private StackPane[][] celdas;
     private Text txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado;
     private VBox inventarioBox;
     private VBox logBox;
@@ -68,10 +75,50 @@ public class PantallaJuego {
     // Acciones desactivables
     private VBox accionesBox;
 
+    // Feedback visual
+    private Text txtFeedback;
+    private StackPane feedbackPane;
+    private Timeline feedbackTimer;
+
+    // Callbacks para navegacion narrativa
+    private Runnable alCambiarCueva;
+    private Runnable alTerminarPartida;
+
+    // Flag para evitar bucles de deteccion de fin de partida
+    private boolean partidaFinalizada = false;
+
+    // Ultima cueva renderizada para detectar cambios de cueva
+    private String ultimaCuevaId = null;
+
+    // Efecto visual de ataque (posicion y contador)
+    private int ataqueFila = -1, ataqueCol = -1;
+    private Timeline ataqueTimer;
+
+    // Efecto visual cuando el jugador recibe dano
+    private int recibirAtaqueFila = -1, recibirAtaqueCol = -1;
+    private Timeline recibirAtaqueTimer;
+
     public PantallaJuego(Partida partida, Stage stage, Runnable volverAlMenu) {
         this.partida = partida;
         this.stage = stage;
         this.volverAlMenu = volverAlMenu;
+    }
+
+    /**
+     * Establece el callback que se ejecuta al cambiar de cueva.
+     * La pantalla de juego delega la transicion narrativa al
+     * controlador principal (EscapeMazmorraApp).
+     */
+    public void setAlCambiarCueva(Runnable alCambiarCueva) {
+        this.alCambiarCueva = alCambiarCueva;
+    }
+
+    /**
+     * Establece el callback que se ejecuta cuando la partida
+     * termina (victoria o derrota).
+     */
+    public void setAlTerminarPartida(Runnable alTerminarPartida) {
+        this.alTerminarPartida = alTerminarPartida;
     }
 
     /**
@@ -89,9 +136,24 @@ public class PantallaJuego {
         VBox gridConLog = new VBox(5);
         gridLayer = new StackPane();
         gridCeldas = new GridPane();
+        gridWalls = new Pane();
+        gridWalls.setMouseTransparent(true);
         gridOverlay = new Pane();
         gridOverlay.setMouseTransparent(true);
-        gridLayer.getChildren().addAll(gridCeldas, gridOverlay);
+        gridLayer.getChildren().addAll(gridCeldas, gridWalls, gridOverlay);
+
+        txtFeedback = new Text("");
+        txtFeedback.setFont(Font.font(FONT, FontWeight.BOLD, 18));
+        txtFeedback.setFill(Color.WHITE);
+        feedbackPane = new StackPane(txtFeedback);
+        feedbackPane.setBackground(new Background(new BackgroundFill(
+                Color.rgb(0, 0, 0, 0.7), new CornerRadii(8), Insets.EMPTY)));
+        feedbackPane.setStyle("-fx-padding: 8 16; -fx-border-color: #888; -fx-border-radius: 8; -fx-border-width: 1;");
+        feedbackPane.setVisible(false);
+        feedbackPane.setUserData(txtFeedback);
+        StackPane.setAlignment(feedbackPane, Pos.TOP_CENTER);
+        StackPane.setMargin(feedbackPane, new Insets(10, 0, 0, 0));
+        gridLayer.getChildren().add(feedbackPane);
         gridConLog.getChildren().add(gridLayer);
 
         // --- Log (debajo del grid) ---
@@ -167,14 +229,83 @@ public class PantallaJuego {
         // Teclado (movimiento WASD/flechas + acciones)
         Scene scene = new Scene(root, ANCHO, ALTO);
         scene.setOnKeyPressed(e -> {
-            KeyCode k = e.getCode();
-            if (k == KeyCode.W || k == KeyCode.UP) { partida.moverJugadorArriba(); actualizar(); }
-            else if (k == KeyCode.S || k == KeyCode.DOWN) { partida.moverJugadorAbajo(); actualizar(); }
-            else if (k == KeyCode.A || k == KeyCode.LEFT) { partida.moverJugadorIzquierda(); actualizar(); }
-            else if (k == KeyCode.D || k == KeyCode.RIGHT) { partida.moverJugadorDerecha(); actualizar(); }
-            else if (k == KeyCode.SPACE) { partida.atacar(); actualizar(); }
-            else if (k == KeyCode.R) { partida.recogerObjeto(); actualizar(); }
-            else if (k == KeyCode.T) { partida.terminarTurno(); actualizar(); }
+            try {
+                KeyCode k = e.getCode();
+                boolean ok = true;
+                String msg = null;
+                Jugador jug = partida.getJugador();
+                int pf = jug.getFila(), pc = jug.getColumna();
+                if (k == KeyCode.W || k == KeyCode.UP) {
+                    if (partida.hayEnemigoEn(pf - 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else { ok = partida.moverJugadorArriba(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                } else if (k == KeyCode.S || k == KeyCode.DOWN) {
+                    if (partida.hayEnemigoEn(pf + 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else { ok = partida.moverJugadorAbajo(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                } else if (k == KeyCode.A || k == KeyCode.LEFT) {
+                    if (partida.hayEnemigoEn(pf, pc - 1)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else { ok = partida.moverJugadorIzquierda(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                } else if (k == KeyCode.D || k == KeyCode.RIGHT) {
+                    if (partida.hayEnemigoEn(pf, pc + 1)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else { ok = partida.moverJugadorDerecha(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                } else if (k == KeyCode.SPACE) {
+                    Enemigo target = partida.getEnemigoAdyacente();
+                    if (target != null) {
+                        ataqueFila = target.getFila();
+                        ataqueCol = target.getColumna();
+                        ok = partida.atacar();
+                        if (ok) {
+                            iniciarEfectoAtaque();
+                        } else {
+                            ataqueFila = ataqueCol = -1;
+                            msg = "No puedes atacar ahora";
+                        }
+                    } else {
+                        ok = false;
+                        msg = "No hay enemigo para atacar";
+                    }
+                }
+                else if (k == KeyCode.R) { ok = partida.recogerObjeto(); if (!ok) msg = "No hay objeto que recoger aqui"; }
+                else if (k == KeyCode.T) {
+                    int hpAntes = partida.getJugador().getVidaActual();
+                    ok = partida.terminarTurno();
+                    if (ok) {
+                        if (partida.getJugador().getVidaActual() < hpAntes) {
+                            Jugador j2 = partida.getJugador();
+                            iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                        }
+                        msg = "Turno terminado";
+                    } else {
+                        msg = "No puedes terminar el turno ahora";
+                    }
+                }
+                actualizar();
+
+                // Auto-terminar turno
+                if (partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                    boolean autoTurno = partida.isMovimientoRealizado() && partida.isAccionRealizada();
+                    autoTurno = autoTurno || (partida.isMovimientoRealizado()
+                            && msg != null && msg.contains("No puedes moverte mas"));
+                    if (autoTurno) {
+                        int hpAntes = partida.getJugador().getVidaActual();
+                        partida.terminarTurno();
+                        if (partida.getJugador().getVidaActual() < hpAntes) {
+                            Jugador j2 = partida.getJugador();
+                            iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                        }
+                        actualizar();
+                        if (msg != null && msg.contains("No puedes moverte mas")) {
+                            msg = null;
+                        }
+                    }
+                }
+
+                if (msg != null) {
+                    mostrarFeedback(msg, ok ? Color.LIGHTGREEN : Color.rgb(255, 120, 100));
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                mostrarFeedback("Error: " + ex.getMessage(), Color.RED);
+            }
         });
 
         // Que el clic en cualquier parte devuelva el foco al root (teclado)
@@ -195,10 +326,11 @@ public class PantallaJuego {
 
     private void construirGrid() {
         gridCeldas.getChildren().clear();
+        gridWalls.getChildren().clear();
         gridCeldas.setHgap(1);
         gridCeldas.setVgap(1);
 
-        Cueva cueva = partida.getCuevaActual();
+        CuevaEnMapa cueva = partida.getCuevaActual();
         if (cueva == null) return;
 
         int filas = cueva.getFilas();
@@ -206,20 +338,51 @@ public class PantallaJuego {
         double cellSize = Math.min(600.0 / cols, 600.0 / filas);
         cellSize = Math.min(cellSize, 80);
 
+        celdas = new StackPane[filas][cols];
+
         for (int f = 0; f < filas; f++) {
             for (int c = 0; c < cols; c++) {
-                Celda celda = cueva.getCelda(f, c);
-                Rectangle rect = new Rectangle(cellSize - 1, cellSize - 1);
-                rect.setFill(colorParaTipo(celda.getTipo()));
-                rect.setStroke(Color.rgb(60, 60, 60));
-                rect.setStrokeWidth(0.5);
+                CeldaEnMapa celda = cueva.getCelda(f, c);
+                Rectangle rect;
+                if (celda.getTipo() == TipoCelda.MURO) {
+                    rect = new Rectangle(cellSize, cellSize);
+                    rect.setFill(Color.TRANSPARENT);
+                    rect.setStroke(null);
+                } else {
+                    rect = new Rectangle(cellSize, cellSize);
+                    rect.setFill(colorParaTipo(celda.getTipo()));
+                    rect.setStroke(Color.rgb(60, 60, 60));
+                    rect.setStrokeWidth(0.5);
+                }
 
                 StackPane cellPane = new StackPane(rect);
+                cellPane.setPrefSize(cellSize, cellSize);
+                celdas[f][c] = cellPane;
                 // Click para moverse
                 final int ff = f, cc = c;
                 cellPane.setOnMouseClicked(e -> {
-                    partida.moverJugador(ff, cc);
+                    boolean ok;
+                    String clickMsg = null;
+                    if (partida.hayEnemigoEn(ff, cc)) {
+                        ok = false;
+                        clickMsg = "Hay un enemigo ahi";
+                    } else {
+                        ok = partida.moverJugador(ff, cc);
+                        if (!ok) clickMsg = "No puedes moverte alli";
+                    }
                     actualizar();
+                    if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
+                            && partida.isMovimientoRealizado() && partida.isAccionRealizada()) {
+                        int hpAntes = partida.getJugador().getVidaActual();
+                        partida.terminarTurno();
+                        if (partida.getJugador().getVidaActual() < hpAntes) {
+                            Jugador j2 = partida.getJugador();
+                            iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                        }
+                        actualizar();
+                    } else if (clickMsg != null) {
+                        mostrarFeedback(clickMsg, Color.rgb(255, 120, 100));
+                    }
                 });
                 cellPane.setCursor(Cursor.HAND);
                 gridCeldas.add(cellPane, c, f);
@@ -227,6 +390,50 @@ public class PantallaJuego {
         }
 
         gridOverlay.setPrefSize(cols * cellSize, filas * cellSize);
+
+        // Dibujar muros finos en gridWalls
+        double grosor = 5;
+        Color colorMuro = DatosTemaCueva.paraCuevaId(cueva.getId()).getColorMuro();
+        for (int f = 0; f < filas; f++) {
+            for (int c = 0; c < cols; c++) {
+                CeldaEnMapa celdaActual = cueva.getCelda(f, c);
+                if (celdaActual == null || celdaActual.getTipo() != TipoCelda.MURO) continue;
+                double x = c * (cellSize + 1);
+                double y = f * (cellSize + 1);
+                // Arriba
+                CeldaEnMapa arriba = f > 0 ? cueva.getCelda(f - 1, c) : null;
+                if (f == 0 || arriba == null || arriba.getTipo() != TipoCelda.MURO) {
+                    Rectangle w = new Rectangle(cellSize, grosor);
+                    w.setFill(colorMuro); w.setStroke(null);
+                    w.setLayoutX(x); w.setLayoutY(y);
+                    gridWalls.getChildren().add(w);
+                }
+                // Abajo
+                CeldaEnMapa abajo = f < filas - 1 ? cueva.getCelda(f + 1, c) : null;
+                if (f == filas - 1 || abajo == null || abajo.getTipo() != TipoCelda.MURO) {
+                    Rectangle w = new Rectangle(cellSize, grosor);
+                    w.setFill(colorMuro); w.setStroke(null);
+                    w.setLayoutX(x); w.setLayoutY(y + cellSize - grosor);
+                    gridWalls.getChildren().add(w);
+                }
+                // Izquierda
+                CeldaEnMapa izq = c > 0 ? cueva.getCelda(f, c - 1) : null;
+                if (c == 0 || izq == null || izq.getTipo() != TipoCelda.MURO) {
+                    Rectangle w = new Rectangle(grosor, cellSize);
+                    w.setFill(colorMuro); w.setStroke(null);
+                    w.setLayoutX(x); w.setLayoutY(y);
+                    gridWalls.getChildren().add(w);
+                }
+                // Derecha
+                CeldaEnMapa der = c < cols - 1 ? cueva.getCelda(f, c + 1) : null;
+                if (c == cols - 1 || der == null || der.getTipo() != TipoCelda.MURO) {
+                    Rectangle w = new Rectangle(grosor, cellSize);
+                    w.setFill(colorMuro); w.setStroke(null);
+                    w.setLayoutX(x + cellSize - grosor); w.setLayoutY(y);
+                    gridWalls.getChildren().add(w);
+                }
+            }
+        }
     }
 
     // ---------------------------------------------------------------
@@ -234,59 +441,132 @@ public class PantallaJuego {
     // ---------------------------------------------------------------
 
     private void actualizar() {
-        // Overlay de entidades (jugador, enemigos, objetos)
-        gridOverlay.getChildren().clear();
-        Cueva cueva = partida.getCuevaActual();
-        if (cueva == null) return;
+        try {
+            // Detectar fin de partida (victoria o derrota)
+            if (!partidaFinalizada && partida.getEstado() != modelo.juego.EstadoPartida.EN_CURSO) {
+                partidaFinalizada = true;
+                if (alTerminarPartida != null) {
+                    alTerminarPartida.run();
+                }
+                return;
+            }
 
-        int filas = cueva.getFilas();
-        int cols = cueva.getColumnas();
-        double cellSize = Math.min(600.0 / cols, 600.0 / filas);
-        cellSize = Math.min(cellSize, 80);
+            // Overlay de entidades (jugador, enemigos, objetos)
+            gridOverlay.getChildren().clear();
+            CuevaEnMapa cueva = partida.getCuevaActual();
+            if (cueva == null) return;
 
-        // Jugador (circulo azul)
+            int filas = cueva.getFilas();
+            int cols = cueva.getColumnas();
+            double cellSize = Math.min(600.0 / cols, 600.0 / filas);
+            cellSize = Math.min(cellSize, 80);
+
+            // Reconstruir el grid si la cueva ha cambiado
+            String cuevaIdActual = cueva.getId();
+            if (!cuevaIdActual.equals(ultimaCuevaId)) {
+                ultimaCuevaId = cuevaIdActual;
+                construirGrid();
+            }
+
+            // Limpiar emojis anteriores de las celdas (conservar fondo)
+            if (celdas != null) {
+                for (int f = 0; f < filas && f < celdas.length; f++) {
+                    if (celdas[f] == null) continue;
+                    for (int c = 0; c < cols && c < celdas[f].length; c++) {
+                        StackPane cell = celdas[f][c];
+                        if (cell != null) {
+                            cell.getChildren().remove(1, cell.getChildren().size());
+                        }
+                    }
+                }
+            }
+
+            // Restaurar colores de todas las celdas y aplicar flash de ataque
+            if (celdas != null) {
+                for (int f = 0; f < filas && f < celdas.length; f++) {
+                    if (celdas[f] == null) continue;
+                    for (int c = 0; c < cols && c < celdas[f].length; c++) {
+                        StackPane cell = celdas[f][c];
+                        if (cell != null && !cell.getChildren().isEmpty()
+                                && cell.getChildren().get(0) instanceof Rectangle) {
+                            Rectangle r = (Rectangle) cell.getChildren().get(0);
+                            CeldaEnMapa celdaActual = cueva.getCelda(f, c);
+                            r.setFill(celdaActual != null ? colorParaTipo(celdaActual.getTipo()) : Color.TRANSPARENT);
+                        }
+                    }
+                }
+                if (ataqueFila >= 0 && ataqueFila < filas && ataqueCol >= 0 && ataqueCol < cols) {
+                    StackPane cell = celdas[ataqueFila][ataqueCol];
+                    if (cell != null && !cell.getChildren().isEmpty()
+                            && cell.getChildren().get(0) instanceof Rectangle) {
+                        ((Rectangle) cell.getChildren().get(0)).setFill(Color.rgb(255, 200, 200));
+                    }
+                }
+                if (recibirAtaqueFila >= 0 && recibirAtaqueFila < filas && recibirAtaqueCol >= 0 && recibirAtaqueCol < cols) {
+                    StackPane cell = celdas[recibirAtaqueFila][recibirAtaqueCol];
+                    if (cell != null && !cell.getChildren().isEmpty()
+                            && cell.getChildren().get(0) instanceof Rectangle) {
+                        ((Rectangle) cell.getChildren().get(0)).setFill(Color.rgb(255, 80, 80));
+                    }
+                }
+            }
+
+        // Obtener tema visual segun la cueva actual
+        DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaIdActual);
+        double emojiSize = Math.min(cellSize * 0.65, 40);
+
+        // Jugador (emoji de mago)
         Jugador j = partida.getJugador();
-        Circle playerCircle = new Circle(
-                j.getColumna() * cellSize + cellSize / 2,
-                j.getFila() * cellSize + cellSize / 2,
-                cellSize * 0.35);
-        playerCircle.setFill(Color.rgb(64, 164, 223, 0.9));
-        playerCircle.setStroke(Color.WHITE);
-        playerCircle.setStrokeWidth(2);
+        Text playerEmoji = crearEmoji("\uD83E\uDDD9", emojiSize);
         DropShadow sombraP = new DropShadow();
-        sombraP.setRadius(8);
-        sombraP.setColor(Color.rgb(64, 164, 223, 0.5));
-        playerCircle.setEffect(sombraP);
-        gridOverlay.getChildren().add(playerCircle);
+        sombraP.setRadius(6);
+        sombraP.setColor(Color.rgb(0, 0, 0, 0.6));
+        playerEmoji.setEffect(sombraP);
+        if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
+            celdas[j.getFila()][j.getColumna()].getChildren().add(playerEmoji);
+        }
 
-        // Enemigos (circulos rojos)
+        // Enemigos (emoji segun tematica y tipo)
         ListaDE<Enemigo> enemigos = partida.getEnemigosActuales();
         MiIterador<Enemigo> itE = enemigos.getIterador();
         while (itE.hasNext()) {
             Enemigo e = itE.next();
-            Circle enemyCircle = new Circle(
-                    e.getColumna() * cellSize + cellSize / 2,
-                    e.getFila() * cellSize + cellSize / 2,
-                    cellSize * 0.3);
-            enemyCircle.setFill(Color.rgb(220, 50, 50, 0.9));
-            enemyCircle.setStroke(Color.rgb(80, 0, 0));
-            enemyCircle.setStrokeWidth(1.5);
-            gridOverlay.getChildren().add(enemyCircle);
+            boolean esBoss = e instanceof modelo.personajes.Boss;
+            String emoji = esBoss ? tema.getEmojiBoss() : tema.getEmojiEnemigo();
+            Text enemyEmoji = crearEmoji(emoji, emojiSize);
+            if (esBoss) {
+                DropShadow sombraBoss = new DropShadow();
+                sombraBoss.setRadius(10);
+                sombraBoss.setColor(Color.rgb(200, 50, 50, 0.5));
+                enemyEmoji.setEffect(sombraBoss);
+            }
+            if (e.getFila() >= 0 && e.getFila() < filas && e.getColumna() >= 0 && e.getColumna() < cols) {
+                celdas[e.getFila()][e.getColumna()].getChildren().add(enemyEmoji);
+            }
         }
 
-        // Objetos en el mapa (circulos amarillos pequenos)
+        // Objetos en el mapa (emoji segun tipo)
         ListaDE<ObjetoEnMapa> objetos = partida.getObjetosActuales();
         MiIterador<ObjetoEnMapa> itO = objetos.getIterador();
         while (itO.hasNext()) {
             ObjetoEnMapa om = itO.next();
-            Circle itemCircle = new Circle(
-                    om.getColumna() * cellSize + cellSize / 2,
-                    om.getFila() * cellSize + cellSize / 2,
-                    cellSize * 0.15);
-            itemCircle.setFill(Color.rgb(255, 215, 0, 0.9));
-            itemCircle.setStroke(Color.rgb(180, 140, 0));
-            itemCircle.setStrokeWidth(1);
-            gridOverlay.getChildren().add(itemCircle);
+            String emoji = emojiParaObjeto(om.getObjeto());
+            Text itemEmoji = crearEmoji(emoji, emojiSize * 0.6);
+            if (om.getFila() >= 0 && om.getFila() < filas && om.getColumna() >= 0 && om.getColumna() < cols) {
+                celdas[om.getFila()][om.getColumna()].getChildren().add(itemEmoji);
+            }
+        }
+
+        // Barras de vida sobre entidades
+        if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
+            agregarBarraVida(celdas[j.getFila()][j.getColumna()], j.getVidaActual(), j.getVidaMaxima(), cellSize);
+        }
+        MiIterador<Enemigo> itHp = enemigos.getIterador();
+        while (itHp.hasNext()) {
+            Enemigo e = itHp.next();
+            if (e.estaVivo() && e.getFila() >= 0 && e.getFila() < filas && e.getColumna() >= 0 && e.getColumna() < cols) {
+                agregarBarraVida(celdas[e.getFila()][e.getColumna()], e.getVidaActual(), e.getVidaMaxima(), cellSize);
+            }
         }
 
         // Stats
@@ -312,18 +592,12 @@ public class PantallaJuego {
 
             if (obj instanceof Pocion) {
                 Text btnUsar = crearBotonTexto("[USAR]");
-                btnUsar.setOnMouseClicked(e -> {
-                    partida.usarPocion(obj.getId());
-                    actualizar();
-                });
+                btnUsar.setOnMouseClicked(e -> ejecutarAccion(partida.usarPocion(obj.getId()), "No puedes usar esto ahora"));
                 itemRow.getChildren().add(btnUsar);
             }
             if (obj.esEquipable()) {
                 Text btnEquip = crearBotonTexto("[EQUIPAR]");
-                btnEquip.setOnMouseClicked(e -> {
-                    partida.equiparItem(obj.getId());
-                    actualizar();
-                });
+                btnEquip.setOnMouseClicked(e -> ejecutarAccion(partida.equiparItem(obj.getId()), "No puedes equipar esto ahora"));
                 itemRow.getChildren().add(btnEquip);
             }
 
@@ -338,23 +612,49 @@ public class PantallaJuego {
 
         // Acciones
         accionesBox.getChildren().clear();
-        agregarBotonAccion("ARRIBA [W]", () -> { partida.moverJugadorArriba(); actualizar(); });
+        agregarBotonAccion("ARRIBA [W]", () -> ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno"));
         HBox movHoriz = new HBox(4);
         movHoriz.setAlignment(Pos.CENTER);
         Text btnIzq = crearBotonTexto("< IZQ [A]");
-        btnIzq.setOnMouseClicked(e -> { partida.moverJugadorIzquierda(); actualizar(); });
+        btnIzq.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno"));
         Text btnDer = crearBotonTexto("DER [D] >");
-        btnDer.setOnMouseClicked(e -> { partida.moverJugadorDerecha(); actualizar(); });
+        btnDer.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno"));
         movHoriz.getChildren().addAll(btnIzq, btnDer);
         accionesBox.getChildren().add(movHoriz);
-        agregarBotonAccion("ABAJO [S]", () -> { partida.moverJugadorAbajo(); actualizar(); });
+        agregarBotonAccion("ABAJO [S]", () -> ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno"));
 
-        agregarBotonAccion("ATACAR [ESPACIO]", () -> { partida.atacar(); actualizar(); });
-        agregarBotonAccion("RECOGER [R]", () -> { partida.recogerObjeto(); actualizar(); });
-        agregarBotonAccion("TERMINAR TURNO [T]", () -> { partida.terminarTurno(); actualizar(); });
+        agregarBotonAccion("ATACAR [ESPACIO]", () -> ejecutarAccion(partida.atacar(), "No hay enemigo para atacar"));
+        agregarBotonAccion("RECOGER [R]", () -> ejecutarAccion(partida.recogerObjeto(), "No hay objeto que recoger"));
+
+        // Boton Terminar Turno destacado
+        Text btnTurno = crearBotonTexto("=== TERMINAR TURNO [T] ===");
+        btnTurno.setFill(Color.web("#FFD700"));
+        btnTurno.setStyle("-fx-background-color: rgba(200,150,50,0.3); -fx-padding: 4 8; -fx-border-color: #FFD700; -fx-border-width: 1; -fx-border-radius: 4;");
+        btnTurno.setOnMouseClicked(e -> {
+            int hpAntes = partida.getJugador().getVidaActual();
+            boolean ok = partida.terminarTurno();
+            if (ok) {
+                if (partida.getJugador().getVidaActual() < hpAntes) {
+                    Jugador j2 = partida.getJugador();
+                    iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                }
+                mostrarFeedback("Turno terminado", Color.LIGHTGREEN);
+            } else {
+                mostrarFeedback("No puedes terminar el turno ahora", Color.rgb(255, 120, 100));
+            }
+            actualizar();
+        });
+        accionesBox.getChildren().add(btnTurno);
 
         Text btnPuerta = crearBotonTexto("CAMBIAR CUEVA (en PUERTA)");
-        btnPuerta.setOnMouseClicked(e -> { partida.cambiarCueva(); actualizar(); });
+        btnPuerta.setOnMouseClicked(e -> {
+            boolean cambioRealizado = partida.cambiarCueva();
+            if (cambioRealizado && alCambiarCueva != null) {
+                alCambiarCueva.run();
+            } else {
+                ejecutarAccion(false, "Necesitas estar en la puerta y tener su llave");
+            }
+        });
         accionesBox.getChildren().add(btnPuerta);
 
         Text btnGuardar = crearBotonTexto("GUARDAR PARTIDA");
@@ -362,8 +662,10 @@ public class PantallaJuego {
             try {
                 partida.guardar("datos/partida_guardada.json");
                 partida.getMensajes().addLast("Partida guardada.");
+                mostrarFeedback("Partida guardada", Color.LIGHTGREEN);
             } catch (Exception ex) {
                 partida.getMensajes().addLast("Error al guardar: " + ex.getMessage());
+                mostrarFeedback("Error al guardar", Color.rgb(255, 120, 100));
             }
             actualizar();
         });
@@ -386,11 +688,35 @@ public class PantallaJuego {
             msg.setFill(Color.rgb(180, 220, 180));
             logBox.getChildren().add(msg);
         }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     // ---------------------------------------------------------------
     // Helpers de UI
     // ---------------------------------------------------------------
+
+    private void ejecutarAccion(boolean ok, String mensajeError) {
+        if (!ok) {
+            mostrarFeedback(mensajeError, Color.rgb(255, 120, 100));
+        }
+        actualizar();
+    }
+
+    private void mostrarFeedback(String mensaje, Color color) {
+        txtFeedback.setText(mensaje);
+        txtFeedback.setFill(color);
+        feedbackPane.setVisible(true);
+        if (feedbackTimer != null) {
+            feedbackTimer.stop();
+        }
+        feedbackTimer = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
+            feedbackPane.setVisible(false);
+        }));
+        feedbackTimer.setCycleCount(1);
+        feedbackTimer.play();
+    }
 
     private Text labelStats(String nombre) {
         Text t = new Text(nombre + ": ");
@@ -416,11 +742,94 @@ public class PantallaJuego {
     }
 
     /**
+     * Devuelve el emoji correspondiente a un tipo de objeto.
+     */
+    private String emojiParaObjeto(Objeto obj) {
+        if (obj instanceof modelo.objetos.Pocion) return "\uD83E\uDDEA";
+        if (obj instanceof modelo.objetos.Llave) return "\uD83D\uDD11";
+        if (obj instanceof modelo.objetos.Escudo) return "\uD83D\uDEE1\uFE0F";
+        if (obj instanceof modelo.objetos.Arco) return "\uD83C\uDFF9";
+        if (obj instanceof modelo.objetos.Arma) return "\uD83D\uDDE1\uFE0F";
+        return "\uD83D\uDC8E";
+    }
+
+    /**
+     * Crea un Text con emoji centrado para meter en una celda.
+     */
+    private Text crearEmoji(String emoji, double tamanio) {
+        Text t = new Text(emoji);
+        t.setFont(Font.font("Segoe UI Emoji", FontWeight.NORMAL, tamanio));
+        return t;
+    }
+
+    private void iniciarEfectoAtaque() {
+        if (ataqueTimer != null) {
+            ataqueTimer.stop();
+        }
+        ataqueTimer = new Timeline(new KeyFrame(Duration.millis(300), ev -> {
+            ataqueFila = ataqueCol = -1;
+            actualizar();
+        }));
+        ataqueTimer.setCycleCount(1);
+        ataqueTimer.play();
+    }
+
+    private void iniciarEfectoRecibirAtaque(int fila, int col) {
+        recibirAtaqueFila = fila;
+        recibirAtaqueCol = col;
+        if (recibirAtaqueTimer != null) {
+            recibirAtaqueTimer.stop();
+        }
+        recibirAtaqueTimer = new Timeline(new KeyFrame(Duration.millis(400), ev -> {
+            recibirAtaqueFila = recibirAtaqueCol = -1;
+            actualizar();
+        }));
+        recibirAtaqueTimer.setCycleCount(1);
+        recibirAtaqueTimer.play();
+    }
+
+    private void agregarBarraVida(StackPane cell, int vidaActual, int vidaMaxima, double cellSize) {
+        double anchoBarra = cellSize * 0.8;
+        double altoBarra = 5;
+        double yBarra = cellSize * 0.15;
+
+        Rectangle fondo = new Rectangle(anchoBarra, altoBarra);
+        fondo.setFill(Color.rgb(40, 40, 40));
+        fondo.setStroke(Color.rgb(80, 80, 80));
+        fondo.setStrokeWidth(0.5);
+        StackPane.setAlignment(fondo, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(fondo, new Insets(0, 0, yBarra, 0));
+
+        double pct = Math.max(0, (double) vidaActual / vidaMaxima);
+        Rectangle relleno = new Rectangle(anchoBarra * pct, altoBarra);
+        Color colorBarra = pct > 0.5 ? Color.LIGHTGREEN : (pct > 0.25 ? Color.ORANGE : Color.RED);
+        relleno.setFill(colorBarra);
+        StackPane.setAlignment(relleno, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(relleno, new Insets(0, 0, yBarra, cellSize * 0.1));
+
+        Text hpText = new Text(vidaActual + "/" + vidaMaxima);
+        hpText.setFont(Font.font("Monospaced", FontWeight.BOLD, 9));
+        hpText.setFill(Color.WHITE);
+        StackPane.setAlignment(hpText, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(hpText, new Insets(0, 0, yBarra - 10, 0));
+
+        cell.getChildren().addAll(fondo, relleno, hpText);
+    }
+
+    /**
      * Mapa de TipoCelda a colores para el grid.
+     * Los muros usan el color tematico de la cueva actual.
      */
     private Color colorParaTipo(TipoCelda tipo) {
+        // Para los muros usar el color tematico de la cueva actual
+        if (tipo == TipoCelda.MURO) {
+            CuevaEnMapa cueva = partida.getCuevaActual();
+            if (cueva != null) {
+                return DatosTemaCueva.paraCuevaId(cueva.getId()).getColorMuro();
+            }
+            return Color.rgb(70, 70, 70);
+        }
         switch (tipo) {
-            case MURO:   return Color.rgb(70, 70, 70);
             case SUELO:  return Color.rgb(160, 130, 90);
             case INICIO: return Color.rgb(60, 160, 60);
             case PUERTA: return Color.rgb(200, 170, 40);

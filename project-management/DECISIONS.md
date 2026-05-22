@@ -273,3 +273,103 @@ El log vive en Partida como ListaSE<String>.
 ```
 
 Si mas adelante el log necesita filtros, tipos de evento o formato especifico para JavaFX, se podra crear una clase `LogJuego`.
+
+## D-20 Tematica narrativa del juego
+
+Decision:
+
+```text
+El juego cuenta la historia de un Mago convocado para derrotar al Rey Demonio Malakor
+a traves de tres cuevas de dificultad progresiva.
+```
+
+Las tres cuevas reciben nombres tematicos:
+- CUEVA I: LAS CRIPTAS DE MARFIL (facil, esqueletos)
+- CUEVA II: EL PARAMO PUTREFACTO (media, zombies)
+- CUEVA III: EL ABISMO DE MALAKOR (dificil, demonios + boss final)
+
+Motivo:
+- Dar identidad narrativa al juego y cohesion a las pantallas de transicion.
+- Diferenciar visualmente cada cueva para que el jugador perciba la progresion.
+
+## D-21 Pantallas narrativas y flujo de juego
+
+Decision:
+
+```text
+Se anaden tres nuevas pantallas al flujo del juego:
+1. PantallaIntroduccion: historia inicial al pulsar "Nueva Partida".
+2. PantallaTransicion: pantalla reutilizable antes de cada cueva.
+3. PantallaFinal: pantalla de victoria o derrota al terminar la partida.
+```
+
+Flujo completo:
+
+```text
+Menu -> "Iniciar Partida" -> Introduccion -> Transicion(Cueva I) ->
+Juego(Cueva I) -> Transicion(Cueva II) -> Juego(Cueva II) ->
+Transicion(Cueva III) -> Juego(Cueva III) -> Victoria/Derrota
+```
+
+La navegacion entre cuevas se gestiona mediante callbacks:
+- `PantallaJuego.setAlCambiarCueva()`: al pulsar "CAMBIAR CUEVA", pega la siguiente cueva con `Partida.getSiguienteCuevaId()` y delega la transicion a `EscapeMazmorraApp`.
+- `PantallaJuego.setAlTerminarPartida()`: cuando el estado de `Partida` ya no es `EN_CURSO`, muestra la pantalla final.
+
+Motivo:
+- Centralizar la navegacion en `EscapeMazmorraApp` sin acoplar `PantallaJuego` al flujo completo.
+- Permitir que las pantallas de transicion se muestren antes de entrar a cada cueva.
+
+## D-22 Emojis por tematica de cueva
+
+Decision:
+
+```text
+Los circulos de colores se reemplazan por emojis que varian segun la
+tematica de la cueva actual.
+```
+
+Mapeo por cueva:
+
+| Cueva | Enemigo normal | Boss | Color muro |
+|---|---|---|---|
+| CRIPTAS | 💀 (esqueleto) | ☠️ (guardian osario) | #d2cdc3 hueso |
+| PARAMO | 🧟 (zombie) | 🧌 (señor zombie) | #468246 verde |
+| ABISMO | 👹 (demonio) | 😈 (Malakor) | #aa2d2d rojo |
+
+El jugador siempre se representa con 🧙 (mago).
+Los objetos usan: 🧪 pocion, 🔑 llave, 🛡️ escudo, 🏹 arco, 🗡️ arma cuerpo a cuerpo.
+
+Motivo:
+- Dar coherencia visual a cada cueva.
+- Reemplazar la representacion abstracta (circulos de colores) por iconos reconocibles.
+
+## D-23 Tamano de mapas
+
+Decision:
+
+```text
+Las cuevas se redimensionan con progresion creciente:
+- Cueva facil (Criptas): 7x7
+- Cueva media (Paramero): 10x10
+- Cueva dificil (Abismo): 13x13
+```
+
+Los mapas se redisenan completamente para adaptarse a las nuevas dimensiones manteniendo jugabilidad.
+
+Motivo:
+- La progresion de tamano refuerza la sensacion de dificultad creciente.
+- Mapas mas grandes permiten mejor colocacion de enemigos y objetos.
+
+## D-24 DatosTemaCueva como fuente central de configuracion visual
+
+Decision:
+
+```text
+Se crea el enum DatosTemaCueva en el paquete vista para centralizar
+todos los datos estaticos de presentacion por cueva: titulo, texto
+narrativo, fondo CSS, color de muro y emojis de enemigos/boss.
+```
+
+Motivo:
+- Evita duplicar configuracion visual entre PantallaJuego, PantallaTransicion y PantallaFinal.
+- Facilita anadir nuevas cuevas o cambiar la tematica sin modificar varias clases.

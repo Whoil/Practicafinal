@@ -44,6 +44,16 @@ public class CuevaEnMapa {
         return celdas.copy();
     }
 
+    public CeldaEnMapa getCelda(int fila, int columna) {
+        for (int i = 0; i < celdas.getSize(); i++) {
+            CeldaEnMapa celda = celdas.get(i);
+            if (celda.getFila() == fila && celda.getColumna() == columna) {
+                return celda;
+            }
+        }
+        return null;
+    }
+
     private static void validarTexto(String texto, String campo) {
         if (texto == null || texto.trim().isEmpty()) {
             throw new IllegalArgumentException("El campo " + campo + " es obligatorio");
