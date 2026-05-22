@@ -11,8 +11,9 @@ public class DatosPartidaDTO {
     private String version;
     private DatosMazmorraDTO mazmorra;
     private DatosJugadorDTO jugador;
-    private String estado;          // EN_CURSO, VICTORIA, DERROTA
+    private String estado;
     private int turnosRestantes;
+    private DatosPuertaDTO[] puertas;
 
     public DatosPartidaDTO() {
     }
@@ -20,30 +21,25 @@ public class DatosPartidaDTO {
     public DatosPartidaDTO(String version, DatosMazmorraDTO mazmorra,
                            DatosJugadorDTO jugador, String estado,
                            int turnosRestantes) {
+        this(version, mazmorra, jugador, estado, turnosRestantes, null);
+    }
+
+    public DatosPartidaDTO(String version, DatosMazmorraDTO mazmorra,
+                           DatosJugadorDTO jugador, String estado,
+                           int turnosRestantes,
+                           DatosPuertaDTO[] puertas) {
         this.version = version;
         this.mazmorra = mazmorra;
         this.jugador = jugador;
         this.estado = estado;
         this.turnosRestantes = turnosRestantes;
+        this.puertas = puertas;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public DatosMazmorraDTO getMazmorra() {
-        return mazmorra;
-    }
-
-    public DatosJugadorDTO getJugador() {
-        return jugador;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public int getTurnosRestantes() {
-        return turnosRestantes;
-    }
+    public String getVersion() { return version; }
+    public DatosMazmorraDTO getMazmorra() { return mazmorra; }
+    public DatosJugadorDTO getJugador() { return jugador; }
+    public String getEstado() { return estado; }
+    public int getTurnosRestantes() { return turnosRestantes; }
+    public DatosPuertaDTO[] getPuertas() { return puertas; }
 }

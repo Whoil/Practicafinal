@@ -31,36 +31,36 @@ class CargadorConfiguracionTest {
     }
 
     @Test
-    void cuevaFacilTieneTamano5x5() throws Exception {
+    void cuevaFacilTieneTamano9x9() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva facil = resultado.getMazmorra().getCuevaPorId("cueva_facil");
         assertNotNull(facil);
-        assertEquals(5, facil.getFilas());
-        assertEquals(5, facil.getColumnas());
+        assertEquals(9, facil.getFilas());
+        assertEquals(9, facil.getColumnas());
     }
 
     @Test
-    void cuevaMediaTieneTamano6x6() throws Exception {
+    void cuevaMediaTieneTamano13x13() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva media = resultado.getMazmorra().getCuevaPorId("cueva_media");
         assertNotNull(media);
-        assertEquals(6, media.getFilas());
-        assertEquals(6, media.getColumnas());
+        assertEquals(13, media.getFilas());
+        assertEquals(13, media.getColumnas());
     }
 
     @Test
-    void cuevaDificilTieneTamano7x7() throws Exception {
+    void cuevaDificilTieneTamano15x15() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva dificil = resultado.getMazmorra().getCuevaPorId("cueva_dificil");
         assertNotNull(dificil);
-        assertEquals(7, dificil.getFilas());
-        assertEquals(7, dificil.getColumnas());
+        assertEquals(15, dificil.getFilas());
+        assertEquals(15, dificil.getColumnas());
     }
 
     @Test
@@ -123,10 +123,10 @@ class CargadorConfiguracionTest {
         }
 
         assertNotNull(boss);
-        assertEquals(150, boss.getVida());
-        assertEquals(20, boss.getAtaque());
-        assertEquals(5, boss.getDefensa());
-        assertEquals(2, boss.getMovimiento());
+        assertEquals(200, boss.getVida());
+        assertEquals(22, boss.getAtaque());
+        assertEquals(8, boss.getDefensa());
+        assertEquals(3, boss.getMovimiento());
     }
 
 

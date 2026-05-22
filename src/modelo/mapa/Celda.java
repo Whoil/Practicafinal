@@ -54,12 +54,14 @@ public class Celda implements InterfazCelda {
     /**
      * Regla estructural minima de movimiento.
      *
-     * De momento solo MURO bloquea el paso. Otros tipos como PUERTA, TRAMPA o
+     * MURO, ROCA y ARBUSTO bloquean el paso. Otros tipos como PUERTA, TRAMPA o
      * TESORO son transitables porque el jugador puede entrar en ellos y despues
      * la logica de Parte B decidira que efecto se aplica.
      */
     public boolean esTransitable() {
-        return tipo != TipoCelda.MURO;
+        return tipo != TipoCelda.MURO
+                && tipo != TipoCelda.ROCA
+                && tipo != TipoCelda.ARBUSTO;
     }
 
     /**

@@ -21,6 +21,7 @@ public class DatosObjetoDTO {
     private int bonificacionAtaque;
     private int bonificacionDefensa;
     private String tipoLlave;
+    private String codigoCerradura;
 
     public DatosObjetoDTO() {
     }
@@ -29,6 +30,15 @@ public class DatosObjetoDTO {
                           String descripcion, int fila, int columna,
                           int cura, int bonificacionAtaque,
                           int bonificacionDefensa, String tipoLlave) {
+        this(id, tipo, nombre, descripcion, fila, columna, cura,
+             bonificacionAtaque, bonificacionDefensa, tipoLlave, null);
+    }
+
+    public DatosObjetoDTO(String id, String tipo, String nombre,
+                          String descripcion, int fila, int columna,
+                          int cura, int bonificacionAtaque,
+                          int bonificacionDefensa, String tipoLlave,
+                          String codigoCerradura) {
         this.id = id;
         this.tipo = tipo;
         this.nombre = nombre;
@@ -39,6 +49,7 @@ public class DatosObjetoDTO {
         this.bonificacionAtaque = bonificacionAtaque;
         this.bonificacionDefensa = bonificacionDefensa;
         this.tipoLlave = tipoLlave;
+        this.codigoCerradura = codigoCerradura;
     }
 
     public String getId() {
@@ -79,5 +90,9 @@ public class DatosObjetoDTO {
 
     public String getTipoLlave() {
         return tipoLlave;
+    }
+
+    public String getCodigoCerradura() {
+        return codigoCerradura;
     }
 }

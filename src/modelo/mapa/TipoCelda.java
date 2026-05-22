@@ -7,5 +7,7 @@ public enum TipoCelda {
     TRAMPA,
     TESORO,
     INICIO,
-    SALIDA
+    SALIDA,
+    ROCA,
+    ARBUSTO
 }

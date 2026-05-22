@@ -18,7 +18,8 @@ $JunitJar = Join-Path $ProjectRoot "lib\junit-platform-console-standalone-1.10.0
 $JavaFxJars = @(
     "$env:USERPROFILE\.m2\repository\org\openjfx\javafx-base\21.0.5\javafx-base-21.0.5-win.jar",
     "$env:USERPROFILE\.m2\repository\org\openjfx\javafx-controls\21.0.5\javafx-controls-21.0.5-win.jar",
-    "$env:USERPROFILE\.m2\repository\org\openjfx\javafx-graphics\21.0.5\javafx-graphics-21.0.5-win.jar"
+    "$env:USERPROFILE\.m2\repository\org\openjfx\javafx-graphics\21.0.5\javafx-graphics-21.0.5-win.jar",
+    "$env:USERPROFILE\.m2\repository\org\openjfx\javafx-media\21.0.5\javafx-media-21.0.5-win.jar"
 )
 
 if (!(Test-Path $Javac)) {
@@ -52,7 +53,7 @@ Write-Host "Compilando codigo y tests..."
 & $Javac `
     -encoding UTF-8 `
     --module-path $JavaFxPath `
-    --add-modules javafx.controls `
+    --add-modules javafx.controls,javafx.media `
     -cp $CompileClasspath `
     -d $BuildDir `
     "@$SourcesFile"
@@ -64,7 +65,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Ejecutando tests..."
 & $Java `
     --module-path $JavaFxPath `
-    --add-modules javafx.controls `
+    --add-modules javafx.controls,javafx.media `
     -jar $JunitJar `
     execute `
     --class-path $RunClasspath `

@@ -63,7 +63,7 @@ public class PantallaJuego {
 
     // Nodos JavaFX que se actualizan dinamicamente
     private Pane gridLayer;
-    private GridPane gridCeldas;
+    private Pane gridCeldas;
     private Pane gridWalls;
     private Pane gridOverlay;
     private StackPane[][] celdas;
@@ -79,6 +79,10 @@ public class PantallaJuego {
     private Text txtFeedback;
     private StackPane feedbackPane;
     private Timeline feedbackTimer;
+
+    // Ayuda overlay
+    private StackPane ayudaPane;
+    private boolean ayudaVisible = false;
 
     // Callbacks para navegacion narrativa
     private Runnable alCambiarCueva;
@@ -125,8 +129,10 @@ public class PantallaJuego {
      * Construye y devuelve la Scene de juego.
      */
     public Scene crearScene() {
+        StackPane rootStack = new StackPane();
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #1A1A1A;");
+        rootStack.getChildren().add(root);
 
         // Layout horizontal: grid (izquierda) + panel derecho
         HBox centro = new HBox(10);
@@ -135,7 +141,7 @@ public class PantallaJuego {
         // --- Grid de la cueva ---
         VBox gridConLog = new VBox(5);
         gridLayer = new StackPane();
-        gridCeldas = new GridPane();
+        gridCeldas = new Pane();
         gridWalls = new Pane();
         gridWalls.setMouseTransparent(true);
         gridOverlay = new Pane();
@@ -227,7 +233,7 @@ public class PantallaJuego {
         root.setCenter(centro);
 
         // Teclado (movimiento WASD/flechas + acciones)
-        Scene scene = new Scene(root, ANCHO, ALTO);
+        Scene scene = new Scene(rootStack, ANCHO, ALTO);
         scene.setOnKeyPressed(e -> {
             try {
                 KeyCode k = e.getCode();
@@ -265,6 +271,7 @@ public class PantallaJuego {
                     }
                 }
                 else if (k == KeyCode.R) { ok = partida.recogerObjeto(); if (!ok) msg = "No hay objeto que recoger aqui"; }
+                else if (k == KeyCode.H) { toggleAyuda(); return; }
                 else if (k == KeyCode.T) {
                     int hpAntes = partida.getJugador().getVidaActual();
                     ok = partida.terminarTurno();
@@ -312,6 +319,47 @@ public class PantallaJuego {
         root.setFocusTraversable(true);
         root.setOnMouseClicked(e -> root.requestFocus());
 
+        // --- Panel de ayuda (superpuesto, oculto inicialmente) ---
+        VBox ayudaContent = new VBox(8);
+        ayudaContent.setAlignment(Pos.TOP_CENTER);
+        ayudaContent.setPadding(new Insets(20));
+        ayudaContent.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-border-color: #C89D65; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;");
+        ayudaContent.setMaxWidth(500);
+
+        Text tituloAyuda = new Text("CONTROLES");
+        tituloAyuda.setFont(Font.font(FONT, FontWeight.BOLD, 22));
+        tituloAyuda.setFill(Color.web("#FFD700"));
+
+        Text controlesAyuda = new Text(
+            "W / Flecha arriba  - Mover arriba\n" +
+            "S / Flecha abajo   - Mover abajo\n" +
+            "A / Flecha izq.    - Mover izquierda\n" +
+            "D / Flecha der.    - Mover derecha\n" +
+            "ESPACIO            - Atacar enemigo adyacente\n" +
+            "R                  - Recoger objeto\n" +
+            "T                  - Terminar turno\n" +
+            "H                  - Mostrar / ocultar esta ayuda\n\n" +
+            "Click en celda     - Moverse a esa celda\n" +
+            "Click en objeto    - Usar / equipar desde inventario\n\n" +
+            "Estructura del juego:\n" +
+            "  3 cuevas conectadas por puertas.\n" +
+            "  Derrota al boss en la ultima cueva para\n" +
+            "  obtener la llave final.\n" +
+            "  Luego pisa la SALIDA para ganar."
+        );
+        controlesAyuda.setFont(Font.font(FONT, FontWeight.NORMAL, 14));
+        controlesAyuda.setFill(Color.WHITE);
+        controlesAyuda.setLineSpacing(3);
+
+        Text cerrarAyuda = crearBotonTexto("CERRAR [H]");
+        cerrarAyuda.setOnMouseClicked(e -> toggleAyuda());
+
+        ayudaContent.getChildren().addAll(tituloAyuda, controlesAyuda, cerrarAyuda);
+        ayudaPane = new StackPane(ayudaContent);
+        ayudaPane.setAlignment(Pos.CENTER);
+        ayudaPane.setVisible(false);
+        rootStack.getChildren().add(ayudaPane);
+
         // Construir grid inicial y paneles
         construirGrid();
         actualizar();
@@ -327,8 +375,6 @@ public class PantallaJuego {
     private void construirGrid() {
         gridCeldas.getChildren().clear();
         gridWalls.getChildren().clear();
-        gridCeldas.setHgap(1);
-        gridCeldas.setVgap(1);
 
         CuevaEnMapa cueva = partida.getCuevaActual();
         if (cueva == null) return;
@@ -337,103 +383,141 @@ public class PantallaJuego {
         int cols = cueva.getColumnas();
         double cellSize = Math.min(600.0 / cols, 600.0 / filas);
         cellSize = Math.min(cellSize, 80);
+        double wallThickness = 5;
+        Color colorMuro = DatosTemaCueva.paraCuevaId(cueva.getId()).getColorMuro();
+
+        // Calcular anchos de columna: solo MURO -> 5px, else cellSize
+        double[] colWidth = new double[cols];
+        for (int c = 0; c < cols; c++) {
+            boolean soloMuro = true;
+            for (int f = 0; f < filas; f++) {
+                if (cueva.getCelda(f, c).getTipo() != TipoCelda.MURO) {
+                    soloMuro = false;
+                    break;
+                }
+            }
+            colWidth[c] = soloMuro ? wallThickness : cellSize;
+        }
+
+        // Calcular altos de fila: solo MURO -> 5px, else cellSize
+        double[] rowHeight = new double[filas];
+        for (int f = 0; f < filas; f++) {
+            boolean soloMuro = true;
+            for (int c = 0; c < cols; c++) {
+                if (cueva.getCelda(f, c).getTipo() != TipoCelda.MURO) {
+                    soloMuro = false;
+                    break;
+                }
+            }
+            rowHeight[f] = soloMuro ? wallThickness : cellSize;
+        }
+
+        // Posiciones acumuladas
+        double[] cumX = new double[cols];
+        for (int c = 1; c < cols; c++) {
+            cumX[c] = cumX[c-1] + colWidth[c-1];
+        }
+        double[] cumY = new double[filas];
+        for (int f = 1; f < filas; f++) {
+            cumY[f] = cumY[f-1] + rowHeight[f-1];
+        }
+
+        double totalWidth = cumX[cols-1] + colWidth[cols-1];
+        double totalHeight = cumY[filas-1] + rowHeight[filas-1];
 
         celdas = new StackPane[filas][cols];
 
         for (int f = 0; f < filas; f++) {
             for (int c = 0; c < cols; c++) {
                 CeldaEnMapa celda = cueva.getCelda(f, c);
-                Rectangle rect;
+                double px = cumX[c];
+                double py = cumY[f];
+                double w = colWidth[c];
+                double h = rowHeight[f];
+
                 if (celda.getTipo() == TipoCelda.MURO) {
-                    rect = new Rectangle(cellSize, cellSize);
-                    rect.setFill(Color.TRANSPARENT);
-                    rect.setStroke(null);
+                    // Dibujar solo tiras de 5px en los bordes que limitan con celdas no MURO
+                    double left = px;
+                    double top = py;
+                    double right = px + w;
+                    double bottom = py + h;
+                    // Izquierda
+                    if (c == 0 || cueva.getCelda(f, c-1).getTipo() != TipoCelda.MURO) {
+                        Rectangle wr = new Rectangle(wallThickness, h);
+                        wr.setFill(colorMuro); wr.setStroke(null);
+                        wr.setLayoutX(left); wr.setLayoutY(top);
+                        gridWalls.getChildren().add(wr);
+                    }
+                    // Derecha
+                    if (c == cols-1 || cueva.getCelda(f, c+1).getTipo() != TipoCelda.MURO) {
+                        Rectangle wr = new Rectangle(wallThickness, h);
+                        wr.setFill(colorMuro); wr.setStroke(null);
+                        wr.setLayoutX(right - wallThickness); wr.setLayoutY(top);
+                        gridWalls.getChildren().add(wr);
+                    }
+                    // Arriba
+                    if (f == 0 || cueva.getCelda(f-1, c).getTipo() != TipoCelda.MURO) {
+                        Rectangle wr = new Rectangle(w, wallThickness);
+                        wr.setFill(colorMuro); wr.setStroke(null);
+                        wr.setLayoutX(left); wr.setLayoutY(top);
+                        gridWalls.getChildren().add(wr);
+                    }
+                    // Abajo
+                    if (f == filas-1 || cueva.getCelda(f+1, c).getTipo() != TipoCelda.MURO) {
+                        Rectangle wr = new Rectangle(w, wallThickness);
+                        wr.setFill(colorMuro); wr.setStroke(null);
+                        wr.setLayoutX(left); wr.setLayoutY(bottom - wallThickness);
+                        gridWalls.getChildren().add(wr);
+                    }
                 } else {
-                    rect = new Rectangle(cellSize, cellSize);
+                    Rectangle rect = new Rectangle(w, h);
                     rect.setFill(colorParaTipo(celda.getTipo()));
                     rect.setStroke(Color.rgb(60, 60, 60));
                     rect.setStrokeWidth(0.5);
-                }
 
-                StackPane cellPane = new StackPane(rect);
-                cellPane.setPrefSize(cellSize, cellSize);
-                celdas[f][c] = cellPane;
-                // Click para moverse
-                final int ff = f, cc = c;
-                cellPane.setOnMouseClicked(e -> {
-                    boolean ok;
-                    String clickMsg = null;
-                    if (partida.hayEnemigoEn(ff, cc)) {
-                        ok = false;
-                        clickMsg = "Hay un enemigo ahi";
-                    } else {
-                        ok = partida.moverJugador(ff, cc);
-                        if (!ok) clickMsg = "No puedes moverte alli";
-                    }
-                    actualizar();
-                    if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
-                            && partida.isMovimientoRealizado() && partida.isAccionRealizada()) {
-                        int hpAntes = partida.getJugador().getVidaActual();
-                        partida.terminarTurno();
-                        if (partida.getJugador().getVidaActual() < hpAntes) {
-                            Jugador j2 = partida.getJugador();
-                            iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                    StackPane cellPane = new StackPane(rect);
+                    cellPane.setPrefSize(w, h);
+                    cellPane.setLayoutX(px);
+                    cellPane.setLayoutY(py);
+                    celdas[f][c] = cellPane;
+                    // Click para moverse
+                    final int ff = f, cc = c;
+                    cellPane.setOnMouseClicked(e -> {
+                        boolean ok;
+                        String clickMsg = null;
+                        if (partida.hayEnemigoEn(ff, cc)) {
+                            ok = false;
+                            clickMsg = "Hay un enemigo ahi";
+                        } else {
+                            ok = partida.moverJugador(ff, cc);
+                            if (!ok) clickMsg = "No puedes moverte alli";
                         }
                         actualizar();
-                    } else if (clickMsg != null) {
-                        mostrarFeedback(clickMsg, Color.rgb(255, 120, 100));
-                    }
-                });
-                cellPane.setCursor(Cursor.HAND);
-                gridCeldas.add(cellPane, c, f);
-            }
-        }
-
-        gridOverlay.setPrefSize(cols * cellSize, filas * cellSize);
-
-        // Dibujar muros finos en gridWalls
-        double grosor = 5;
-        Color colorMuro = DatosTemaCueva.paraCuevaId(cueva.getId()).getColorMuro();
-        for (int f = 0; f < filas; f++) {
-            for (int c = 0; c < cols; c++) {
-                CeldaEnMapa celdaActual = cueva.getCelda(f, c);
-                if (celdaActual == null || celdaActual.getTipo() != TipoCelda.MURO) continue;
-                double x = c * (cellSize + 1);
-                double y = f * (cellSize + 1);
-                // Arriba
-                CeldaEnMapa arriba = f > 0 ? cueva.getCelda(f - 1, c) : null;
-                if (f == 0 || arriba == null || arriba.getTipo() != TipoCelda.MURO) {
-                    Rectangle w = new Rectangle(cellSize, grosor);
-                    w.setFill(colorMuro); w.setStroke(null);
-                    w.setLayoutX(x); w.setLayoutY(y);
-                    gridWalls.getChildren().add(w);
-                }
-                // Abajo
-                CeldaEnMapa abajo = f < filas - 1 ? cueva.getCelda(f + 1, c) : null;
-                if (f == filas - 1 || abajo == null || abajo.getTipo() != TipoCelda.MURO) {
-                    Rectangle w = new Rectangle(cellSize, grosor);
-                    w.setFill(colorMuro); w.setStroke(null);
-                    w.setLayoutX(x); w.setLayoutY(y + cellSize - grosor);
-                    gridWalls.getChildren().add(w);
-                }
-                // Izquierda
-                CeldaEnMapa izq = c > 0 ? cueva.getCelda(f, c - 1) : null;
-                if (c == 0 || izq == null || izq.getTipo() != TipoCelda.MURO) {
-                    Rectangle w = new Rectangle(grosor, cellSize);
-                    w.setFill(colorMuro); w.setStroke(null);
-                    w.setLayoutX(x); w.setLayoutY(y);
-                    gridWalls.getChildren().add(w);
-                }
-                // Derecha
-                CeldaEnMapa der = c < cols - 1 ? cueva.getCelda(f, c + 1) : null;
-                if (c == cols - 1 || der == null || der.getTipo() != TipoCelda.MURO) {
-                    Rectangle w = new Rectangle(grosor, cellSize);
-                    w.setFill(colorMuro); w.setStroke(null);
-                    w.setLayoutX(x + cellSize - grosor); w.setLayoutY(y);
-                    gridWalls.getChildren().add(w);
+                        if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
+                                && partida.isMovimientoRealizado() && partida.isAccionRealizada()) {
+                            int hpAntes = partida.getJugador().getVidaActual();
+                            partida.terminarTurno();
+                            if (partida.getJugador().getVidaActual() < hpAntes) {
+                                Jugador j2 = partida.getJugador();
+                                iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                            }
+                            actualizar();
+                        } else if (clickMsg != null) {
+                            mostrarFeedback(clickMsg, Color.rgb(255, 120, 100));
+                        }
+                    });
+                    cellPane.setCursor(Cursor.HAND);
+                    gridCeldas.getChildren().add(cellPane);
                 }
             }
         }
+
+        gridOverlay.setPrefSize(totalWidth, totalHeight);
+        gridCeldas.setPrefSize(totalWidth, totalHeight);
+        gridWalls.setPrefSize(totalWidth, totalHeight);
+        StackPane.setAlignment(gridCeldas, Pos.TOP_LEFT);
+        StackPane.setAlignment(gridWalls, Pos.TOP_LEFT);
+        StackPane.setAlignment(gridOverlay, Pos.TOP_LEFT);
     }
 
     // ---------------------------------------------------------------
@@ -557,6 +641,24 @@ public class PantallaJuego {
             }
         }
 
+        // Obstaculos (roca, arbusto) — emoji permanente sobre la celda
+        for (int f = 0; f < filas; f++) {
+            for (int c = 0; c < cols; c++) {
+                if (celdas[f][c] == null) continue;
+                TipoCelda tc = cueva.getCelda(f, c).getTipo();
+                String obsEmoji = null;
+                if (tc == TipoCelda.ROCA) {
+                    obsEmoji = "\uD83E\uDEA8";
+                } else if (tc == TipoCelda.ARBUSTO) {
+                    obsEmoji = "\uD83C\uDF3F";
+                }
+                if (obsEmoji != null) {
+                    Text emojiT = crearEmoji(obsEmoji, emojiSize * 0.7);
+                    celdas[f][c].getChildren().add(emojiT);
+                }
+            }
+        }
+
         // Barras de vida sobre entidades
         if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
             agregarBarraVida(celdas[j.getFila()][j.getColumna()], j.getVidaActual(), j.getVidaMaxima(), cellSize);
@@ -671,6 +773,10 @@ public class PantallaJuego {
         });
         accionesBox.getChildren().add(btnGuardar);
 
+        Text btnAyuda = crearBotonTexto("AYUDA [H]");
+        btnAyuda.setOnMouseClicked(e -> toggleAyuda());
+        accionesBox.getChildren().add(btnAyuda);
+
         Text btnMenu = crearBotonTexto("VOLVER AL MENU");
         btnMenu.setOnMouseClicked(e -> volverAlMenu.run());
         accionesBox.getChildren().add(btnMenu);
@@ -696,6 +802,11 @@ public class PantallaJuego {
     // ---------------------------------------------------------------
     // Helpers de UI
     // ---------------------------------------------------------------
+
+    private void toggleAyuda() {
+        ayudaVisible = !ayudaVisible;
+        ayudaPane.setVisible(ayudaVisible);
+    }
 
     private void ejecutarAccion(boolean ok, String mensajeError) {
         if (!ok) {
@@ -836,6 +947,8 @@ public class PantallaJuego {
             case TESORO: return Color.rgb(140, 60, 180);
             case SALIDA: return Color.rgb(200, 50, 50);
             case TRAMPA: return Color.rgb(220, 120, 40);
+            case ROCA:   return Color.rgb(100, 100, 110);
+            case ARBUSTO:return Color.rgb(50, 120, 50);
             default:     return Color.rgb(100, 100, 100);
         }
     }

@@ -28,6 +28,23 @@ HECHA
 
 ## En curso
 
+### Resumen de tareas pendientes (Parte C)
+
+- **C-09** Pulido audiovisual (sonidos/musica/animaciones) - PENDIENTE
+- **R-01** Revision de restricciones (colecciones prohibidas, arrays) - PENDIENTE
+- **R-02** Revision de codigo y tests para cada PR - PENDIENTE
+
+### Resumen de tareas pendientes (Parte B)
+
+- **B-02** Modelo de objetos e inventario - REVISION
+- **B-03** Reglas de turno y combate - REVISION
+- **B-04** Mejoras de logica (IA enemiga, drops, cofres, trampas) - PENDIENTE
+- **B-05** Ataque direccional - PENDIENTE
+
+### Resumen de tareas pendientes (Parte A)
+
+- **A-01** Revisar estructuras propias - PENDIENTE
+
 ## Peticiones urgentes entre partes
 
 Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revisarla al inicio de sesion.
@@ -64,13 +81,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
 - Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`.
 - Nota de alcance: Guillermo autoriza traer `ListaDE`, `ElementoDE` e `IteradorDE` desde las estructuras del grupo y adaptar `ListaDE` para no exigir `Comparable`, porque el inventario necesita guardar objetos sin orden natural.
-
-### B-03 Reglas de turno y combate
-
-- Responsable: Guille / Parte B
-- Estado: PENDIENTE
-- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
-- Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
 
 ### C-02 Cargar y guardar partida
 
@@ -136,14 +146,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
   - Mejorar IA enemiga con reglas distintas por tipo de enemigo.
   - Revisar si el log necesita pasar de `ListaSE<String>` a una clase `LogJuego`.
 
-### C-02 Cargar y guardar partida
-
-- Responsable: Hector / Parte C
-- Estado: PENDIENTE
-- Archivos permitidos: `src/json/`, `test/`, `project-management/`
-- Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
-- Nota de coordinacion: Parte B deja `FabricaPartida` como puente inicial para convertir `ResultadoCarga` en `Partida`; el guardado/carga de estado completo sigue siendo alcance de C-02.
-
 ### C-03 Boceto JavaFX
 
 - Responsable: Hector / Parte C
@@ -167,6 +169,35 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/modelo/juego/Partida.java`, `src/vista/PantallaJuego.java`, `src/vista/EscapeMazmorraApp.java`, `test/`, `project-management/`
 - Terminado cuando exista Partida que cargue JSON, maneje movimiento, combate, objetos, turnos, condiciones de victoria/derrota, guardado/carga, y PantallaJuego que muestre grid coloreado con jugador/enemigos/objetos, panel de stats, inventario, acciones, log, teclado WASD/flechas y atajos SPACE/R/T.
 - Verificacion: 148 tests JUnit pasados el 2026-05-22 (24 tests de Partida + 124 existentes). Demo jugable confirmada por Hector.
+
+### B-05 Ataque direccional cuando haya varios enemigos cerca
+
+- Responsable: Guille / Parte B
+- Estado: PENDIENTE
+- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `test/modelo/juego/`, `project-management/`
+- Terminado cuando el jugador pueda elegir la direccion u objetivo del ataque si hay varios enemigos adyacentes, y solo reciba dano el enemigo elegido.
+- Propuesta tecnica: exponer un metodo tipo `atacarDireccion(df, dc)` o reutilizar `atacar(fila, columna)` desde JavaFX.
+- Tests minimos: varios enemigos adyacentes, ataque hacia una direccion concreta, direccion sin enemigo devuelve `false`.
+
+### C-09 Pulido audiovisual y presentacion
+
+- Responsable: Hector / Parte C
+- Estado: EN_CURSO
+- Archivos permitidos: `src/vista/`, `datos/`, recursos graficos/audio, `project-management/`
+- Terminado cuando la UI de partida este mas pulida visualmente y, si se aprueba, incluya efectos de sonido o musica para pasos, ataques, objetos y cambio de habitacion.
+
+Sub-tareas:
+- **C-09.1** Obstaculos (ROCA, ARBUSTO), mapas laberinticos (9x9, 13x13, 15x15) y muros finos (5px) - PARCIAL
+- **C-09.2** Musica de fondo con javafx.media y ReproductorMusica singleton - HECHA
+- **C-09.3** Animaciones (movimiento suave, ataque, muerte) - PENDIENTE
+- **C-09.4** Efectos visuales (particulas, brillos) - PENDIENTE
+- **C-09.5** Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) - PENDIENTE
+- **C-09.6** Mejorar diseno de cuevas: no todas cuadradas, trazado laberintico con mejores obstaculos - PENDIENTE
+
+- **C-09.7** Implementar efectos de sonido cortos (SFX) para interacciones: recoger objeto, ataque y dano - PENDIENTE
+- **C-09.8** Anadir animaciones de transicion fluida (fade in/out) entre pantallas - PENDIENTE
+- **C-09.9** Desarrollar sistema de alertas visuales temporales: textos flotantes de dano y cura - PENDIENTE
+- **C-09.10** Crear modo antorcha / filtro de contraste accesible mediante CSS dinamico - PENDIENTE
 
 ### R-01 Revision de restricciones
 
@@ -222,6 +253,43 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/json/`, `datos/`, `project-management/`
 - Terminado: existe un JSON de configuracion para las 3 cuevas, DTOs, cargador Gson y tests de carga.
 - Verificacion: PR #3 mergeada en `main` el 2026-05-21; compilacion manual de `src` y tests correcta.
+
+### INT-02 Actualizar tests a los mapas actuales
+
+- Responsable: Alvaro / Guille / Hector segun area afectada
+- Estado: HECHA
+- Archivos permitidos: `test/`, `datos/cuevas.json`, `project-management/`
+- Terminado cuando la suite JUnit refleje los mapas actuales 7x7, 10x10 y 13x13, los ids actuales de objetos/enemigos y las estadisticas actuales del boss.
+- Verificacion: 180/180 tests pasados el 2026-05-22.
+
+### B-06 Decidir condicion final de victoria
+
+- Responsable: Guille / Parte B, con validacion del grupo
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/`, `test/modelo/juego/`, `datos/cuevas.json`, `project-management/DECISIONS.md`
+- Terminado: victoria requiere derrotar al boss para obtener llave final Y pisar celda SALIDA. Implementado en `Partida.comprobarVictoriaODerrota()` y documentado en DECISIONS.md D-18.
+
+### C-06 Menu principal completo para demo presentable
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/vista/`, `src/json/`, `src/modelo/juego/`, `project-management/`
+- Terminado: boton "Controles" reemplaza a "Ajustes", "Cargar partida" funcional, "Salir" cierra ventana, titulo ESCAPE en linea recta.
+
+### C-07 Guardado y carga honesta desde UI
+
+- Responsable: Hector / Parte C, con apoyo de Parte B si hace falta reconstruir `Partida`
+- Estado: HECHA
+- Archivos permitidos: `src/json/`, `src/modelo/juego/`, `src/vista/`, `test/`, `project-management/`
+- Terminado: guardar serializa enemigos vivos, objetos en suelo y puertas; cargar restaura ContenidoCueva completo desde DTO. 182 tests pasan.
+- Nota: puertas se recrean desde conexiones al cargar (opcion A, pierde estado abierto/cerrado).
+
+### C-08 Tutorial o ayuda integrada
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/vista/`, `project-management/`
+- Terminado: boton "AYUDA [H]" en panel de acciones, overlay superpuesto con todos los controles, atajo tecla H.
 
 ### PM-01 Crear documentos de coordinacion
 

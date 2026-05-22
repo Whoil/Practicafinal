@@ -24,8 +24,8 @@ class FabricaPartidaTest {
         assertEquals("cueva_facil", partida.getCuevaActual().getId());
         assertEquals(1, partida.getJugadorEnMapa().getFila());
         assertEquals(1, partida.getJugadorEnMapa().getColumna());
-        assertEquals(1, partida.getEnemigos().getSize());
-        assertEquals(2, partida.getObjetosEnSuelo().getSize());
+        assertEquals(2, partida.getEnemigos().getSize());
+        assertEquals(3, partida.getObjetosEnSuelo().getSize());
     }
 
     @Test
@@ -33,14 +33,20 @@ class FabricaPartidaTest {
         ResultadoCarga resultado = new CargadorConfiguracion().cargar(RUTA_JSON);
         Partida partida = new FabricaPartida().crearPartida(resultado);
 
-        assertTrue(partida.moverJugador(3, 2));
+        assertTrue(partida.moverJugador(1, 3));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(3, 3));
         assertTrue(partida.recogerObjeto("llave-cueva-media"));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(5, 3));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(5, 5));
         assertTrue(partida.pasarTurno());
         assertTrue(partida.avanzarACueva("cueva_media"));
 
         assertEquals("cueva_media", partida.getCuevaActual().getId());
-        assertEquals(5, partida.getJugadorEnMapa().getFila());
-        assertEquals(4, partida.getJugadorEnMapa().getColumna());
+        assertEquals(1, partida.getJugadorEnMapa().getFila());
+        assertEquals(1, partida.getJugadorEnMapa().getColumna());
     }
 
     @Test
@@ -52,7 +58,7 @@ class FabricaPartidaTest {
         Objeto objeto = partida.getObjetosEnSuelo().get(0).getObjeto();
 
         assertEquals("ESQUELETO", enemigo.getNombre());
-        assertEquals("pocion-facil-1", objeto.getId());
+        assertEquals("pocion-criptas-1", objeto.getId());
     }
 
     @Test

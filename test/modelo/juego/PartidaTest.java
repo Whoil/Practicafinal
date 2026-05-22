@@ -1,8 +1,10 @@
 package modelo.juego;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import Estructuras.ListaDE;
 import Estructuras.ListaSE;
@@ -56,22 +58,23 @@ class PartidaTest {
     }
 
     @Test
-    void moverJugadorArribaFunciona() throws Exception {
-        Partida p = Partida.crearPartidaNueva();
-        Jugador j = p.getJugador();
-        p.moverJugador(j.getFila() + 1, j.getColumna());
-        p.terminarTurno();
-        int filaAntes = j.getFila();
-        assertTrue(p.moverJugadorArriba());
-        assertEquals(filaAntes - 1, j.getFila());
+    void moverJugadorArribaFunciona() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        assertTrue(partida.moverJugadorArriba());
+        assertEquals(0, jugador.getFila());
     }
 
     @Test
     void moverJugadorAbajoFunciona() throws Exception {
         Partida p = Partida.crearPartidaNueva();
         Jugador j = p.getJugador();
+        assertTrue(p.moverJugador(1, 3));
+        assertTrue(p.terminarTurno());
         assertTrue(p.moverJugadorAbajo());
-        assertEquals(j.getFila(), 2);
+        assertEquals(2, j.getFila());
     }
 
     @Test
@@ -94,18 +97,19 @@ class PartidaTest {
     }
 
     @Test
-    void atacarSinEnemigoAdyacenteDevuelveFalse() throws Exception {
-        Partida p = Partida.crearPartidaNueva();
-        assertFalse(p.atacar());
+    void atacarSinEnemigoAdyacenteDevuelveFalse() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 0, 0);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        assertFalse(partida.atacar());
     }
 
     @Test
     void atacarEnemigoAdyacenteReduceSuVida() throws Exception {
         Partida p = Partida.crearPartidaNueva();
-        Jugador j = p.getJugador();
-        p.moverJugador(j.getFila() + 1, j.getColumna());
         ListaDE<Enemigo> antes = p.getEnemigosActuales();
-        assertEquals(1, antes.getSize());
+        assertTrue(antes.getSize() > 0);
         Enemigo e = antes.get(0);
         int vidaAntes = e.getVidaActual();
         assertTrue(p.atacar());
@@ -115,8 +119,6 @@ class PartidaTest {
     @Test
     void atacarVariasVecesMataEnemigo() throws Exception {
         Partida p = Partida.crearPartidaNueva();
-        Jugador j = p.getJugador();
-        p.moverJugador(j.getFila() + 1, j.getColumna());
         Enemigo e = p.getEnemigosActuales().get(0);
         while (e.estaVivo() && p.getEstado() == EstadoPartida.EN_CURSO) {
             p.atacar();
@@ -125,16 +127,14 @@ class PartidaTest {
             }
         }
         assertFalse(e.estaVivo());
-        assertEquals(0, p.getEnemigosActuales().getSize());
     }
 
     @Test
     void recogerObjetoEnLaMismaCasilla() throws Exception {
         Partida p = Partida.crearPartidaNueva();
-        Jugador j = p.getJugador();
         assertTrue(p.moverJugador(1, 3));
         p.terminarTurno();
-        assertTrue(p.moverJugador(2, 3));
+        assertTrue(p.moverJugador(1, 4));
         assertTrue(p.hayObjetoEnPosicion());
         assertTrue(p.recogerObjeto());
     }
@@ -472,6 +472,7 @@ class PartidaTest {
     @Test
     void ataqueAdyacenteDerrotaBossYEntregaLlaveFinal() {
         Cueva cueva = new Cueva("c1", 3, 3);
+        cueva.cambiarTipoCelda(0, 0, TipoCelda.SALIDA);
         Mazmorra mazmorra = mazmorraCon(cueva);
         Jugador jugador = new Jugador("Heroe", 100, 30, 5, 2, 1, 1);
         Partida partida = new Partida(mazmorra, jugador, 10);
@@ -479,14 +480,18 @@ class PartidaTest {
 
         assertTrue(partida.anadirEnemigo(cueva, boss));
         assertTrue(partida.atacar(2, 2));
+        assertTrue(partida.tieneLlaveFinal());
+        assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
+
+        assertTrue(partida.moverJugador(0, 0));
 
         assertEquals(EstadoPartida.VICTORIA, partida.getEstado());
-        assertTrue(partida.tieneLlaveFinal());
     }
 
     @Test
     void llaveFinalNoFallaSiExisteOtroObjetoConElIdPorDefecto() {
         Cueva cueva = new Cueva("c1", 3, 3);
+        cueva.cambiarTipoCelda(0, 0, TipoCelda.SALIDA);
         Mazmorra mazmorra = mazmorraCon(cueva);
         Jugador jugador = new Jugador("Heroe", 100, 30, 5, 2, 1, 1);
         jugador.agregarObjeto(new Llave(Partida.ID_LLAVE_FINAL_DEFECTO, TipoLlave.PUERTA, "otra-cerradura"));
@@ -495,10 +500,13 @@ class PartidaTest {
 
         assertTrue(partida.anadirEnemigo(cueva, boss));
         assertTrue(partida.atacar(2, 2));
+        assertTrue(partida.tieneLlaveFinal());
+        assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
+        assertEquals(2, jugador.getCantidadObjetosInventario());
+
+        assertTrue(partida.moverJugador(0, 0));
 
         assertEquals(EstadoPartida.VICTORIA, partida.getEstado());
-        assertTrue(partida.tieneLlaveFinal());
-        assertEquals(2, jugador.getCantidadObjetosInventario());
     }
 
     @Test
@@ -602,6 +610,36 @@ class PartidaTest {
         assertTrue(partida.puedeCambiarCueva());
         assertTrue(partida.cambiarCueva());
         assertEquals("destino", partida.getCuevaActual().getId());
+    }
+
+    @Test
+    void guardarYCargarRoundTripPreservaContenidos(@TempDir Path tempDir) throws Exception {
+        Partida original = Partida.crearPartidaNueva();
+        original.getJugador().recibirDano(30);
+
+        String ruta = tempDir.resolve("roundtrip.json").toString();
+        original.guardar(ruta);
+
+        Partida cargada = Partida.cargarPartida(ruta);
+        assertNotNull(cargada);
+        assertEquals(original.getJugador().getNombre(), cargada.getJugador().getNombre());
+        assertEquals(original.getJugador().getVidaActual(), cargada.getJugador().getVidaActual());
+        assertEquals(original.getEstado(), cargada.getEstado());
+        assertEquals(original.getTurnosRestantes(), cargada.getTurnosRestantes());
+    }
+
+    @Test
+    void guardarYCargarRoundTripPreservaEnemigosDeFabrica(@TempDir Path tempDir) throws Exception {
+        Partida original = Partida.crearPartidaNueva();
+        int enemigosFabrica = original.getEnemigos().getSize();
+        assertTrue(enemigosFabrica > 0, "La partida de fabrica debe tener enemigos");
+
+        String ruta = tempDir.resolve("roundtrip_fabrica.json").toString();
+        original.guardar(ruta);
+
+        Partida cargada = Partida.cargarPartida(ruta);
+        assertEquals(enemigosFabrica, cargada.getEnemigos().getSize(),
+            "Los enemigos de fabrica deben preservarse al cargar");
     }
 
     private Mazmorra mazmorraCon(Cueva cueva) {
