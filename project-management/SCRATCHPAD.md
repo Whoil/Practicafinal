@@ -608,3 +608,265 @@ Si no se ejecutaron, motivo: la sesion fue solo de diseno y documentacion, sin c
 - Arco, escudo e invisibilidad aparecen como opcionales o extras en los documentos iniciales; conviene validarlo con el grupo antes de implementarlos como imprescindibles.
 - La regla de bajada de defensa al 75% modifica el combate y debe quedar documentada en decisiones cuando el grupo la apruebe.
 - La logica de llaves, cofres y drops tocara coordinacion con mapa y JSON, por lo que Parte B debe exponer reglas claras sin cambiar archivos de otras partes sin permiso.
+
+## 2026-05-21 - Hector / Parte C - C-01 JSON inicial
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Primera sesion de implementacion de Parte C. Se configura Gson en el proyecto y se crea el fichero JSON de configuracion de las 3 cuevas de la mazmorra, junto con los DTOs y el cargador que construye los objetos del modelo (Cueva, Mazmorra) a partir del JSON.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: si — se detectaron 15 commits nuevos de A y B en `origin/main`.
+Documentos leidos: `PRD.md`, `ARCHITECTURE.md`, `TASKS.md`, `DECISIONS.md`, `AGENTS.md`, `GITHUB_WORKFLOW.md`, `SCRATCHPAD.md`, `AGENT_C_JAVAFX_JSON_DOCS.md`.
+
+### Tarea trabajada
+
+C-01 Disenar JSON inicial.
+
+### Cambios
+
+- Configurado Gson 2.10.1 en el proyecto:
+  - `lib/gson-2.10.1.jar` copiado desde MATCOMP.
+  - `.idea/libraries/google_code_gson.xml` creado.
+  - `Practica final.iml` actualizado con entrada de Gson.
+- Creado `datos/cuevas.json` con configuracion de las 3 cuevas:
+  - Cueva Facil 5x5, Cueva Media 6x6, Cueva Dificil 7x7.
+  - Matriz de tipos de celda (MURO, SUELO, INICIO, PUERTA, TESORO, SALIDA).
+  - Enemigos y objetos definidos por cueva (pendientes de que Parte B los implemente).
+  - Conexiones dirigidas del grafo: facil -> media -> dificil.
+- Creados DTOs en `src/json/`:
+  - `ConfiguracionMazmorra.java`, `ConfiguracionCuevaDTO.java`.
+  - `ConfiguracionEnemigoDTO.java`, `ConfiguracionObjetoDTO.java`.
+  - `ConexionDTO.java`.
+- Creado `src/json/CargadorConfiguracion.java` y `ResultadoCarga.java`.
+- Creado test `test/json/CargadorConfiguracionTest.java` con 10 tests.
+
+### Pruebas ejecutadas
+
+- Compilacion manual de `src` completo con `javac`: correcta.
+- Compilacion de tests con JUnit: correcta.
+- Tests pendientes de ejecutar en IntelliJ.
+
+### Riesgos
+
+- El formato JSON de enemigos y objetos puede requerir cambios cuando Parte B implemente sus clases.
+- Gson local; si se limpia .idea habra que reconfigurarlo.
+
+### Archivos compartidos tocados o solicitados
+
+Ninguno dentro del area permitida de Parte C.
+
+### Estado de TASKS.md
+
+C-01 pasa a REVISION.
+
+## 2026-05-21 - Hector / Parte C - Resolver merge conflicts PR #3
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Segunda sesion de Parte C. La PR #3 (C-01) tenia conflictos con main en los documentos
+de coordinacion (IA_DIARY.md, SCRATCHPAD.md) y en "Practica final.iml". Se resolvieron
+localmente con `git merge main`.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Conflicto detectado via `gh pr view 3`: mergeable=CONFLICTING, mergeStateStatus=DIRTY.
+
+### Tarea trabajada
+
+Resolver merge conflict de PR #3.
+
+### Cambios
+
+Ningun cambio funcional. Solo resolucion de merge:
+- `Practica final.iml`: keep entrada Gson de HEAD.
+- `IA_DIARY.md`: keep entrada C-01 de HEAD.
+- `SCRATCHPAD.md`: keep entrada C-01 de HEAD (ligeramente simplificada).
+- Commit merge ed1aea7 y push a origin.
+
+### Archivos modificados
+
+- `Practica final.iml` (merge)
+- `project-management/IA_DIARY.md` (merge + entrada sesion 2)
+- `project-management/SCRATCHPAD.md` (merge + entrada sesion 2)
+
+### Pruebas ejecutadas
+
+No aplica (sin cambios de codigo).
+
+### Riesgos
+
+- Si otros companeros modifican los mismos documentos antes de mergear la PR,
+  podrian aparecer nuevos conflictos.
+
+### Archivos compartidos tocados o solicitados
+
+Ninguno.
+
+### Estado de TASKS.md
+
+Sin cambios: C-01 sigue en REVISION.
+
+## 2026-05-21 - Guillermo / Parte B
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B - logica del juego
+Agente: Codex / Agente B Logica
+
+### Contexto
+
+Se implemento `B-01 Modelo de personajes`. Antes de programar se reviso la documentacion actualizada de `project-management`, se comprobo GitHub, se actualizo `feature/b-logica` con `origin/main` y se acordo el alcance exacto: personajes base, contrato mediante `Personaje` abstracto y tests JUnit, sin objetos, inventario, turnos, combate, mapa, JavaFX ni JSON.
+
+Tambien se reviso el PDF de la practica y se localizo el apartado 8.4, que pide declarar contratos. Para B-01 se decidio que el contrato necesario seria la clase abstracta `Personaje`, no una interfaz Java adicional.
+
+### Sincronizacion
+
+Rama: `feature/b-logica`
+Cambio remoto revisado: si.
+Rama actualizada con `origin/main`: si, se incorporaron los cambios recientes de Parte A y Parte C, incluyendo `POST_MORTEM.md`, configuracion JUnit, JSON inicial y configuracion Gson.
+Documentos leidos: `AGENTS.md`, `TASKS.md`, `AGENT_B_LOGICA.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRD.md`, `SCRATCHPAD.md`, `IA_DIARY.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `POST_MORTEM.md`.
+
+### Cambios
+
+- Creado `src/modelo/personajes/Personaje.java`.
+- Creado `src/modelo/personajes/Jugador.java`.
+- Creado `src/modelo/personajes/Enemigo.java`.
+- Creado `src/modelo/personajes/Boss.java`.
+- Creado `src/modelo/personajes/TipoEnemigo.java`.
+- Creado `test/modelo/personajes/PersonajeTest.java`.
+- Creado `test/modelo/personajes/EnemigoTest.java`.
+- `Personaje` queda como clase abstracta y contrato base de B-01.
+- `Jugador` hereda de `Personaje`.
+- `Enemigo` hereda de `Personaje` y guarda `TipoEnemigo`.
+- `Boss` hereda de `Enemigo` y fija `TipoEnemigo.BOSS`.
+- Se implementan vida maxima, vida actual, ataque base, defensa base, movimiento, fila y columna.
+- Se implementan `recibirDano`, `curar`, `estaVivo` y `cambiarPosicion`.
+- No se anadieron setters generales para estadisticas base; queda comentado como decision de encapsulacion.
+- Se deja `B-01` en estado `REVISION` en `TASKS.md`.
+- Se paso revision independiente. El revisor recomendo aceptar sin bloqueos.
+- Se corrigio la nota de compatibilidad Java cambiando `String.isBlank()` por `trim().isEmpty()`.
+- Se ampliaron los tests para mejorar la cobertura de `Jugador`, `Enemigo`, `Boss`, `TipoEnemigo` y ramas de validacion de `Personaje`.
+- Guillermo verifico en IntelliJ cobertura del 100% en el paquete `modelo.personajes`.
+
+### Tests
+
+Tests JUnit creados o actualizados:
+
+- `PersonajeTest`
+- `EnemigoTest`
+
+Tests ejecutados:
+
+- Compilacion de codigo de produccion con `javac`.
+- Compilacion de fuentes de test con JUnit disponible en la configuracion actual del proyecto.
+- Ejecucion de tests JUnit de `modelo.personajes`.
+
+Resultado:
+
+- Codigo de produccion de `modelo.personajes`: compila correctamente.
+- Tests de `modelo.personajes`: 26 tests ejecutados y pasados.
+- Cobertura en IntelliJ: 100% en clases, metodos, lineas y ramas del paquete `modelo.personajes`.
+- Compilacion completa del `src` actualizado, incluyendo Parte A, Parte B y Parte C: correcta.
+- Nota tecnica: `javac` genero clases de test pero mostro un aviso/excepcion interna de permisos al cerrar un jar de JUnit en `.m2`; para verificar comportamiento se ejecutaron los metodos `@Test` compilados mediante reflexion, todos con resultado correcto.
+
+### Pendiente
+
+- Preparar commit, push y Pull Request cuando Guillermo lo autorice.
+- Mantener `B-01` en `REVISION` hasta que el grupo acepte la PR o indique marcarla como `HECHA`.
+- Mantener inventario, objetos, turnos, combate y regla del 75% para `B-02` y `B-03`.
+
+### Riesgos
+
+- `B-01` evita a proposito inventario, objetos, drops, combate, turnos y regla del 75%; esas partes deben mantenerse fuera de esta tarea.
+- Los datos JSON de Parte C ya incluyen enemigos y objetos como configuracion, pero Parte B aun no debe acoplarse a ellos hasta `B-02`/`B-03`.
+
+## 2026-05-22 - Guillermo / Parte B
+
+### Identificacion de sesion
+
+Humano: Guillermo
+Rol: Parte B - logica del juego
+Agente: Codex / Agente B Logica
+
+### Contexto
+
+Se inicio la tarea `B-02 Modelo de objetos e inventario`. Antes de programar se revisaron GitHub y los documentos actualizados de `project-management` desde `main`, se confirmo que PR #5 estaba mergeada y se leyeron los dos PDF del proyecto para comprobar que B-01 no tenia huecos y que B-02 debia centrarse en objetos, inventario y equipo.
+
+Antes de cerrar el alcance, Guillermo pidio decidir punto por punto. Se acordo incluir `Arco` y `Escudo`, permitir objetos repetidos por tipo pero no duplicar el mismo `id`, usar ranuras separadas de arma y escudo, hacer que el arco ocupe las dos manos y desequipe/bloquee escudo, dejar llaves sin equipar, implementar solo pocion de cura y dejar invisibilidad, drops, cofres, recoger del suelo, mapa, JSON, turnos, combate y regla del 75% fuera de B-02.
+
+### Sincronizacion
+
+Rama: `feature/b-logica`
+Cambio remoto revisado: si.
+Rama local: limpia al inicio pero por delante de `origin/feature/b-logica` por commits locales de merge/documentacion de la sesion anterior.
+Limitacion tecnica: el entorno de Codex no pudo ejecutar `git fetch` local por permisos en `.git/FETCH_HEAD`; se contrasto GitHub con el conector y se leyeron documentos desde `main`.
+Documentos leidos: `TASKS.md`, `AGENT_B_LOGICA.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRD.md`, `SCRATCHPAD.md`, `IA_DIARY.md`, `GITHUB_WORKFLOW.md`, `REVIEW_CHECKLIST.md`, `POST_MORTEM.md` y los dos PDF del proyecto.
+
+### Cambios
+
+- `TASKS.md`: B-02 queda en `REVISION` y se documenta la autorizacion de Guillermo para traer `ListaDE`, `ElementoDE` e `IteradorDE`.
+- `src/Estructuras/ElementoDE.java`, `IteradorDE.java`, `ListaDE.java`: se traen desde las estructuras del grupo.
+- `ListaDE` se adapta para no exigir `Comparable`, usando igualdad por `equals`, porque el inventario debe guardar objetos sin orden natural.
+- `src/modelo/objetos/Objeto.java`: clase base de objetos con `id`, nombre, descripcion, igualdad por `id` y marcas de equipable/consumible.
+- `src/modelo/objetos/Arma.java`, `Espada.java`, `Arco.java`: armas equipables con bonificacion de ataque; espada +12 y arco +7.
+- `src/modelo/objetos/Escudo.java`: equipable con +5 defensa.
+- `src/modelo/objetos/Llave.java`, `TipoLlave.java`: llaves de puerta o cofre con codigo de cerradura; no se equipan en B-02.
+- `src/modelo/objetos/Pocion.java`: pocion de cura, cura 25 y se consume.
+- `Jugador`: inventario con `ListaDE<Objeto>`, rechazo de ids duplicados, copia defensiva de inventario, equipo de arma y escudo, regla de arco a dos manos, uso de pocion de cura y calculo de ataque/defensa total.
+- Tests nuevos: `ListaDETest`, `ObjetoTest`, `JugadorInventarioTest`.
+
+### Tests
+
+Tests JUnit creados o actualizados:
+
+- `test/Estructuras/ListaDETest.java`
+- `test/modelo/objetos/ObjetoTest.java`
+- `test/modelo/personajes/JugadorInventarioTest.java`
+
+Pruebas ejecutadas:
+
+- Compilacion completa de `src` con `javac`: correcta.
+- Compilacion de tests con JUnit en classpath: genero clases correctamente, aunque `javac` volvio a mostrar una excepcion interna de permisos al cerrar el jar de JUnit en `.m2`.
+- Ejecucion por reflexion de todos los tests compilados tras ampliar cobertura de objetos: 105 tests ejecutados, 0 fallos.
+- Busqueda de colecciones prohibidas: sin usos reales nuevos; solo menciones en comentarios existentes.
+
+### Revision independiente
+
+Resultado: revisado por agente independiente.
+
+Hallazgos:
+
+- El revisor marco que `src/Estructuras/` estaba fuera del alcance estandar de B-02.
+- Se resolvio documentando en `TASKS.md` la autorizacion explicita de Guillermo para traer y adaptar `ListaDE`, `ElementoDE` e `IteradorDE`.
+- No se detectaron bugs funcionales ni uso de colecciones prohibidas.
+- El revisor considero funcionalmente aceptable la implementacion de inventario, objetos, equipo, copia defensiva y colisiones de id con tipo distinto.
+
+### Pendiente
+
+- B-02 queda pendiente de revision de PR antes de marcarla como `HECHA`.
+- Ejecutar/confirmar tests en IntelliJ si se quiere cobertura visual.
+- Preparar commit, push y PR solo con autorizacion humana.
+- Mantener para B-03: turnos, combate, invisibilidad por turnos, drops, cofres, recoger objetos del mapa, integracion con JSON/JavaFX y regla del 75%.
+
+### Riesgos
+
+- `build/` quedo generado localmente por las compilaciones y no debe incluirse en commit.
+- La ejecucion de tests fuera de IntelliJ sigue teniendo la limitacion del aviso interno de `javac` al cerrar el jar de JUnit, aunque los tests se ejecutaron correctamente por reflexion.
+- La integracion futura con JSON debera mapear las configuraciones de objetos a estas clases sin mezclar reglas de juego en `src/json`.
