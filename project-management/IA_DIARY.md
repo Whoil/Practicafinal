@@ -316,3 +316,52 @@ El Agente Revisor Independiente recomendo aceptar sin bloqueos. La nota de compa
 ### Critica
 
 La sesion fue util para ajustar el trabajo al PDF: primero contratos y alcance, luego implementacion. El principal cuidado fue actualizar la rama con los cambios recientes de Parte A y Parte C antes de preparar la PR, porque `main` habia incorporado JSON, Gson, documentos actualizados y tests de otra parte. Tambien conviene mantener la disciplina de no mezclar B-01 con objetos, combate o turnos aunque parezcan cercanos.
+
+## 2026-05-22 - Guillermo
+
+### Agente o herramienta
+
+Codex / Agente B Logica.
+
+### Objetivo
+
+Iniciar e implementar la tarea `B-02 Modelo de objetos e inventario`, manteniendo el alcance separado de B-03 y revisando antes los dos PDF del proyecto.
+
+### Prompt o resumen del prompt
+
+Guillermo pidio empezar la sesion del dia revisando GitHub y `project-management`, despues leer los dos PDF del proyecto para comprobar que estaba hecho y que faltaba en Parte B. Tras confirmar que B-01 estaba cubierta y que B-02 debia centrarse en objetos e inventario, Guillermo pidio decidir el alcance punto por punto antes de programar.
+
+Se acordo incluir `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo` y `Llave`; permitir objetos del mismo tipo si tienen ids distintos; rechazar ids duplicados; usar ranuras separadas de arma y escudo; hacer que el arco ocupe las dos manos; dejar llaves sin equipar; implementar solo pocion de cura; y dejar drops, cofres, mapa, JSON, JavaFX, turnos, combate, invisibilidad y regla del 75% fuera de B-02.
+
+### Resultado
+
+Se implemento la base de B-02:
+
+- `ListaDE`, `ElementoDE` e `IteradorDE` traidos desde las estructuras del grupo.
+- `ListaDE` adaptada para no exigir `Comparable`, usando `equals`, porque el inventario necesita guardar objetos sin orden natural.
+- Paquete `modelo.objetos` con `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` y `TipoLlave`.
+- `Jugador` ampliado con inventario `ListaDE<Objeto>`, equipo de arma/escudo, ataque/defensa total, uso de pocion de cura y reglas de duplicados por id.
+- Tests JUnit nuevos para `ListaDE`, objetos e inventario/equipo del jugador.
+- Revision independiente completada sin bloqueos funcionales.
+- Verificacion local por reflexion: 105 tests ejecutados, 0 fallos.
+
+### Cambios aceptados
+
+- Incluir `Arco` y `Escudo` en B-02.
+- Permitir objetos repetidos por tipo pero no duplicar el mismo `id`.
+- Arco a dos manos: al equiparlo desequipa el escudo y bloquea equipar escudo mientras siga equipado.
+- Llaves no equipables: quedan en inventario con tipo y codigo de cerradura.
+- Pocion de cura de 25 puntos consumible.
+- `getInventario()` devuelve copia defensiva.
+
+### Cambios rechazados o modificados
+
+- No se implementa pocion de invisibilidad porque depende de turnos y ataques enemigos.
+- No se implementan drops, cofres ni recoger del suelo porque dependen de combate/mapa.
+- No se integra con JSON ni JavaFX en B-02.
+- No se implementa combate, turnos ni regla del 75%.
+- El revisor independiente marco que `src/Estructuras/` estaba fuera del alcance normal de B-02; se documento la autorizacion expresa de Guillermo en `TASKS.md`.
+
+### Critica
+
+La sesion fue util para frenar antes de programar y cerrar decisiones pequenas pero importantes: especialmente equipo por ranuras, arco a dos manos y llaves sin equipar. El principal ajuste fue traer `ListaDE` desde las estructuras del grupo sin mantener `Comparable`, porque exigir orden natural a `Objeto` habria sido artificial. Para futuras sesiones conviene mantener esta misma disciplina: decidir primero, implementar despues, y documentar cualquier excepcion de alcance compartido antes del commit.
