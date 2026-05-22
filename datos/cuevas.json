@@ -16,7 +16,7 @@
       ],
       "enemigos": [
         {
-          "tipo": "NORMAL",
+          "tipo": "ESQUELETO",
           "fila": 3,
           "columna": 1,
           "vida": 30,
@@ -28,11 +28,22 @@
       "objetos": [
         {
           "tipo": "POCION",
+          "id": "pocion-facil-1",
           "fila": 2,
           "columna": 3,
           "nombre": "Pocion de vida",
           "descripcion": "Recupera 25 puntos de vida",
           "cura": 25
+        },
+        {
+          "tipo": "LLAVE",
+          "id": "llave-cueva-media",
+          "fila": 3,
+          "columna": 3,
+          "nombre": "Llave de la cueva media",
+          "descripcion": "Abre la puerta hacia la cueva media",
+          "tipoLlave": "PUERTA",
+          "codigoCerradura": "llave-cueva_media"
         }
       ]
     },
@@ -52,7 +63,7 @@
       ],
       "enemigos": [
         {
-          "tipo": "NORMAL",
+          "tipo": "ESQUELETO",
           "fila": 1,
           "columna": 2,
           "vida": 35,
@@ -61,7 +72,7 @@
           "movimiento": 2
         },
         {
-          "tipo": "NORMAL",
+          "tipo": "ORCO",
           "fila": 4,
           "columna": 3,
           "vida": 40,
@@ -73,10 +84,13 @@
       "objetos": [
         {
           "tipo": "LLAVE",
+          "id": "llave-cueva-dificil",
           "fila": 3,
           "columna": 3,
           "nombre": "Llave de la puerta final",
-          "descripcion": "Abre la puerta de la cueva dificil"
+          "descripcion": "Abre la puerta de la cueva dificil",
+          "tipoLlave": "PUERTA",
+          "codigoCerradura": "llave-cueva_dificil"
         }
       ]
     },
@@ -100,15 +114,16 @@
           "tipo": "BOSS",
           "fila": 3,
           "columna": 3,
-          "vida": 100,
+          "vida": 150,
           "ataque": 20,
-          "defensa": 10,
-          "movimiento": 3
+          "defensa": 5,
+          "movimiento": 2
         }
       ],
       "objetos": [
         {
           "tipo": "POCION",
+          "id": "pocion-dificil-1",
           "fila": 1,
           "columna": 5,
           "nombre": "Pocion grande",
@@ -117,8 +132,9 @@
         },
         {
           "tipo": "ESCUDO",
+          "id": "escudo-dificil-1",
           "fila": 4,
-          "columna": 4,
+          "columna": 5,
           "nombre": "Escudo de madera",
           "descripcion": "Aumenta la defensa en 8 puntos",
           "defensa": 8

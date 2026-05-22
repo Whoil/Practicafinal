@@ -10,20 +10,23 @@ import modelo.juego.Mazmorra;
  * celdas y conexiones del grafo) ademas de las configuraciones de
  * enemigos y objetos extraidas del JSON.
  *
- * Parte B usara las listas de enemigos y objetos para instanciar los
- * personajes y objetos del juego cuando llegue el momento.
+ * Parte B usa estas listas para instanciar los personajes, objetos y
+ * puertas de la partida sin mezclar reglas de juego dentro del cargador.
  */
 public class ResultadoCarga {
     private final Mazmorra mazmorra;
     private final ListaSE<ConfiguracionEnemigoDTO> enemigos;
     private final ListaSE<ConfiguracionObjetoDTO> objetos;
+    private final ListaSE<ConexionDTO> conexiones;
 
     public ResultadoCarga(Mazmorra mazmorra,
                           ListaSE<ConfiguracionEnemigoDTO> enemigos,
-                          ListaSE<ConfiguracionObjetoDTO> objetos) {
+                          ListaSE<ConfiguracionObjetoDTO> objetos,
+                          ListaSE<ConexionDTO> conexiones) {
         this.mazmorra = mazmorra;
         this.enemigos = enemigos;
         this.objetos = objetos;
+        this.conexiones = conexiones;
     }
 
     public Mazmorra getMazmorra() {
@@ -36,5 +39,9 @@ public class ResultadoCarga {
 
     public ListaSE<ConfiguracionObjetoDTO> getObjetos() {
         return objetos;
+    }
+
+    public ListaSE<ConexionDTO> getConexiones() {
+        return conexiones;
     }
 }

@@ -427,3 +427,34 @@ Se anadieron tests JUnit en `PartidaTest` y Alvaro mostro cobertura de IntelliJ 
 ### Critica
 
 La sesion corrigio una frontera de responsabilidades a tiempo: `Partida` estaba creciendo hacia tareas estructurales que ya pertenecian a `Mazmorra`. La revision independiente tambien fue util porque detecto riesgos de mutabilidad y ocupacion que podian romper la primera version jugable. Queda como aviso que esta capa todavia no esta conectada en profundidad con JSON ni JavaFX, asi que debe presentarse como base funcional de logica, no como juego cerrado.
+
+## 2026-05-22 - Guillermo
+
+### Agente o herramienta
+
+Codex-B Logica, continuando desde `feature/b-json-partida`.
+
+### Objetivo
+
+Desbloquear a Parte C con una forma simple de crear una `Partida` desde el JSON ya cargado, sin ampliar hoy combate, regla del 75% ni efectos por turnos.
+
+### Resultado
+
+Se anadio `FabricaPartida`, que recibe `ResultadoCarga`, busca la celda `INICIO`, crea el jugador base, traduce conexiones a puertas, coloca enemigos y coloca objetos en suelo. Tambien se ajustaron los DTO y el JSON de ejemplo para conservar la cueva de cada elemento y datos minimos de llaves.
+
+### Decisiones
+
+- La fabrica es estricta: configuraciones invalidas lanzan `IllegalArgumentException`.
+- Las puertas usan codigos `llave-` + id de cueva destino.
+- Los valores del jugador quedan fijos en la fabrica para esta primera version.
+- No se implementan todavia invisibilidad, regla del 75% ni guardado/carga de estado.
+
+### Pruebas
+
+Se comprobaron por terminal compilacion de `src`, compilacion de tests y ejecucion por reflexion de `CargadorConfiguracionTest` y `FabricaPartidaTest`: 21 tests, 0 fallos.
+
+La revision independiente detecto tres ajustes reales: no ignorar conexiones JSON invalidas, recolocar al jugador al cambiar de cueva y corregir las estadisticas del boss del JSON. Se aplicaron las tres correcciones y se anadieron tests de regresion.
+
+### Critica
+
+La solucion es deliberadamente pequena y util para coordinacion: evita meter reglas de juego en `src/json` y ofrece a Hector un punto de entrada claro. El coste es que `FabricaPartida` conoce DTOs de JSON desde la capa de juego, algo aceptable como adaptador inicial pero revisable cuando el guardado/carga de estado este mas definido.

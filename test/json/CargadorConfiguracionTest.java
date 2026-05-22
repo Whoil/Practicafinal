@@ -6,6 +6,9 @@ import modelo.mapa.Cueva;
 import modelo.mapa.TipoCelda;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -102,7 +105,30 @@ class CargadorConfiguracionTest {
         ListaSE<ConfiguracionEnemigoDTO> enemigos = resultado.getEnemigos();
         assertNotNull(enemigos);
         assertTrue(enemigos.getSize() > 0);
+        assertEquals("cueva_facil", enemigos.get(0).getIdCueva());
     }
+
+    @Test
+    void bossRespetaEstadisticasAcordadas() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
+
+        ConfiguracionEnemigoDTO boss = null;
+        ListaSE<ConfiguracionEnemigoDTO> enemigos = resultado.getEnemigos();
+        for (int indice = 0; indice < enemigos.getSize(); indice++) {
+            ConfiguracionEnemigoDTO enemigo = enemigos.get(indice);
+            if ("BOSS".equals(enemigo.getTipo())) {
+                boss = enemigo;
+            }
+        }
+
+        assertNotNull(boss);
+        assertEquals(150, boss.getVida());
+        assertEquals(20, boss.getAtaque());
+        assertEquals(5, boss.getDefensa());
+        assertEquals(2, boss.getMovimiento());
+    }
+
 
     @Test
     void hayObjetosEnElResultado() throws Exception {
@@ -112,11 +138,56 @@ class CargadorConfiguracionTest {
         ListaSE<ConfiguracionObjetoDTO> objetos = resultado.getObjetos();
         assertNotNull(objetos);
         assertTrue(objetos.getSize() > 0);
+        assertEquals("cueva_facil", objetos.get(0).getIdCueva());
+    }
+
+    @Test
+    void conservaConexionesParaCrearPuertasDePartida() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
+
+        assertNotNull(resultado.getConexiones());
+        assertEquals(2, resultado.getConexiones().getSize());
+        assertEquals("cueva_facil", resultado.getConexiones().get(0).getOrigen());
+        assertEquals("cueva_media", resultado.getConexiones().get(0).getDestino());
     }
 
     @Test
     void cargaConRutaInvalidaLanzaExcepcion() {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         assertThrows(Exception.class, () -> cargador.cargar("datos/no_existe.json"));
+    }
+
+    @Test
+    void rechazaConexionConCuevaInexistente() throws Exception {
+        Path ruta = Files.createTempFile("cuevas-conexion-invalida", ".json");
+        Files.writeString(ruta, """
+                {
+                  "nombre": "Mazmorra invalida",
+                  "cuevas": [
+                    {
+                      "id": "cueva_unica",
+                      "filas": 3,
+                      "columnas": 3,
+                      "matriz": [
+                        ["MURO", "MURO", "MURO"],
+                        ["MURO", "INICIO", "MURO"],
+                        ["MURO", "MURO", "MURO"]
+                      ]
+                    }
+                  ],
+                  "conexiones": [
+                    {
+                      "origen": "cueva_unica",
+                      "destino": "cueva_fantasma",
+                      "etiqueta": "puerta_rota"
+                    }
+                  ]
+                }
+                """);
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> new CargadorConfiguracion().cargar(ruta.toString()));
+        assertTrue(error.getMessage().contains("Conexion invalida"));
     }
 }

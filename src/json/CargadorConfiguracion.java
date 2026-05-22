@@ -19,8 +19,8 @@ import modelo.mapa.TipoCelda;
  * a las clases reales del juego: Cueva, Mazmorra y conexiones del grafo.
  *
  * Las configuraciones de enemigos y objetos se devuelven en el
- * ResultadoCarga para que Parte B las use cuando implemente personajes,
- * inventario y objetos del juego.
+ * ResultadoCarga para que Parte B monte la Partida real sin meter reglas
+ * de juego dentro de la capa JSON.
  */
 public class CargadorConfiguracion {
 
@@ -45,6 +45,7 @@ public class CargadorConfiguracion {
         ListaSE<ConfiguracionCuevaDTO> cuevasDTO = new ListaSE<>();
         ListaSE<ConfiguracionEnemigoDTO> todosEnemigos = new ListaSE<>();
         ListaSE<ConfiguracionObjetoDTO> todosObjetos = new ListaSE<>();
+        ListaSE<ConexionDTO> todasConexiones = new ListaSE<>();
 
         ConfiguracionCuevaDTO[] cuevasArray = config.getCuevas();
         if (cuevasArray == null || cuevasArray.length == 0) {
@@ -78,11 +79,13 @@ public class CargadorConfiguracion {
              */
             if (cuevaDTO.getEnemigos() != null) {
                 for (ConfiguracionEnemigoDTO enemigo : cuevaDTO.getEnemigos()) {
+                    enemigo.setIdCueva(cuevaDTO.getId());
                     todosEnemigos.addLast(enemigo);
                 }
             }
             if (cuevaDTO.getObjetos() != null) {
                 for (ConfiguracionObjetoDTO objeto : cuevaDTO.getObjetos()) {
+                    objeto.setIdCueva(cuevaDTO.getId());
                     todosObjetos.addLast(objeto);
                 }
             }
@@ -97,13 +100,16 @@ public class CargadorConfiguracion {
             for (ConexionDTO conexion : conexiones) {
                 Cueva origen = mazmorra.getCuevaPorId(conexion.getOrigen());
                 Cueva destino = mazmorra.getCuevaPorId(conexion.getDestino());
-                if (origen != null && destino != null) {
-                    mazmorra.conectarCuevas(origen, destino, conexion.getEtiqueta());
+                if (origen == null || destino == null) {
+                    throw new IllegalArgumentException("Conexion invalida en JSON: "
+                            + conexion.getOrigen() + " -> " + conexion.getDestino());
                 }
+                mazmorra.conectarCuevas(origen, destino, conexion.getEtiqueta());
+                todasConexiones.addLast(conexion);
             }
         }
 
-        return new ResultadoCarga(mazmorra, todosEnemigos, todosObjetos);
+        return new ResultadoCarga(mazmorra, todosEnemigos, todosObjetos, todasConexiones);
     }
 
     /**
