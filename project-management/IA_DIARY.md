@@ -412,3 +412,55 @@ La tarea salio segun lo planeado. El haber descargado JUNIT standalone
 permitio ejecutar tests desde terminal, lo que no se pudo en C-01. Para
 proximas sesiones, mantener el standalone en lib/ para poder seguir
 ejecutando tests sin IntelliJ.
+
+## 2026-05-22 - Hector (sesion 4)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Planificar C-03: boceto de la interfaz JavaFX.
+
+### Prompt o resumen del prompt
+
+Hector pidio planificar C-03 siguiendo todos los requisitos del proyecto.
+Se revisaron PRD.md, ARCHITECTURE.md, DECISIONS.md, AGENTS.md,
+GITHUB_WORKFLOW.md, TASKS.md y las clases del modelo (InterfazCueva,
+InterfazMazmorra, TipoCelda, Jugador, Objeto, etc.).
+
+### Resultado
+
+- Creado `docs/BOCETO_JAVAFX.md` con:
+  - Layout ASCII completo (5 zonas: matriz, estado, inventario, acciones, log).
+  - Tabla de simbolos y colores por TipoCelda.
+  - Descripcion detallada de cada zona y su mapeo a componentes JavaFX.
+  - Flujo de datos desde Partida a cada panel.
+  - Estructura de clases propuesta para C-04 (7 clases).
+  - Contrato minimo que Partida debe exponer.
+  - Estrategia de mock para C-04 si B-03 no esta listo.
+  - Checklist de verificacion.
+
+### Cambios aceptados
+
+- Layout con matriz a la izquierda, estado+inventario a la derecha,
+  acciones debajo del inventario, log en la parte inferior.
+- Clic en celda de la matriz como alternativa a botones direccionales.
+- Botones contextuales (Atacar solo si hay enemigo adyacente, etc.).
+- Mock de Partida para C-04 si B-03 no esta listo.
+
+### Cambios rechazados o modificados
+
+- No se incluyen animaciones ni transiciones (extra congelado en PRD).
+- No se incluyen Arco ni escondite en acciones (extra congelado).
+- El boceto no entra en detalles de estilos CSS ni tamanos exactos de
+  ventana; eso se decidira en C-04.
+
+### Critica
+
+La planificacion previa es util para que el grupo valide el diseno antes
+de implementar. El contrato con Partida queda explicito, lo que deberia
+facilitar la coordinacion con Parte B. Para la siguiente sesion (C-04)
+habra que descargar las librerias JavaFX (openjfx) para el JDK 25 y
+verificar que el mock de Partida es suficiente para probar la interfaz.

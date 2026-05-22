@@ -942,3 +942,64 @@ C-02 Cargar y guardar partida.
 ### Estado de TASKS.md
 
 C-02 pasa a REVISION.
+
+## 2026-05-22 - Hector / Parte C - Planificar C-03 Boceto JavaFX
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C - JavaFX, JSON y documentacion
+Agente: Agente C JavaFX/JSON/Docs
+
+### Contexto
+
+Sesion de planificacion de C-03. Se revisan todos los documentos del proyecto
+(PRD, ARCHITECTURE, DECISIONS, AGENTS, GITHUB_WORKFLOW, TASKS) y las clases
+del modelo existentes para disenar el boceto de la interfaz JavaFX.
+
+### Sincronizacion
+
+Rama: `feature/c-javafx-json-docs`
+Cambio remoto revisado: ningun cambio nuevo en origin/main.
+Rama al dia con origin/main.
+
+### Tarea trabajada
+
+C-03 Boceto JavaFX (planificacion).
+
+### Cambios
+
+- Creado `docs/BOCETO_JAVAFX.md` con:
+  - Layout ASCII de la ventana completa con 5 zonas.
+  - Tabla de colores por TipoCelda para la matriz.
+  - Descripcion detallada de cada zona: matriz (GridPane), estado, inventario, acciones, log.
+  - Flujo de datos desde Partida hasta cada panel.
+  - Estructura de clases propuesta para C-04 (6 clases en src/vista/, 1 en src/controlador/).
+  - Contrato minimo que Partida (B-03) debe exponer para que JavaFX funcione.
+  - Estrategia de mock para C-04 si B-03 no esta listo.
+  - Checklist de verificacion.
+- Actualizado TASKS.md: C-03 -> EN_CURSO.
+
+### Archivos modificados
+
+- `docs/BOCETO_JAVAFX.md` (nuevo)
+- `project-management/TASKS.md` (C-03 -> EN_CURSO)
+- `project-management/SCRATCHPAD.md` (actualizado)
+- `project-management/IA_DIARY.md` (pendiente)
+
+### Pruebas ejecutadas
+
+No aplica (solo documentacion).
+
+### Riesgos
+
+- C-03 es solo un boceto. C-04 implementara el codigo JavaFX real.
+- La implementacion de C-04 puede necesitar ajustes cuando B-03 implemente
+  Partida, especialmente en los nombres y parametros de los metodos.
+- Si B-03 no esta listo para C-04, se usara un PartidaMock con datos fijos.
+- JavaFX no esta en el JDK 25; habra que descargar las librerias JavaFX
+  (openjfx) cuando se implemente C-04.
+
+### Estado de TASKS.md
+
+C-03 pasa a EN_CURSO.

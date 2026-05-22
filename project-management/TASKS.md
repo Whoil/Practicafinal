@@ -35,6 +35,14 @@ HECHA
 - Archivos permitidos: `src/json/`, `test/`, `project-management/`
 - Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
 
+### C-03 Boceto JavaFX
+
+- Responsable: Hector / Parte C
+- Estado: EN_CURSO
+- Archivos permitidos: `docs/`, `project-management/`
+- Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
+- Verificacion: documento `docs/BOCETO_JAVAFX.md` creado con layout, zonas, mapeo de componentes, flujo de datos y contrato con Partida.
+
 ## Peticiones urgentes entre partes
 
 Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revisarla al inicio de sesion.
@@ -90,9 +98,10 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### C-03 Boceto JavaFX
 
 - Responsable: Hector / Parte C
-- Estado: PENDIENTE
+- Estado: EN_CURSO
 - Archivos permitidos: `docs/`, `project-management/`
 - Terminado cuando haya boceto de pantalla con matriz, estado, acciones, inventario y log.
+- Verificacion: documento `docs/BOCETO_JAVAFX.md` con layout ASCII, zonas detalladas, mapeo a componentes JavaFX, flujo de datos y contrato minimo de Partida.
 
 ### C-04 JavaFX minima
 
