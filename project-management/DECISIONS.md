@@ -256,13 +256,14 @@ Mover o actuar no finaliza automaticamente el turno. Aun asi, la partida puede c
 
 ## D-18 Victoria
 
-Decision:
+Decision (actualizada 2026-05-22):
 
 ```text
-El jugador gana al conseguir la llave final.
+El jugador gana al derrotar al boss final, conseguir la llave final
+y situarse sobre una celda SALIDA para escapar.
 ```
 
-La llave final solo se obtiene derrotando al boss final. La implementacion inicial puede representar esta llave como una `Llave` especial entregada al matar al boss.
+La llave final solo se obtiene derrotando al boss final. Una vez que el jugador tiene la llave final y pisa una celda `SALIDA`, `comprobarVictoriaODerrota()` activa el estado `VICTORIA`.
 
 ## D-19 Log de partida
 

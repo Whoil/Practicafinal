@@ -1544,3 +1544,65 @@ Rama:
 - La suite sigue en rojo por 15 tests desactualizados respecto a los nuevos datos.
 - Hay cambios previos de opencode sin commit en varios archivos de vista, datos y documentacion.
 - No se hizo commit ni push; pedir autorizacion explicita antes de hacerlo.
+
+## 2026-05-23 - Cierre de sesion con Alvaro / Ajuste de tareas
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Coordinacion de tareas y comprobacion de demo
+Agente: Codex
+
+### Sincronizacion
+
+Rama: no cambiada durante la sesion
+Cambio remoto revisado: no
+Rama actualizada con `origin/main`: no
+Documentos leidos: `project-management/TASKS.md`, `project-management/SCRATCHPAD.md`
+
+### Tareas trabajadas
+
+- Se ejecuto el juego mediante `scripts/run.ps1` en ventana visible.
+- Se centralizo la lista de tareas en `project-management/TASKS.md`.
+- Se elimino `tareas.md` para evitar dos fuentes de verdad.
+- Se anadieron tareas nuevas de pulido audiovisual y accesibilidad.
+
+### Archivos modificados
+
+- `project-management/TASKS.md`
+- `project-management/SCRATCHPAD.md`
+- `tareas.md` eliminado
+
+### Cambios realizados
+
+- `project-management/TASKS.md` queda como lista oficial de tareas.
+- Anadidas subtareas:
+  - `C-09.7`: SFX cortos para recoger objeto, ataque y dano.
+  - `C-09.8`: transiciones fade in/out entre pantallas.
+  - `C-09.9`: alertas visuales temporales con textos flotantes de dano y cura.
+  - `C-09.10`: modo antorcha / filtro de contraste accesible con CSS dinamico.
+
+### Tests
+
+Tests JUnit creados o actualizados: no
+Tests ejecutados: no
+Resultado: no aplica
+Si no se ejecutaron, motivo: solo se modifico documentacion de tareas.
+
+### Commits y push
+
+Commit realizado: no
+Hash:
+Push realizado: no
+Rama:
+
+### Pendiente para la siguiente sesion
+
+- Revisar el estado actual del arbol de trabajo antes de commitear, porque hay mas cambios locales ademas de `TASKS.md`.
+- Implementar o priorizar las nuevas subtareas C-09.7 a C-09.10.
+- Mantener `project-management/TASKS.md` como unica lista oficial.
+
+### Riesgos o avisos
+
+- Hay cambios locales sin commit en varios archivos del proyecto.
+- `tareas.md` fue eliminado intencionadamente para evitar duplicidad.

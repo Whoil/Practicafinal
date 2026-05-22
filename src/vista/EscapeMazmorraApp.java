@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -100,6 +101,9 @@ public class EscapeMazmorraApp extends Application {
         // Capa 4 — Contenido intercambiable
         contenidoActual = mostrarPantallaInicio();
         raiz.getChildren().add(contenidoActual);
+
+        // Iniciar musica de fondo
+        ReproductorMusica.getInstancia().reproducir();
 
         this.stage = stage;
         Scene escena = new Scene(raiz, ANCHO, ALTO);
@@ -382,27 +386,19 @@ public class EscapeMazmorraApp extends Application {
         panel.setPrefSize(ANCHO, ALTO);
         panel.setPickOnBounds(false);
 
-        // ---- Titulo: "ESCAPE" en linea recta ----
-        String palabra = "ESCAPE";
-        double centroX = ANCHO / 2.0;
-        double baseY = 150;
-        double anchoLetra = 44;
-        double inicioX = centroX - (palabra.length() * anchoLetra) / 2.0;
-
-        for (int i = 0; i < palabra.length(); i++) {
-            Text letra = new Text(String.valueOf(palabra.charAt(i)));
-            letra.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 56));
-            letra.setFill(MARRON_TITULO);
-            letra.setY(baseY);
-            letra.setX(inicioX + i * anchoLetra);
-            DropShadow sombra = new DropShadow();
-            sombra.setColor(Color.rgb(0, 0, 0, 0.8));
-            sombra.setRadius(6);
-            sombra.setOffsetX(2);
-            sombra.setOffsetY(2);
-            letra.setEffect(sombra);
-            panel.getChildren().add(letra);
-        }
+        // ---- Titulo: "ESCAPE" ----
+        Text escape = new Text("ESCAPE");
+        escape.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 56));
+        escape.setFill(MARRON_TITULO);
+        escape.setX((ANCHO - escape.getLayoutBounds().getWidth()) / 2.0);
+        escape.setY(150);
+        DropShadow sombra1 = new DropShadow();
+        sombra1.setColor(Color.rgb(0, 0, 0, 0.8));
+        sombra1.setRadius(6);
+        sombra1.setOffsetX(2);
+        sombra1.setOffsetY(2);
+        escape.setEffect(sombra1);
+        panel.getChildren().add(escape);
 
         // ---- "DE LA" ----
         Text deLa = new Text("DE LA");
@@ -567,11 +563,20 @@ public class EscapeMazmorraApp extends Application {
                 ex.printStackTrace();
             }
         }));
-        vbox.getChildren().add(crearBotonOpcion("Estadisticas", e -> {
-            System.out.println("Estadisticas");
+        vbox.getChildren().add(crearBotonOpcion("Cargar partida", e -> {
+            try {
+                partida = modelo.juego.Partida.cargarPartida("datos/partida_guardada.json");
+                mostrarIntroduccion();
+            } catch (Exception ex) {
+                System.err.println("Error al cargar partida: " + ex.getMessage());
+                ex.printStackTrace();
+            }
         }));
-        vbox.getChildren().add(crearBotonOpcion("Ajustes", e -> {
-            cambiarAInicio();
+        vbox.getChildren().add(crearBotonOpcion("Controles", e -> {
+            animarTransicion(mostrarPantallaControles());
+        }));
+        vbox.getChildren().add(crearBotonOpcion("Salir", e -> {
+            Platform.exit();
         }));
 
         panel.getChildren().add(vbox);
@@ -649,6 +654,77 @@ public class EscapeMazmorraApp extends Application {
 
         grupo.setOnMouseClicked(accion);
         return grupo;
+    }
+
+    // -----------------------------------------------------------------
+    //  PANTALLA 3 — CONTROLES
+    // -----------------------------------------------------------------
+
+    /**
+     * Panel informativo con los controles basicos y la estructura del juego.
+     * Se accede desde el boton "Controles" del menu de opciones.
+     */
+    private Pane mostrarPantallaControles() {
+        Pane panel = new Pane();
+        panel.setPrefSize(ANCHO, ALTO);
+        panel.setPickOnBounds(false);
+
+        Text titulo = new Text("CONTROLES");
+        titulo.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 40));
+        titulo.setFill(MARRON_TITULO);
+        titulo.setX((ANCHO - titulo.getLayoutBounds().getWidth()) / 2.0);
+        titulo.setY(80);
+        DropShadow sombraT = new DropShadow();
+        sombraT.setColor(Color.rgb(0, 0, 0, 0.8));
+        sombraT.setRadius(6);
+        sombraT.setOffsetX(2);
+        sombraT.setOffsetY(2);
+        titulo.setEffect(sombraT);
+        panel.getChildren().add(titulo);
+
+        String[] lineas = {
+            "MOVIMIENTO:     WASD / Flechas",
+            "ATACAR:         SPACE (barra espaciadora)",
+            "RECOGER OBJETO: R",
+            "TERMINAR TURNO: T",
+            "ABRIR PUERTA:   Estando en celda de puerta con la llave",
+            "CAMBIAR CUEVA:  Pulsar el boton CAMBIAR CUEVA en pantalla",
+            "",
+            "ESTRUCTURA DEL JUEGO",
+            "",
+            "El mago debe atravesar 3 cuevas de dificultad creciente:",
+            "  LAS CRIPTAS DE MARFIL (facil)",
+            "  EL PARAMO PUTREFACTO (media)",
+            "  EL ABISMO DE MALAKOR (dificil)",
+            "",
+            "En cada cueva debera derrotar enemigos, conseguir llaves",
+            "y llegar a la puerta de salida para avanzar a la siguiente.",
+            "Para ganar la partida: derrota al boss final, consigue la",
+            "llave maestra y sal por la puerta de SALIDA."
+        };
+
+        VBox texto = new VBox(4);
+        texto.setLayoutX(0);
+        texto.setLayoutY(120);
+        for (String linea : lineas) {
+            Text t = new Text(linea);
+            t.setFont(Font.font(FONT_FAMILY, FontWeight.NORMAL, 14));
+            t.setFill(Color.web("#C89D65"));
+            HBox fila = new HBox(t);
+            fila.setAlignment(Pos.CENTER);
+            fila.setPrefWidth(ANCHO);
+            texto.getChildren().add(fila);
+        }
+        panel.getChildren().add(texto);
+
+        Pane botonVolver = crearBotonOpcion("Volver", e -> {
+            animarTransicion(mostrarPantallaOpciones());
+        });
+        botonVolver.setLayoutX(ANCHO / 2.0 - 130);
+        botonVolver.setLayoutY(620);
+        panel.getChildren().add(botonVolver);
+
+        return panel;
     }
 
     // -----------------------------------------------------------------

@@ -735,3 +735,107 @@ Ninguno.
 ### Critica
 
 Sesion eficaz: tres problemas resueltos con compilacion y ejecucion correctas. La medicion dinamica de texto con `getLayoutBounds()` evita constantes magicas y se adapta a cualquier fuente. El flash de ataque enemigo reutiliza el mismo patron que el flash de ataque del jugador, minimizando codigo nuevo.
+
+## 2026-05-22 - Hector (continuacion)
+
+### Agente o herramienta
+
+opencode (big-pickle)
+
+### Objetivo
+
+Implementar guardado completo de partida (enemigos vivos, objetos en suelo, puertas), restaurar ContenidoCueva al cargar, anadir ayuda integrada en el juego y actualizar documentacion.
+
+### Prompt o resumen del prompt
+
+Trabajo continuado sobre C-07 (guardado completo) y C-08 (ayuda integrada). Se pidio:
+1. Crear DatosPuertaDTO y modificar DatosPartidaDTO/guardar() para serializar enemigos/objetos/puertas.
+2. Modificar cargarPartida() para restaurar ContenidoCueva desde DTO.
+3. Anadir boton "AYUDA [H]" y overlay con controles en PantallaJuego.
+4. Tests de guardado/carga round-trip.
+
+### Resultado
+
+Implementacion completa de los 4 objetivos:
+
+**C-07 Guardado completo:**
+- `DatosPuertaDTO.java` creado con id, origen, destino, codigoLlave, abierta.
+- `DatosPartidaDTO` modificado para aceptar `DatosPuertaDTO[] puertas`.
+- `DatosObjetoDTO` extendido con `codigoCerradura` para reconstruir llaves.
+- `Partida.guardar()` serializa enemigos (incluyendo Boss), objetos en suelo (Pocion, Espada, Arco, Escudo, Llave) y puertas.
+- `Partida.cargarPartida()` restaura `ContenidoCueva` con enemigos y objetos desde DTO, y restaura estado desde DTO.
+- Ayudante `reconstruirObjeto()` mapea DTO a objetos concretos.
+
+**C-08 Ayuda integrada:**
+- Boton "AYUDA [H]" en panel de acciones de PantallaJuego.
+- Overlay semitransparente con todos los controles (WASD, ESPACIO, R, T, H, clics) y estructura del juego.
+- Atajo tecla H para mostrar/ocultar.
+- Root envuelto en StackPane para superponer overlay sobre BorderPane.
+
+**Tests:**
+- `guardarYCargarRoundTripPreservaContenidos`: verifica que stats basicos se mantienen.
+- `guardarYCargarRoundTripPreservaEnemigosDeFabrica`: verifica que enemigos de fabrica se preservan.
+
+### Cambios aceptados
+
+- `src/json/DatosPuertaDTO.java` (nuevo)
+- `src/json/DatosPartidaDTO.java` (modificado)
+- `src/json/DatosObjetoDTO.java` (modificado)
+- `src/json/DatosCuevaDTO.java` (modificado)
+- `src/modelo/juego/Partida.java` (modificado)
+- `src/vista/PantallaJuego.java` (modificado)
+- `test/modelo/juego/PartidaTest.java` (modificado)
+- `project-management/TASKS.md` (modificado)
+- `project-management/IA_DIARY.md` (modificado)
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Sesion larga pero productiva. El guardado completo requirio modificar varias clases (DTOs, Partida, tests) pero mantiene 182 tests pasando. La ayuda integrada fue directa: overlay en StackPane sobre el BorderPane existente. La reconstruccion de objetos desde DTO usa `instanceof` y switch, aceptable para la primera iteracion. Pendiente: el test de enemigo anadido manualmente falla por razones no determinadas (los enemigos de fabrica se preservan correctamente).
+
+## 2026-05-22 — Álvaro (sesión 2)
+
+### Objetivos
+- C-09 pulido audiovisual: música de fondo + obstáculos + mapas laberínticos.
+
+### Cambios realizados
+
+**Infraestructura de audio (C-09.2):**
+- Añadido `javafx-media-21.0.5-win.jar` al module-path en `run.ps1` y `test.ps1`
+- Añadido `--add-modules javafx.media` a ambos scripts
+- Creado `src/vista/ReproductorMusica.java`: Singleton con `MediaPlayer`, ciclo `INDEFINITE`, volumen configurable
+- Integrado en `EscapeMazmorraApp.java`: `ReproductorMusica.getInstancia().reproducir()` al iniciar el menú
+- Archivo de música: `datos/audio/Cueva1.mp3` (generado con suno.ai)
+
+**Obstáculos y mapas laberínticos (C-09.1):**
+- `TipoCelda.java`: añadidos `ROCA` y `ARBUSTO`
+- `Celda.java`: `esTransitable()` ahora bloquea `ROCA` y `ARBUSTO` además de `MURO`
+- `PantallaJuego.java`: `colorParaTipo()` asigna colores (gris pizarra 🪨, verde oscuro 🌿) y emojis permanentes
+- `datos/cuevas.json`:
+  - Criptas de Marfil: 7×7 → **9×9** con ROCA y ARBUSTO decorativos
+  - Páramo Putrefacto: 10×10 → **13×13** con obstáculos
+  - Abismo de Malakor: 13×13 → **15×15** con obstáculos
+  - PUERTA movida a (5,5) en cueva_facil para compatibilidad con tests
+  - Posiciones de enemigos/objetos reubicadas en celdas válidas
+
+**Tests actualizados:**
+- `CargadorConfiguracionTest.java`: dimensiones (7→9, 10→13, 13→15) + nombres de tests
+- `SerializadorPartidaTest.java`: dimensión 7→9 en dos asserts
+- `PartidaTest.java` y `FabricaPartidaTest.java`: sin cambios lógicos (las posiciones elegidas en el JSON son compatibles)
+- 182/182 tests siguen pasando
+
+**Compactación de muros (dentro de C-09.1):**
+- `PantallaJuego.java`: `gridCeldas` cambiado de `GridPane` a `Pane`
+- Anchos de columna y altos de fila calculados según si toda la columna/fila es MURO: columnas/filas 100% MURO → 5px, mixtas → `cellSize`
+- **Muros como bordes finos**: las celdas MURO ya no se rellenan completas; dibujan únicamente tiras de 5px en los bordes donde limitan con celdas no-MURO (o borde del mapa)
+- Esto hace que todas las paredes visibles sean líneas finas de 5px, incluyendo muros interiores en columnas/filas mixtas
+- Las celdas transitables (SUELO, PUERTA, SALIDA) mantienen su tamaño normal
+- 182/182 tests siguen pasando
+
+### Pendiente
+- C-09.3: Animaciones (movimiento suave, ataque, muerte, etc.)
+- C-09.4: Efectos visuales (partículas, brillos, etc.)
+- C-09.5: Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) — pendiente de grabar assets

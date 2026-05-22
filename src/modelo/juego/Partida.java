@@ -6,7 +6,14 @@ import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import Estructuras.MiIterador;
 import json.CargadorConfiguracion;
+import json.ConexionDTO;
+import json.DatosCuevaDTO;
+import json.DatosEnemigoDTO;
+import json.DatosMazmorraDTO;
+import json.DatosObjetoDTO;
 import json.DatosPartidaDTO;
+import json.DatosPuertaDTO;
+import json.DatosJugadorDTO;
 import json.ResultadoCarga;
 import json.SerializadorPartida;
 import modelo.mapa.Celda;
@@ -22,6 +29,8 @@ import modelo.objetos.TipoLlave;
 import modelo.personajes.Boss;
 import modelo.personajes.Enemigo;
 import modelo.personajes.Jugador;
+import modelo.personajes.TipoEnemigo;
+import modelo.objetos.Espada;
 
 
 
@@ -697,7 +706,6 @@ public class Partida implements InterfazPartida {
             jugador.agregarObjeto(new Llave(generarIdLlaveFinal(), TipoLlave.PUERTA, codigoLlaveFinal));
             registrarLog("Llave final conseguida");
         }
-        estado = EstadoPartida.VICTORIA;
     }
 
     private String generarIdLlaveFinal() {
@@ -718,9 +726,9 @@ public class Partida implements InterfazPartida {
         if (estado == EstadoPartida.VICTORIA) {
             return;
         }
-        if (tieneLlaveFinal()) {
+        if (tieneLlaveFinal() && jugadorEstaSobreTipo(TipoCelda.SALIDA)) {
             estado = EstadoPartida.VICTORIA;
-            registrarLog("Victoria: el jugador tiene la llave final");
+            registrarLog("Victoria: el jugador sale por la puerta con la llave final");
         } else if (!jugador.estaVivo() || turnosRestantes <= 0) {
             estado = EstadoPartida.DERROTA;
             registrarLog("Derrota");
@@ -799,6 +807,101 @@ public class Partida implements InterfazPartida {
         ResultadoCarga resultado = cargador.cargar("datos/cuevas.json");
         FabricaPartida fabrica = new FabricaPartida();
         return fabrica.crearPartida(resultado);
+    }
+
+    public static Partida cargarPartida(String ruta) throws IOException {
+        DatosPartidaDTO dto = SerializadorPartida.cargar(ruta);
+        Mazmorra mazmorra = SerializadorPartida.dtoAMazmorra(dto.getMazmorra());
+        Jugador jugador = SerializadorPartida.dtoAJugador(dto.getJugador());
+        int turnosRestantes = dto.getTurnosRestantes();
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        if (dto.getMazmorra().getConexiones() != null) {
+            for (ConexionDTO conexion : dto.getMazmorra().getConexiones()) {
+                Cueva origen = mazmorra.getCuevaPorId(conexion.getOrigen());
+                Cueva destino = mazmorra.getCuevaPorId(conexion.getDestino());
+                if (origen != null && destino != null && mazmorra.existeConexion(origen, destino)) {
+                    String idPuerta = conexion.getEtiqueta();
+                    if (idPuerta == null || idPuerta.trim().isEmpty()) {
+                        idPuerta = "puerta-" + origen.getId() + "-" + destino.getId();
+                    }
+                    puertas.addLast(new Puerta(idPuerta, origen, destino, "llave-" + destino.getId()));
+                }
+            }
+        }
+        Partida partida = new Partida(mazmorra, jugador, turnosRestantes, puertas);
+        partida.estado = EstadoPartida.valueOf(dto.getEstado());
+
+        if (dto.getMazmorra().getCuevas() != null) {
+            for (DatosCuevaDTO cuevaDTO : dto.getMazmorra().getCuevas()) {
+                Cueva cueva = mazmorra.getCuevaPorId(cuevaDTO.getId());
+                if (cueva == null) continue;
+                ContenidoCueva contenido = new ContenidoCueva(cueva);
+
+                if (cuevaDTO.getEnemigos() != null) {
+                    for (DatosEnemigoDTO eDTO : cuevaDTO.getEnemigos()) {
+                        Enemigo enemigo;
+                        if ("BOSS".equals(eDTO.getTipo())) {
+                            enemigo = new Boss(eDTO.getNombre(),
+                                eDTO.getVidaMaxima(), eDTO.getAtaqueBase(),
+                                eDTO.getDefensaBase(), eDTO.getMovimiento(),
+                                eDTO.getFila(), eDTO.getColumna());
+                        } else {
+                            enemigo = new Enemigo(eDTO.getNombre(),
+                                TipoEnemigo.valueOf(eDTO.getTipo()),
+                                eDTO.getVidaMaxima(), eDTO.getAtaqueBase(),
+                                eDTO.getDefensaBase(), eDTO.getMovimiento(),
+                                eDTO.getFila(), eDTO.getColumna());
+                        }
+                        int danoRecibido = enemigo.getVidaMaxima() - eDTO.getVidaActual();
+                        if (danoRecibido > 0) {
+                            enemigo.recibirDano(danoRecibido);
+                        }
+                        if (!eDTO.isVivo() && enemigo.estaVivo()) {
+                            enemigo.recibirDano(enemigo.getVidaMaxima());
+                        }
+                        contenido.agregarEnemigo(enemigo);
+                    }
+                }
+
+                if (cuevaDTO.getObjetos() != null) {
+                    for (DatosObjetoDTO oDTO : cuevaDTO.getObjetos()) {
+                        Objeto obj = reconstruirObjeto(oDTO);
+                        if (obj != null) {
+                            contenido.agregarObjeto(new ObjetoEnMapa(obj, cueva,
+                                oDTO.getFila(), oDTO.getColumna()));
+                        }
+                    }
+                }
+
+                partida.contenidosPorCueva.addLast(contenido);
+            }
+        }
+
+        return partida;
+    }
+
+    private static Objeto reconstruirObjeto(DatosObjetoDTO oDTO) {
+        switch (oDTO.getTipo()) {
+            case "POCION":
+                return new Pocion(oDTO.getId(), oDTO.getCura());
+            case "ARMA":
+                if (oDTO.getBonificacionAtaque() >= Espada.ATAQUE_EXTRA) {
+                    return new Espada(oDTO.getId());
+                } else {
+                    return new Arco(oDTO.getId());
+                }
+            case "ESCUDO":
+                return new Escudo(oDTO.getId());
+            case "LLAVE":
+                TipoLlave tipo = TipoLlave.valueOf(oDTO.getTipoLlave());
+                String codigo = oDTO.getCodigoCerradura();
+                if (codigo == null || codigo.trim().isEmpty()) {
+                    codigo = "llave-" + oDTO.getId();
+                }
+                return new Llave(oDTO.getId(), tipo, codigo);
+            default:
+                return null;
+        }
     }
 
     public boolean moverJugadorArriba() {
@@ -908,8 +1011,65 @@ public class Partida implements InterfazPartida {
     }
 
     public void guardar(String ruta) throws IOException {
-        DatosPartidaDTO dto = SerializadorPartida.desdeMazmorraJugador(
-                mazmorra, jugador, estado.name(), turnosRestantes);
+        DatosMazmorraDTO mazmorraDTO = SerializadorPartida.mazmorraADTO(mazmorra);
+        DatosCuevaDTO[] cuevasDTO = mazmorraDTO.getCuevas();
+        for (int i = 0; i < cuevasDTO.length; i++) {
+            Cueva cueva = mazmorra.getCuevaPorId(cuevasDTO[i].getId());
+            if (cueva == null) continue;
+            ContenidoCueva contenido = buscarContenido(cueva);
+            if (contenido == null) continue;
+
+            ListaSE<Enemigo> enemigos = contenido.getEnemigos();
+            DatosEnemigoDTO[] enemigosDTO = new DatosEnemigoDTO[enemigos.getSize()];
+            for (int j = 0; j < enemigos.getSize(); j++) {
+                Enemigo e = enemigos.get(j);
+                enemigosDTO[j] = new DatosEnemigoDTO(
+                    e.getTipoEnemigo().name(), e.getNombre(),
+                    e.getVidaActual(), e.getVidaMaxima(),
+                    e.getAtaqueBase(), e.getDefensaBase(),
+                    e.getMovimiento(), e.getFila(), e.getColumna(),
+                    e.estaVivo());
+            }
+            cuevasDTO[i].setEnemigos(enemigosDTO);
+
+            ListaSE<ObjetoEnMapa> objetos = contenido.getObjetosEnSuelo();
+            DatosObjetoDTO[] objetosDTO = new DatosObjetoDTO[objetos.getSize()];
+            for (int j = 0; j < objetos.getSize(); j++) {
+                ObjetoEnMapa o = objetos.get(j);
+                Objeto obj = o.getObjeto();
+                String tipoObjeto;
+                if (obj instanceof Pocion) tipoObjeto = "POCION";
+                else if (obj instanceof Arma) tipoObjeto = "ARMA";
+                else if (obj instanceof Escudo) tipoObjeto = "ESCUDO";
+                else if (obj instanceof Llave) tipoObjeto = "LLAVE";
+                else tipoObjeto = "DESCONOCIDO";
+                int cura = (obj instanceof Pocion) ? ((Pocion) obj).getPuntosCuracion() : 0;
+                int bonifAtk = (obj instanceof Arma) ? ((Arma) obj).getBonificacionAtaque() : 0;
+                int bonifDef = (obj instanceof Escudo) ? ((Escudo) obj).getBonificacionDefensa() : 0;
+                String tipoLlave = (obj instanceof Llave) ? ((Llave) obj).getTipoLlave().name() : null;
+                String codCerradura = (obj instanceof Llave) ? ((Llave) obj).getCodigoCerradura() : null;
+                objetosDTO[j] = new DatosObjetoDTO(
+                    obj.getId(), tipoObjeto, obj.getNombre(),
+                    obj.getDescripcion(), o.getFila(), o.getColumna(),
+                    cura, bonifAtk, bonifDef, tipoLlave, codCerradura);
+            }
+            cuevasDTO[i].setObjetos(objetosDTO);
+        }
+
+        DatosPuertaDTO[] puertasDTO = new DatosPuertaDTO[puertas.getSize()];
+        for (int i = 0; i < puertas.getSize(); i++) {
+            Puerta p = puertas.get(i);
+            puertasDTO[i] = new DatosPuertaDTO(
+                p.getId(), p.getOrigen().getId(),
+                p.getDestino().getId(), p.getCodigoLlave(),
+                p.isAbierta());
+        }
+
+        DatosJugadorDTO jugadorDTO = SerializadorPartida.jugadorADTO(jugador);
+        DatosPartidaDTO dto = new DatosPartidaDTO(
+            SerializadorPartida.getVersionActual(),
+            mazmorraDTO, jugadorDTO, estado.name(), turnosRestantes,
+            puertasDTO);
         SerializadorPartida.guardar(dto, ruta);
     }
 
@@ -994,6 +1154,14 @@ public class Partida implements InterfazPartida {
 
         private ListaSE<ObjetoEnMapa> getObjetosEnSuelo() {
             return objetosEnSuelo;
+        }
+
+        private void agregarEnemigo(Enemigo enemigo) {
+            enemigos.addLast(enemigo);
+        }
+
+        private void agregarObjeto(ObjetoEnMapa objeto) {
+            objetosEnSuelo.addLast(objeto);
         }
     }
 }

@@ -57,7 +57,15 @@ public class DatosCuevaDTO {
         return enemigos;
     }
 
+    public void setEnemigos(DatosEnemigoDTO[] enemigos) {
+        this.enemigos = enemigos;
+    }
+
     public DatosObjetoDTO[] getObjetos() {
         return objetos;
+    }
+
+    public void setObjetos(DatosObjetoDTO[] objetos) {
+        this.objetos = objetos;
     }
 }
