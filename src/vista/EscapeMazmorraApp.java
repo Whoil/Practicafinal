@@ -6,6 +6,7 @@ import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
@@ -47,8 +48,42 @@ public class EscapeMazmorraApp extends Application {
     private Timeline animacionDerecha;
     private Stage stage;
 
+    /** Partida activa durante el flujo narrativo. */
+    private modelo.juego.Partida partida;
+
     @Override
     public void start(Stage stage) {
+        // Redirigir System.err a consola + crash.log
+        try {
+            java.io.PrintStream originalErr = System.err;
+            java.io.PrintStream fileOut = new java.io.PrintStream(
+                new java.io.FileOutputStream("crash.log", true));
+            System.setErr(new java.io.PrintStream(
+                new java.io.OutputStream() {
+                    @Override public void write(int b) {
+                        originalErr.write(b);
+                        fileOut.write(b);
+                    }
+                    @Override public void write(byte[] buf, int off, int len) {
+                        originalErr.write(buf, off, len);
+                        fileOut.write(buf, off, len);
+                        fileOut.flush();
+                    }
+                    @Override public void flush() { originalErr.flush(); fileOut.flush(); }
+                    @Override public void close() { fileOut.close(); }
+                }));
+        } catch (Exception ignored) {}
+        Thread.setDefaultUncaughtExceptionHandler((t, ex) -> {
+            System.err.println("[CRASH] Hilo: " + t.getName());
+            ex.printStackTrace();
+            Platform.runLater(() -> {
+                if (stage != null && stage.isShowing()) {
+                    try {
+                        stage.close();
+                    } catch (Exception ignored) {}
+                }
+            });
+        });
         raiz = new StackPane();
 
         // Capa 1 — Fondo de cueva
@@ -347,7 +382,7 @@ public class EscapeMazmorraApp extends Application {
         panel.setPrefSize(ANCHO, ALTO);
         panel.setPickOnBounds(false);
 
-        // ---- Titulo: "ESCAPE" con arco simulado ----
+        // ---- Titulo: "ESCAPE" en linea recta ----
         String palabra = "ESCAPE";
         double centroX = ANCHO / 2.0;
         double baseY = 150;
@@ -358,12 +393,8 @@ public class EscapeMazmorraApp extends Application {
             Text letra = new Text(String.valueOf(palabra.charAt(i)));
             letra.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 56));
             letra.setFill(MARRON_TITULO);
-            // Arco senoidal: sube en el centro, baja en los extremos
-            double arco = -10 * Math.sin(Math.PI * i / (palabra.length() - 1));
-            letra.setY(baseY + arco);
-            letra.setX(inicioX + i * anchoLetra + 5 * Math.sin(i));
-            // Rotacion sutil por letra
-            letra.setRotate(3 * Math.cos(Math.PI * i / (palabra.length() - 1) + Math.PI));
+            letra.setY(baseY);
+            letra.setX(inicioX + i * anchoLetra);
             DropShadow sombra = new DropShadow();
             sombra.setColor(Color.rgb(0, 0, 0, 0.8));
             sombra.setRadius(6);
@@ -377,7 +408,7 @@ public class EscapeMazmorraApp extends Application {
         Text deLa = new Text("DE LA");
         deLa.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 48));
         deLa.setFill(MARRON_TITULO);
-        deLa.setX(centroX - 70);
+        deLa.setX((ANCHO - deLa.getLayoutBounds().getWidth()) / 2.0);
         deLa.setY(225);
         DropShadow sombra2 = new DropShadow();
         sombra2.setColor(Color.rgb(0, 0, 0, 0.8));
@@ -391,7 +422,7 @@ public class EscapeMazmorraApp extends Application {
         Text mazmorra = new Text("MAZMORRA");
         mazmorra.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 56));
         mazmorra.setFill(MARRON_TITULO);
-        mazmorra.setX(centroX - 145);
+        mazmorra.setX((ANCHO - mazmorra.getLayoutBounds().getWidth()) / 2.0);
         mazmorra.setY(290);
         DropShadow sombra3 = new DropShadow();
         sombra3.setColor(Color.rgb(0, 0, 0, 0.8));
@@ -507,11 +538,10 @@ public class EscapeMazmorraApp extends Application {
         panel.setPrefSize(ANCHO, ALTO);
         panel.setPickOnBounds(false);
 
-        // Titulo reducido
+        // Titulo centrado dinamicamente
         Text titulo = new Text("ESCAPE DE LA MAZMORRA");
         titulo.setFont(Font.font(FONT_FAMILY, FontWeight.BOLD, 34));
         titulo.setFill(MARRON_TITULO);
-        titulo.setX(ANCHO / 2.0 - 180);
         titulo.setY(120);
         DropShadow sombraT = new DropShadow();
         sombraT.setColor(Color.rgb(0, 0, 0, 0.8));
@@ -519,6 +549,7 @@ public class EscapeMazmorraApp extends Application {
         sombraT.setOffsetX(2);
         sombraT.setOffsetY(2);
         titulo.setEffect(sombraT);
+        titulo.setX((ANCHO - titulo.getLayoutBounds().getWidth()) / 2.0);
         panel.getChildren().add(titulo);
 
         // Botonera centrada con VBox
@@ -529,10 +560,8 @@ public class EscapeMazmorraApp extends Application {
 
         vbox.getChildren().add(crearBotonOpcion("Iniciar partida", e -> {
             try {
-                modelo.juego.Partida partida = modelo.juego.Partida.crearPartidaNueva();
-                PantallaJuego pj = new PantallaJuego(partida, stage, this::volverAlMenu);
-                Scene gameScene = pj.crearScene();
-                stage.setScene(gameScene);
+                partida = modelo.juego.Partida.crearPartidaNueva();
+                mostrarIntroduccion();
             } catch (Exception ex) {
                 System.err.println("Error al crear partida: " + ex.getMessage());
                 ex.printStackTrace();
@@ -650,6 +679,80 @@ public class EscapeMazmorraApp extends Application {
             entrada.play();
         });
         salida.play();
+    }
+
+    // -----------------------------------------------------------------
+    //  FLUJO NARRATIVO — Introduccion, Transicion, Juego, Final
+    // -----------------------------------------------------------------
+
+    /**
+     * Muestra la pantalla de introduccion con la historia inicial.
+     */
+    private void mostrarIntroduccion() {
+        PantallaIntroduccion intro = new PantallaIntroduccion(() -> {
+            mostrarTransicion("cueva_facil");
+        });
+        Scene scene = intro.crearScene();
+        scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
+        stage.setScene(scene);
+    }
+
+    /**
+     * Muestra la pantalla de transicion correspondiente a una cueva.
+     *
+     * Si es la primera cueva (cueva_facil), al pulsar "Entrar" solo
+     * muestra el juego porque la partida ya esta inicializada con ella.
+     * Para las siguientes, llama a partida.cambiarCueva() antes de
+     * mostrar el juego.
+     */
+    private void mostrarTransicion(String cuevaId) {
+        DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaId);
+        PantallaTransicion transicion = new PantallaTransicion(tema, () -> {
+            // Si no es la primera cueva, avanzar la partida
+            if (!"cueva_facil".equals(cuevaId)) {
+                partida.cambiarCueva();
+            }
+            mostrarJuego();
+        });
+        Scene scene = transicion.crearScene();
+        scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
+        stage.setScene(scene);
+    }
+
+    /**
+     * Muestra la pantalla de juego (PantallaJuego) vinculada a la
+     * partida actual. Configura los callbacks para cambio de cueva
+     * y fin de partida.
+     */
+    private void mostrarJuego() {
+        PantallaJuego pj = new PantallaJuego(partida, stage, this::volverAlMenu);
+
+        // Callback al cambiar de cueva: mostrar transicion a la siguiente
+        pj.setAlCambiarCueva(() -> {
+            String siguienteId = partida.getSiguienteCuevaId();
+            if (siguienteId != null) {
+                mostrarTransicion(siguienteId);
+            }
+        });
+
+        // Callback al terminar la partida: mostrar pantalla final
+        pj.setAlTerminarPartida(() -> {
+            boolean victoria = partida.getEstado() == modelo.juego.EstadoPartida.VICTORIA;
+            mostrarFinal(victoria);
+        });
+
+        Scene gameScene = pj.crearScene();
+        stage.setScene(gameScene);
+    }
+
+    /**
+     * Muestra la pantalla de victoria o derrota segun el resultado.
+     */
+    private void mostrarFinal(boolean victoria) {
+        PantallaFinal pantallaFinal = new PantallaFinal(victoria, this::volverAlMenu);
+        Scene scene = pantallaFinal.crearScene();
+        scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
+        stage.setScene(scene);
     }
 
     /**

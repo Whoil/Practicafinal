@@ -1326,3 +1326,124 @@ Modo economico aplicado: lectura escalonada, uso de `SCRATCHPAD.md` como memoria
 - `FabricaPartida` acopla de forma explicita JSON con la logica de partida; se acepta como puente minimo para desbloquear a Parte C, pero puede evolucionar despues a builder o adaptador mas formal.
 - Los atributos JSON `nombre`, `descripcion`, `ataque` y `defensa` de objetos no se usan todavia para crear objetos parametrizables, porque las clases de B-02 tienen valores fijos por tipo.
 - `build/` puede quedar generado localmente por pruebas manuales y no debe subirse.
+
+## 2026-05-22 - Alvaro / Bloque narrativo y visual
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Visual / Narrativo (coordinacion transversal)
+Agente: Codex (big-pickle)
+
+### Contexto
+
+Integracion del bloque narrativo y visual del juego: pantallas de introduccion,
+transicion por cueva, final (victoria/derrota), emojis tematicos, muros
+coloreados por cueva, rediseno de mapas con progresion 7x7→10x10→13x13.
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si
+Documentos leidos: `tareas.md`, `PantallaJuego.java`, `EscapeMazmorraApp.java`,
+`Partida.java`, `Cueva.java`, `CuevaEnMapa.java`, `Mazmorra.java`,
+`project-management/DECISIONS.md`, `project-management/AGENTS.md`,
+`project-management/TASKS.md`
+
+### Cambios
+
+Archivos nuevos:
+- `src/vista/DatosTemaCueva.java` — enum con datos estaticos por cueva
+  (titulo, texto narrativo, fondoCSS, colorMuro, emojis)
+- `src/vista/PantallaIntroduccion.java` — pantalla de historia inicial
+- `src/vista/PantallaTransicion.java` — pantalla reutilizable de transicion
+- `src/vista/PantallaFinal.java` — pantalla de victoria/derrota
+
+Archivos modificados:
+- `src/vista/PantallaJuego.java`:
+  - Anadidos callbacks `setAlCambiarCueva()` y `setAlTerminarPartida()`
+  - Sustituidos circulos de colores por emojis (tarea 8)
+  - Muros coloreados segun tematica de cueva via `DatosTemaCueva` (tarea 9b)
+  - Deteccion de cambio de cueva para reconstruir grid
+  - Deteccion de fin de partida para disparar pantalla final
+- `src/vista/EscapeMazmorraApp.java`:
+  - Nuevo flujo narrativo: Intro → Transicion(CuevaI) → Juego → Transicion(CuevaII) → ...
+  - Nuevos metodos: `mostrarIntroduccion()`, `mostrarTransicion()`, `mostrarJuego()`, `mostrarFinal()`
+- `src/modelo/juego/Partida.java`:
+  - Anadido `getSiguienteCuevaId()` para inspeccionar siguiente cueva sin transicionar
+- `datos/cuevas.json`: mapas redisenados a 7x7, 10x10 y 13x13 con nuevas
+  disposiciones de muros, enemigos y objetos
+- `tareas.md`: actualizados estados (tareas 4-8, 9b)
+- `project-management/DECISIONS.md`: anadidas decisiones D-20 a D-24
+
+### Datos de cueva
+
+| Cueva | Nombre | Tamano | Color muro | Emoji enemigo | Emoji boss |
+|---|---|---|---|---|---|
+| facil | Las Criptas de Marfil | 7×7 | #d2cdc3 hueso | 💀 | ☠️ |
+| media | El Paramo Putrefacto | 10×10 | #468246 verde | 🧟 | 🧌 |
+| dificil | El Abismo de Malakor | 13×13 | #aa2d2d rojo | 👹 | 😈 |
+
+### Pruebas
+
+No se pudieron ejecutar tests JUnit por falta de JDK/JDK con javac en PATH.
+El proyecto requiere JavaFX 23 y Gson en classpath para compilar y ejecutar.
+No hay script de compilacion automatizado disponible.
+
+### Pendiente
+
+- Probar la aplicacion completa en IntelliJ.
+- Verificar que los emojis se renderizan correctamente con la fuente "Segoe UI Emoji".
+- Tarea 9 (Mejora general UI) pendiente para futura sesion.
+- Tarea 10-12 pendientes.
+
+## 2026-05-22 - Hector / Parte C
+
+### Identificacion de sesion
+
+Humano: Hector
+Rol: Parte C
+Agente: opencode (big-pickle)
+
+### Contexto
+
+Sesion de cierre. Se corrigieron los 3 problemas reportados por el usuario al final de la sesion anterior: titulos descentrados en pantallas de inicio, retardo en auto-turno y ausencia de flash visual cuando un enemigo ataca al jugador.
+
+### Sincronizacion
+
+Rama: feature/a-estructuras (usada para cambios de JavaFX; no se cambio a feature/c-javafx-json-docs)
+Cambio remoto revisado: no
+Documentos leidos: AGENTS.md, TASKS.md, PRD.md, ARCHITECTURE.md, DECISIONS.md, SCRATCHPAD.md, IA_DIARY.md, templates/SESSION_SUMMARY_TEMPLATE.md
+
+### Cambios
+
+- `src/vista/EscapeMazmorraApp.java`:
+  - ESCAPE: eliminado arco senoidal, rotacion y desviacion X — ahora letras rectas, mismas Y y espaciado uniforme.
+  - PantallaInicio: "DE LA" y "MAZMORRA" centrados dinamicamente con `getLayoutBounds().getWidth()`.
+  - PantallaOpciones: revertido de StackPane a Pane con titulo centrado por `getLayoutBounds().getWidth()` y VBox de botones en posicion absoluta original (ANCHO/2-130, 240).
+- `src/vista/PantallaJuego.java`:
+  - Auto-turno: suprimido mensaje "No puedes moverte mas este turno" cuando auto-turn se dispara, para que no aparezca feedback erroneo tras el cambio de turno.
+  - Anadido `recibirAtaqueFila/Col` y `recibirAtaqueTimer` para flash rojo cuando enemigo dania al jugador.
+  - Flash rojo se activa en cualquier `terminarTurno()` (tecla T, auto-turn, click, boton) comparando vida antes/despues.
+  - Click handler: movido feedback para que no se solape con auto-turn.
+- `datos/cuevas.json`: sin cambios en esta sesion.
+
+### Pendiente
+
+- Probar que los titulos quedan centrados en ambas pantallas.
+- Probar que el flash de ataque enemigo se ve correctamente.
+- Los cambios estan sin commit ni push.
+
+### Riesgos
+
+- `getLayoutBounds().getWidth()` podria dar 0 si la fuente (Georgia) no esta disponible, derivando en `setX(ANCHO/2)` en vez de centrado real. Sin embargo, Georgia es serif comun y el proyecto ya la usaba sin problemas.
+- Los cambios estan en rama `feature/a-estructuras`, no en `feature/c-javafx-json-docs`. Conviene moverlos a la rama correcta al hacer commit.
+
+### Riesgos
+
+- Los emojis requieren "Segoe UI Emoji" en el sistema; funciona en Windows pero
+  puede no renderizarse igual en otros SO.
+- La deteccion de fin de partida en `actualizar()` detiene el refresco visual
+  cuando se dispara el callback; verificar que no haya race conditions.
+- No se testearon las nuevas pantallas por falta de compilador; revision manual
+  de sintaxis realizada.

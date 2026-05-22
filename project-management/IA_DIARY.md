@@ -699,3 +699,39 @@ La revision independiente detecto tres ajustes reales: no ignorar conexiones JSO
 ### Critica
 
 La solucion es deliberadamente pequena y util para coordinacion: evita meter reglas de juego en `src/json` y ofrece a Hector un punto de entrada claro. El coste es que `FabricaPartida` conoce DTOs de JSON desde la capa de juego, algo aceptable como adaptador inicial pero revisable cuando el guardado/carga de estado este mas definido.
+
+## 2026-05-22 - Hector
+
+### Agente o herramienta
+
+opencode (big-pickle)
+
+### Objetivo
+
+Corregir tres problemas UI: titulos descentrados en pantallas de inicio, retardo en auto-turno por feedback erroneo y ausencia de efecto visual cuando enemigo ataca al jugador.
+
+### Prompt o resumen del prompt
+
+1. "varios problemas: ahora los botones... se han ido hacia un lado y los titulos siguen descentrados"
+2. Confirmacion del plan de revertir PantallaOpciones a Pane + medir texto con getLayoutBounds().getWidth().
+3. "los titulos se ven bien pero en la primera pantalla la palabra escape se ha intentado curvar y se ve mal, ponla en recta. ... los cambios de turno automaticos va muy con delay. sigue sin haber efectos visuales cuando un enemigo te ataca"
+
+### Resultado
+
+Se aplicaron las 3 correcciones en `EscapeMazmorraApp.java` y `PantallaJuego.java`.
+
+### Cambios aceptados
+
+- ESCAPE en linea recta (sin arco, sin rotacion).
+- Titulos centrados con `getLayoutBounds().getWidth()` en todas las pantallas.
+- PantallaOpciones revertida a Pane con posicion absoluta original de los botones.
+- Auto-turno suprime mensaje erroneo cuando se dispara por segundo movimiento fallido.
+- Flash rojo (400ms) en celda del jugador cuando recibe dano enemigo.
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Sesion eficaz: tres problemas resueltos con compilacion y ejecucion correctas. La medicion dinamica de texto con `getLayoutBounds()` evita constantes magicas y se adapta a cualquier fuente. El flash de ataque enemigo reutiliza el mismo patron que el flash de ataque del jugador, minimizando codigo nuevo.
