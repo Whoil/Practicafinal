@@ -29,8 +29,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.geometry.Rectangle2D;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import javafx.application.Platform;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -118,8 +116,19 @@ public class PantallaJuego {
     private int recibirAtaqueFila = -1, recibirAtaqueCol = -1;
     private Timeline recibirAtaqueTimer;
 
+    /**
+     * Entrada del cache de imagenes usando ListaDE propia.
+     */
+    private static class EntradaImagen {
+        private final String clave;
+        private final Image valor;
+        EntradaImagen(String c, Image v) { this.clave = c; this.valor = v; }
+        boolean coincide(String c) { return clave.equals(c); }
+        Image getValor() { return valor; }
+    }
+
     // Cache de imagenes para los assets del Dungeon Asset Pack
-    private static final Map<String, Image> IMAGE_CACHE = new HashMap<>();
+    private static final ListaDE<EntradaImagen> IMAGE_CACHE = new ListaDE<>();
     private static final String ASSETS_BASE = "Dungeon Asset Pack" + File.separator;
 
     // Sistema de vision limitada (fog-of-war)
@@ -1197,17 +1206,29 @@ public class PantallaJuego {
     }
 
     /**
+     * Busca una imagen en el cache lineal (ListaDE).
+     */
+    private static Image buscarEnCache(String ruta) {
+        MiIterador<EntradaImagen> it = IMAGE_CACHE.getIterador();
+        while (it.hasNext()) {
+            EntradaImagen e = it.next();
+            if (e.coincide(ruta)) return e.getValor();
+        }
+        return null;
+    }
+
+    /**
      * Carga un PNG del Dungeon Asset Pack y devuelve un ImageView.
      * Para spritesheets con varias frames, muestra solo la primera frame.
      */
     private ImageView crearSpriteAssets(String assetPath, double tamanio) {
         String fullPath = ASSETS_BASE + assetPath;
-        Image img = IMAGE_CACHE.get(fullPath);
+        Image img = buscarEnCache(fullPath);
         if (img == null) {
             try {
                 File f = new File(fullPath);
                 img = new Image(f.toURI().toString());
-                IMAGE_CACHE.put(fullPath, img);
+                IMAGE_CACHE.addLast(new EntradaImagen(fullPath, img));
             } catch (Exception e) {
                 return new ImageView();
             }

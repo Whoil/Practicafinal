@@ -850,3 +850,13 @@ Sesion larga pero productiva. El guardado completo requirio modificar varias cla
 
 **Tests**: 182/182 OK.
 
+## 2026-05-23 — Revisor Independiente: HashMap reemplazado por ListaDE
+
+**Cambio**: Sustituido `HashMap<String, Image>` en `PantallaJuego.java` por `ListaDE<EntradaImagen>` para cumplir la restriccion de colecciones prohibidas.
+
+**Archivos**: `PantallaJuego.java`, `SCRATCHPAD.md`.
+
+**Merge**: `origin/main` mergeado en `feature/a-iconos` sin conflictos.
+
+**Tests**: 182/182 OK.
+

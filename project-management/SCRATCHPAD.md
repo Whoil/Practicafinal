@@ -1782,3 +1782,39 @@ Tests JUnit: 182/182 OK en ambos commits.
 ### Riesgos o avisos
 - El auto-avance deja `accionRealizada=true`, por lo que el primer input tras la transicion dispara auto-turn (mismo comportamiento que el boton manual "CAMBIAR CUEVA").
 - Los commits estan en `feature/a-iconos`, no mergeados a `main`. Pendiente de PR y revisor independiente antes de merge.
+
+---
+
+## Cierre de sesion — Revisor Independiente 2026-05-23
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Agente Revisor Independiente
+
+### Rama usada
+
+`feature/a-iconos`
+
+### Tareas trabajadas
+
+1. Revision independiente de la rama `feature/a-iconos` antes de merge.
+2. Corregido `HashMap` en `PantallaJuego.java` -> sustituido por `ListaDE<EntradaImagen>`.
+3. Merge de `origin/main` en `feature/a-iconos` (sin conflictos).
+4. Ejecucion de tests: 182/182 OK.
+
+### Archivos modificados
+
+- `src/vista/PantallaJuego.java` — eliminado `HashMap`, reemplazado por cache con `ListaDE` propia.
+- `project-management/SCRATCHPAD.md` — actualizado.
+
+### Commits y push realizados
+
+Pendiente de autorizacion humana.
+
+### Pendiente para la siguiente sesion
+
+- Hacer commit del cambio de `PantallaJuego.java`.
+- Hacer push a `origin/feature/a-iconos`.
+- Hacer merge a `main` cuando se autorice.
