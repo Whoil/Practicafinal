@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
@@ -568,8 +569,12 @@ public class EscapeMazmorraApp extends Application {
                 partida = modelo.juego.Partida.cargarPartida("datos/partida_guardada.json");
                 mostrarIntroduccion();
             } catch (Exception ex) {
-                System.err.println("Error al cargar partida: " + ex.getMessage());
-                ex.printStackTrace();
+                Alert alerta = new Alert(Alert.AlertType.ERROR);
+                alerta.setTitle("Error al cargar");
+                alerta.setHeaderText("No se pudo cargar la partida");
+                alerta.setContentText("No existe una partida guardada en datos/partida_guardada.json.\n\n" +
+                    "Primero debes jugar y guardar la partida desde el menu de juego.");
+                alerta.showAndWait();
             }
         }));
         vbox.getChildren().add(crearBotonOpcion("Controles", e -> {

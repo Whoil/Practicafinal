@@ -262,15 +262,19 @@ public class PantallaJuego {
                 int pf = jug.getFila(), pc = jug.getColumna();
                 if (k == KeyCode.W || k == KeyCode.UP) {
                     if (partida.hayEnemigoEn(pf - 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorArriba(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.S || k == KeyCode.DOWN) {
                     if (partida.hayEnemigoEn(pf + 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esObstaculo(partida.getCuevaActual().getCelda(pf + 1, pc))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorAbajo(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.A || k == KeyCode.LEFT) {
                     if (partida.hayEnemigoEn(pf, pc - 1)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc - 1))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorIzquierda(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.D || k == KeyCode.RIGHT) {
                     if (partida.hayEnemigoEn(pf, pc + 1)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorDerecha(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.SPACE) {
                     Enemigo target = partida.getEnemigoAdyacente();
@@ -503,6 +507,9 @@ public class PantallaJuego {
                         if (partida.hayEnemigoEn(ff, cc)) {
                             ok = false;
                             clickMsg = "Hay un enemigo ahi";
+                        } else if (esObstaculo(cueva.getCelda(ff, cc))) {
+                            ok = false;
+                            clickMsg = "Hay una pared";
                         } else {
                             ok = partida.moverJugador(ff, cc);
                             if (!ok) clickMsg = "No puedes moverte alli";
@@ -726,18 +733,34 @@ public class PantallaJuego {
         // Acciones
         accionesBox.getChildren().clear();
         btnArriba = crearBotonTexto("ARRIBA [W]");
-        btnArriba.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno"));
+        btnArriba.setOnMouseClicked(e -> {
+            int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ejecutarAccion(false, "Hay una pared"); return; }
+            ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno");
+        });
         accionesBox.getChildren().add(btnArriba);
         HBox movHoriz = new HBox(4);
         movHoriz.setAlignment(Pos.CENTER);
         btnIzq = crearBotonTexto("< IZQ [A]");
-        btnIzq.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno"));
+        btnIzq.setOnMouseClicked(e -> {
+            int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc - 1))) { ejecutarAccion(false, "Hay una pared"); return; }
+            ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno");
+        });
         btnDer = crearBotonTexto("DER [D] >");
-        btnDer.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno"));
+        btnDer.setOnMouseClicked(e -> {
+            int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ejecutarAccion(false, "Hay una pared"); return; }
+            ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno");
+        });
         movHoriz.getChildren().addAll(btnIzq, btnDer);
         accionesBox.getChildren().add(movHoriz);
         btnAbajo = crearBotonTexto("ABAJO [S]");
-        btnAbajo.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno"));
+        btnAbajo.setOnMouseClicked(e -> {
+            int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esObstaculo(partida.getCuevaActual().getCelda(pf + 1, pc))) { ejecutarAccion(false, "Hay una pared"); return; }
+            ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno");
+        });
         accionesBox.getChildren().add(btnAbajo);
 
         btnAtacar = crearBotonTexto("ATACAR [ESPACIO]");
@@ -919,6 +942,15 @@ public class PantallaJuego {
     private void toggleAyuda() {
         ayudaVisible = !ayudaVisible;
         ayudaPane.setVisible(ayudaVisible);
+    }
+
+    /**
+     * Comprueba si una celda es un obstaculo que bloquea el paso
+     * (MURO, ROCA o ARBUSTO).
+     */
+    private boolean esObstaculo(CeldaEnMapa celda) {
+        TipoCelda t = celda.getTipo();
+        return t == TipoCelda.MURO || t == TipoCelda.ROCA || t == TipoCelda.ARBUSTO;
     }
 
     private void ejecutarAccion(boolean ok, String mensajeError) {
