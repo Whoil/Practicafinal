@@ -314,12 +314,14 @@ public class PantallaJuego {
                             && msg != null && msg.contains("No puedes moverte mas"));
                     if (autoTurno) {
                         int hpAntes = partida.getJugador().getVidaActual();
-                        partida.terminarTurno();
-                        if (partida.getJugador().getVidaActual() < hpAntes) {
-                            Jugador j2 = partida.getJugador();
-                            iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                        boolean turnoOk = partida.terminarTurno();
+                        if (turnoOk) {
+                            if (partida.getJugador().getVidaActual() < hpAntes) {
+                                Jugador j2 = partida.getJugador();
+                                iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                            }
+                            actualizar();
                         }
-                        actualizar();
                         if (msg != null && msg.contains("No puedes moverte mas")) {
                             msg = null;
                         }
@@ -489,16 +491,21 @@ public class PantallaJuego {
                             if (!ok) clickMsg = "No puedes moverte alli";
                         }
                         actualizar();
-                        if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
-                                && partida.isMovimientoRealizado() && partida.isAccionRealizada()) {
+                        boolean autoClick = (ok && partida.isMovimientoRealizado() && partida.isAccionRealizada())
+                                         || (partida.isMovimientoRealizado() && clickMsg != null
+                                              && clickMsg.contains("No puedes moverte"));
+                        if (autoClick && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
                             int hpAntes = partida.getJugador().getVidaActual();
-                            partida.terminarTurno();
-                            if (partida.getJugador().getVidaActual() < hpAntes) {
-                                Jugador j2 = partida.getJugador();
-                                iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                            boolean turnoOk = partida.terminarTurno();
+                            if (turnoOk) {
+                                if (partida.getJugador().getVidaActual() < hpAntes) {
+                                    Jugador j2 = partida.getJugador();
+                                    iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
+                                }
+                                actualizar();
                             }
-                            actualizar();
-                        } else if (clickMsg != null) {
+                        }
+                        if (clickMsg != null) {
                             mostrarFeedback(clickMsg, Color.rgb(255, 120, 100));
                         }
                     });
@@ -550,14 +557,14 @@ public class PantallaJuego {
                 construirGrid();
             }
 
-            // Limpiar emojis anteriores de las celdas (conservar fondo)
+            // Limpiar iconos anteriores de las celdas
             if (celdas != null) {
                 for (int f = 0; f < filas && f < celdas.length; f++) {
                     if (celdas[f] == null) continue;
                     for (int c = 0; c < cols && c < celdas[f].length; c++) {
                         StackPane cell = celdas[f][c];
-                        if (cell != null && cell.getChildren().size() > 1) {
-                            cell.getChildren().remove(1, cell.getChildren().size());
+                        if (cell != null) {
+                            cell.getChildren().clear();
                         }
                     }
                 }
