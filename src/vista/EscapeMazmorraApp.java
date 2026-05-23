@@ -48,6 +48,7 @@ public class EscapeMazmorraApp extends Application {
     private Pane contenidoActual;
     private Timeline animacionIzquierda;
     private Timeline animacionDerecha;
+    private Pane tesoroDecorativo;
     private Stage stage;
 
     /** Partida activa durante el flujo narrativo. */
@@ -97,7 +98,8 @@ public class EscapeMazmorraApp extends Application {
         raiz.getChildren().addAll(antorchaIzq, antorchaDer);
 
         // Capa 3 — Tesoro
-        raiz.getChildren().add(crearTesoro());
+        tesoroDecorativo = crearTesoro();
+        raiz.getChildren().add(tesoroDecorativo);
 
         // Capa 4 — Contenido intercambiable
         contenidoActual = mostrarPantallaInicio();
@@ -110,7 +112,9 @@ public class EscapeMazmorraApp extends Application {
         Scene escena = new Scene(raiz, ANCHO, ALTO);
         stage.setTitle("ESCAPE DE LA MAZMORRA");
         stage.setScene(escena);
-        stage.setResizable(false);
+        stage.setResizable(true);
+        stage.setMinWidth(960);
+        stage.setMinHeight(540);
         stage.show();
 
         animacionIzquierda.play();
@@ -383,6 +387,7 @@ public class EscapeMazmorraApp extends Application {
      * globo terraqueo. Ningun otro elemento es interactivo.
      */
     private Pane mostrarPantallaInicio() {
+        mostrarTesoroDecorativo(true);
         Pane panel = new Pane();
         panel.setPrefSize(ANCHO, ALTO);
         panel.setPickOnBounds(false);
@@ -531,6 +536,7 @@ public class EscapeMazmorraApp extends Application {
     // -----------------------------------------------------------------
 
     private Pane mostrarPantallaOpciones() {
+        mostrarTesoroDecorativo(true);
         Pane panel = new Pane();
         panel.setPrefSize(ANCHO, ALTO);
         panel.setPickOnBounds(false);
@@ -670,6 +676,7 @@ public class EscapeMazmorraApp extends Application {
      * Se accede desde el boton "Controles" del menu de opciones.
      */
     private Pane mostrarPantallaControles() {
+        mostrarTesoroDecorativo(false);
         Pane panel = new Pane();
         panel.setPrefSize(ANCHO, ALTO);
         panel.setPickOnBounds(false);
@@ -742,6 +749,12 @@ public class EscapeMazmorraApp extends Application {
 
     private void cambiarAInicio() {
         animarTransicion(mostrarPantallaInicio());
+    }
+
+    private void mostrarTesoroDecorativo(boolean visible) {
+        if (tesoroDecorativo != null) {
+            tesoroDecorativo.setVisible(visible);
+        }
     }
 
     private void animarTransicion(Pane nuevaPantalla) {
@@ -851,7 +864,8 @@ public class EscapeMazmorraApp extends Application {
         Pane antorchaIzq = crearAntorchaCompleta(160, 260);
         Pane antorchaDer = crearAntorchaCompleta(ANCHO - 160, 260);
         raiz.getChildren().addAll(antorchaIzq, antorchaDer);
-        raiz.getChildren().add(crearTesoro());
+        tesoroDecorativo = crearTesoro();
+        raiz.getChildren().add(tesoroDecorativo);
 
         contenidoActual = mostrarPantallaInicio();
         raiz.getChildren().add(contenidoActual);

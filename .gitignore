@@ -35,3 +35,5 @@ crash.log
 
 crash_detail.log
 direct_debug.log
+datos/partida_guardada.json
+datos/audio/sfx/

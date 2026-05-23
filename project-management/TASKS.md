@@ -194,15 +194,15 @@ Sub-tareas:
 - **C-09.5** Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) - PENDIENTE
 - **C-09.6** Mejorar diseno de cuevas: mapas laberinticos con paredes de 2 celdas, 3 dificultades, mejor trazado y obstaculos - HECHA
 
-- **C-09.7** Implementar efectos de sonido cortos (SFX) para interacciones: recoger objeto, ataque y dano - PENDIENTE
+- **C-09.7** Implementar efectos de sonido cortos (SFX) para interacciones: recoger objeto, ataque y dano - REVISION
 - **C-09.8** Anadir animaciones de transicion fluida (fade in/out) entre pantallas - PENDIENTE
 - **C-09.9** Desarrollar sistema de alertas visuales temporales: textos flotantes de dano y cura - PENDIENTE
 - **C-09.10** Crear modo antorcha / filtro de contraste accesible mediante CSS dinamico - PENDIENTE
 - **C-09.11** Aumentar turnos de 40 a 60 y auto-avance en PUERTA con llave - HECHA
-- **C-09.12** Menu de pausa durante la partida (P o ESC) con opciones: Continuar, Guardar, Volver al menu - PENDIENTE
-- **C-09.13** Encontrar/crear icono para celda PUERTA (actualmente solo color amarillo) - PENDIENTE
-- **C-09.14** Encontrar/crear icono para ESCUDO (reemplazar `staff2.png` por un asset tipo escudo) - PENDIENTE
-- **C-09.15** Añadir iconos decorativos para TESORO y SALIDA (actualmente solo color) - PENDIENTE
+- **C-09.12** Menu de pausa durante la partida (P o ESC) con opciones: Continuar, Guardar, Volver al menu - REVISION
+- **C-09.13** Encontrar/crear icono para celda PUERTA (actualmente solo color amarillo) - REVISION
+- **C-09.14** Encontrar/crear icono para ESCUDO (reemplazar `staff2.png` por un asset tipo escudo) - REVISION
+- **C-09.15** Añadir iconos decorativos para TESORO y SALIDA (actualmente solo color) - REVISION
 - **C-09.16** Buscar assets adicionales en itch.io: pociones, puertas, escudos, cofres y bosses - PENDIENTE
 
 ### R-01 Revision de restricciones
