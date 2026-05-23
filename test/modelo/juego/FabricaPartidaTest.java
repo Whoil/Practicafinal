@@ -22,8 +22,8 @@ class FabricaPartidaTest {
         assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
         assertEquals(40, partida.getTurnosRestantes());
         assertEquals("cueva_facil", partida.getCuevaActual().getId());
-        assertEquals(1, partida.getJugadorEnMapa().getFila());
-        assertEquals(1, partida.getJugadorEnMapa().getColumna());
+        assertEquals(2, partida.getJugadorEnMapa().getFila());
+        assertEquals(2, partida.getJugadorEnMapa().getColumna());
         assertEquals(2, partida.getEnemigos().getSize());
         assertEquals(3, partida.getObjetosEnSuelo().getSize());
     }
@@ -33,20 +33,41 @@ class FabricaPartidaTest {
         ResultadoCarga resultado = new CargadorConfiguracion().cargar(RUTA_JSON);
         Partida partida = new FabricaPartida().crearPartida(resultado);
 
-        assertTrue(partida.moverJugador(1, 3));
+        assertTrue(partida.moverJugador(2, 4));
         assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(3, 3));
+        assertTrue(partida.moverJugador(2, 6));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(4, 6));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(4, 8));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(5, 9));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(6, 8));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(6, 6));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(8, 6));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(8, 4));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(8, 2));
         assertTrue(partida.recogerObjeto("llave-cueva-media"));
         assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(5, 3));
+        assertTrue(partida.moverJugador(10, 2));
         assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(5, 5));
+        assertTrue(partida.moverJugador(10, 4));
         assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(12, 4));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(12, 6));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(12, 7));
         assertTrue(partida.avanzarACueva("cueva_media"));
 
         assertEquals("cueva_media", partida.getCuevaActual().getId());
-        assertEquals(1, partida.getJugadorEnMapa().getFila());
-        assertEquals(1, partida.getJugadorEnMapa().getColumna());
+        assertEquals(2, partida.getJugadorEnMapa().getFila());
+        assertEquals(2, partida.getJugadorEnMapa().getColumna());
     }
 
     @Test

@@ -1606,3 +1606,72 @@ Rama:
 
 - Hay cambios locales sin commit en varios archivos del proyecto.
 - `tareas.md` fue eliminado intencionadamente para evitar duplicidad.
+
+## 2026-05-23 - Codex-A Estructuras (Parte A, en area audiovisual C-09)
+
+### Identificacion de sesion
+
+Humano: Alvaro (Parte A)
+Rol: Parte A trabajando en audiovisual (C-09, area de Parte C)
+Agente: Codex-A Estructuras
+
+### Contexto
+
+Implementar mapas laberinticos mas grandes (C-09.6) y sistema de niebla (fog-of-war) en PantallaJuego.
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si, sin cambios nuevos de otros agentes.
+Documentos leidos: AGENTS.md, TASKS.md, SCRATCHPAD.md
+
+### Cambios realizados
+
+1. `datos/cuevas.json`: Redisenados 3 mapas laberinticos:
+   - Criptas (facil): 15x15, INICIO(2,2), 2 esqueletos, llave+escudo+pocion.
+   - Paramo (media): 19x19, INICIO(2,2), 3 orcos, llave+espada+pocion.
+   - Abismo (dificil): 23x23, INICIO(2,2), 4 enemigos (1 boss), llave+arco+2 pociones.
+   - Muros de 2 celdas de grosor, pasillos de 1 celda.
+   - Corregido 'T'->'TESORO' en matriz (3 ocurrencias).
+   - Corregida posicion enemigo (9,6)->(6,15) en cueva_media.
+   - Corregidas posiciones enemigos en dificil (5,15)->(5,16), (9,18)->(9,20).
+
+2. `src/vista/PantallaJuego.java`:
+   - wallThickness: 5->10px.
+   - Muros: de bordes finos a relleno solido con Rectangle.
+   - Almacenados cumX, cumY, colWidth, rowHeight como campos.
+   - Anadido gridFog Pane en z-order: gridCeldas->gridWalls->gridFog->gridOverlay.
+   - Anadido BFS recalcularVisibilidad() (Cola propia, radio 3, bloqueo por MURO/ROCA/ARBUSTO).
+   - Anadido actualizarFog() (rectangulos RGBA con opacidad segun distancia).
+   - Llamadas a fog en actualizar().
+   - Fix: crash en cell.getChildren().remove(1, size) cuando size<2.
+
+3. `test/json/CargadorConfiguracionTest.java`: Actualizados tamaños (15/19/23) e INICIO(2,2).
+
+4. `test/json/SerializadorPartidaTest.java`: Actualizados tamaños (9->15) e INICIO(1,1)->(2,2).
+
+5. `test/modelo/juego/FabricaPartidaTest.java`: Actualizados INICIO(2,2) y ruta de movimiento.
+
+6. `test/modelo/juego/PartidaTest.java`: Actualizados caminos de movimiento en 3 tests.
+
+7. `project-management/TASKS.md`: Marcadas C-09.1 y C-09.6 como HECHA, actualizados tamaños.
+
+### Tests
+
+Tests JUnit ejecutados: 182/182 OK
+Compilacion: 0 errores
+
+### Commits y push
+
+Pendiente de autorizacion humana para commit+push.
+
+### Pendiente para la siguiente sesion
+
+- Commit+push.
+- Reemplazo de iconos (emojis).
+- Actualizar IA_DIARY.md.
+
+### Riesgos o avisos
+
+- El fog-of-war cubre entidades (escondiendolas hasta que el jugador se acerque).
+- Los enemigos con danio/vida (formato simple sin ataque/defensa/movimiento) tienen movimiento=0 pero la IA los mueve igual mediante getCaminoMinimo().

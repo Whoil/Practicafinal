@@ -31,36 +31,36 @@ class CargadorConfiguracionTest {
     }
 
     @Test
-    void cuevaFacilTieneTamano9x9() throws Exception {
+    void cuevaFacilTieneTamano15x15() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva facil = resultado.getMazmorra().getCuevaPorId("cueva_facil");
         assertNotNull(facil);
-        assertEquals(9, facil.getFilas());
-        assertEquals(9, facil.getColumnas());
+        assertEquals(15, facil.getFilas());
+        assertEquals(15, facil.getColumnas());
     }
 
     @Test
-    void cuevaMediaTieneTamano13x13() throws Exception {
+    void cuevaMediaTieneTamano19x19() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva media = resultado.getMazmorra().getCuevaPorId("cueva_media");
         assertNotNull(media);
-        assertEquals(13, media.getFilas());
-        assertEquals(13, media.getColumnas());
+        assertEquals(19, media.getFilas());
+        assertEquals(19, media.getColumnas());
     }
 
     @Test
-    void cuevaDificilTieneTamano15x15() throws Exception {
+    void cuevaDificilTieneTamano23x23() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva dificil = resultado.getMazmorra().getCuevaPorId("cueva_dificil");
         assertNotNull(dificil);
-        assertEquals(15, dificil.getFilas());
-        assertEquals(15, dificil.getColumnas());
+        assertEquals(23, dificil.getFilas());
+        assertEquals(23, dificil.getColumnas());
     }
 
     @Test
@@ -69,8 +69,8 @@ class CargadorConfiguracionTest {
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
 
         Cueva facil = resultado.getMazmorra().getCuevaPorId("cueva_facil");
-        assertTrue(facil.getCelda(1, 1).esTransitable());
-        assertEquals(TipoCelda.INICIO, facil.getCelda(1, 1).getTipo());
+        assertTrue(facil.getCelda(2, 2).esTransitable());
+        assertEquals(TipoCelda.INICIO, facil.getCelda(2, 2).getTipo());
     }
 
     @Test
