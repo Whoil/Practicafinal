@@ -71,10 +71,10 @@ class PartidaTest {
     void moverJugadorAbajoFunciona() throws Exception {
         Partida p = Partida.crearPartidaNueva();
         Jugador j = p.getJugador();
-        assertTrue(p.moverJugador(1, 3));
+        assertTrue(p.moverJugador(3, 2));
         assertTrue(p.terminarTurno());
         assertTrue(p.moverJugadorAbajo());
-        assertEquals(2, j.getFila());
+        assertEquals(4, j.getFila());
     }
 
     @Test
@@ -112,6 +112,10 @@ class PartidaTest {
         assertTrue(antes.getSize() > 0);
         Enemigo e = antes.get(0);
         int vidaAntes = e.getVidaActual();
+        assertTrue(p.moverJugador(3, 2));
+        assertTrue(p.terminarTurno());
+        assertTrue(p.moverJugador(4, 2));
+        assertTrue(p.terminarTurno());
         assertTrue(p.atacar());
         assertTrue(e.getVidaActual() < vidaAntes);
     }
@@ -132,9 +136,17 @@ class PartidaTest {
     @Test
     void recogerObjetoEnLaMismaCasilla() throws Exception {
         Partida p = Partida.crearPartidaNueva();
-        assertTrue(p.moverJugador(1, 3));
+        assertTrue(p.moverJugador(2, 4));
         p.terminarTurno();
-        assertTrue(p.moverJugador(1, 4));
+        assertTrue(p.moverJugador(2, 6));
+        p.terminarTurno();
+        assertTrue(p.moverJugador(4, 6));
+        p.terminarTurno();
+        assertTrue(p.moverJugador(4, 8));
+        p.terminarTurno();
+        assertTrue(p.moverJugador(5, 9));
+        p.terminarTurno();
+        assertTrue(p.moverJugador(6, 11));
         assertTrue(p.hayObjetoEnPosicion());
         assertTrue(p.recogerObjeto());
     }

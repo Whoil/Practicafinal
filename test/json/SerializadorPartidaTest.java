@@ -305,15 +305,15 @@ class SerializadorPartidaTest {
         assertNotNull(dto);
         assertEquals(3, dto.getCuevas().length);
         assertEquals("cueva_facil", dto.getCuevas()[0].getId());
-        assertEquals(9, dto.getCuevas()[0].getFilas());
-        assertEquals(9, dto.getCuevas()[0].getColumnas());
+        assertEquals(15, dto.getCuevas()[0].getFilas());
+        assertEquals(15, dto.getCuevas()[0].getColumnas());
 
         Mazmorra recuperada = SerializadorPartida.dtoAMazmorra(dto);
         assertNotNull(recuperada);
         assertEquals(3, recuperada.getNumeroCuevas());
         assertEquals("cueva_facil", recuperada.getCuevaActual().getId());
         assertEquals("INICIO",
-                dto.getCuevas()[0].getMatriz()[1][1]);
+                dto.getCuevas()[0].getMatriz()[2][2]);
     }
 
     @Test
@@ -471,10 +471,10 @@ class SerializadorPartidaTest {
         Cueva facil = resultado.getMazmorra().getCuevaPorId("cueva_facil");
 
         DatosCuevaDTO dto = SerializadorPartida.cuevaADTO(facil);
-        assertEquals(9, dto.getFilas());
-        assertEquals(9, dto.getColumnas());
+        assertEquals(15, dto.getFilas());
+        assertEquals(15, dto.getColumnas());
         assertEquals("MURO", dto.getMatriz()[0][0]);
-        assertEquals("INICIO", dto.getMatriz()[1][1]);
+        assertEquals("INICIO", dto.getMatriz()[2][2]);
 
         Cueva recuperada = SerializadorPartida.dtoACueva(dto);
         assertEquals(facil.getId(), recuperada.getId());

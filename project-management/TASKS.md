@@ -187,12 +187,12 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Terminado cuando la UI de partida este mas pulida visualmente y, si se aprueba, incluya efectos de sonido o musica para pasos, ataques, objetos y cambio de habitacion.
 
 Sub-tareas:
-- **C-09.1** Obstaculos (ROCA, ARBUSTO), mapas laberinticos (9x9, 13x13, 15x15) y muros finos (5px) - PARCIAL
+- **C-09.1** Obstaculos (ROCA, ARBUSTO), mapas laberinticos (15x15, 19x19, 23x23), muros macizos (10px) y sistema de niebla (fog-of-war con radio 3 y opacidad progresiva) - HECHA
 - **C-09.2** Musica de fondo con javafx.media y ReproductorMusica singleton - HECHA
 - **C-09.3** Animaciones (movimiento suave, ataque, muerte) - PENDIENTE
 - **C-09.4** Efectos visuales (particulas, brillos) - PENDIENTE
 - **C-09.5** Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) - PENDIENTE
-- **C-09.6** Mejorar diseno de cuevas: no todas cuadradas, trazado laberintico con mejores obstaculos - PENDIENTE
+- **C-09.6** Mejorar diseno de cuevas: mapas laberinticos con paredes de 2 celdas, 3 dificultades, mejor trazado y obstaculos - HECHA
 
 - **C-09.7** Implementar efectos de sonido cortos (SFX) para interacciones: recoger objeto, ataque y dano - PENDIENTE
 - **C-09.8** Anadir animaciones de transicion fluida (fade in/out) entre pantallas - PENDIENTE

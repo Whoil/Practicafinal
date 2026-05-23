@@ -28,6 +28,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import Estructuras.Cola;
 import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import Estructuras.MiIterador;
@@ -102,6 +103,13 @@ public class PantallaJuego {
     private int recibirAtaqueFila = -1, recibirAtaqueCol = -1;
     private Timeline recibirAtaqueTimer;
 
+    // Sistema de vision limitada (fog-of-war)
+    private static final int RADIO_VISION = 3;
+    private static final double[] OPACIDAD_FOG = { 0.0, 0.15, 0.40, 0.75 };
+    private int[][] visibilidad;
+    private Pane gridFog;
+    private double[] cumX, cumY, colWidth, rowHeight;
+
     public PantallaJuego(Partida partida, Stage stage, Runnable volverAlMenu) {
         this.partida = partida;
         this.stage = stage;
@@ -144,9 +152,11 @@ public class PantallaJuego {
         gridCeldas = new Pane();
         gridWalls = new Pane();
         gridWalls.setMouseTransparent(true);
+        gridFog = new Pane();
+        gridFog.setMouseTransparent(true);
         gridOverlay = new Pane();
         gridOverlay.setMouseTransparent(true);
-        gridLayer.getChildren().addAll(gridCeldas, gridWalls, gridOverlay);
+        gridLayer.getChildren().addAll(gridCeldas, gridWalls, gridFog, gridOverlay);
 
         txtFeedback = new Text("");
         txtFeedback.setFont(Font.font(FONT, FontWeight.BOLD, 18));
@@ -375,6 +385,7 @@ public class PantallaJuego {
     private void construirGrid() {
         gridCeldas.getChildren().clear();
         gridWalls.getChildren().clear();
+        if (gridFog != null) gridFog.getChildren().clear();
 
         CuevaEnMapa cueva = partida.getCuevaActual();
         if (cueva == null) return;
@@ -383,11 +394,11 @@ public class PantallaJuego {
         int cols = cueva.getColumnas();
         double cellSize = Math.min(600.0 / cols, 600.0 / filas);
         cellSize = Math.min(cellSize, 80);
-        double wallThickness = 5;
+        double wallThickness = 10;
         Color colorMuro = DatosTemaCueva.paraCuevaId(cueva.getId()).getColorMuro();
 
-        // Calcular anchos de columna: solo MURO -> 5px, else cellSize
-        double[] colWidth = new double[cols];
+        // Calcular anchos de columna: solo MURO -> wallThickness, else cellSize
+        colWidth = new double[cols];
         for (int c = 0; c < cols; c++) {
             boolean soloMuro = true;
             for (int f = 0; f < filas; f++) {
@@ -399,8 +410,8 @@ public class PantallaJuego {
             colWidth[c] = soloMuro ? wallThickness : cellSize;
         }
 
-        // Calcular altos de fila: solo MURO -> 5px, else cellSize
-        double[] rowHeight = new double[filas];
+        // Calcular altos de fila: solo MURO -> wallThickness, else cellSize
+        rowHeight = new double[filas];
         for (int f = 0; f < filas; f++) {
             boolean soloMuro = true;
             for (int c = 0; c < cols; c++) {
@@ -413,11 +424,11 @@ public class PantallaJuego {
         }
 
         // Posiciones acumuladas
-        double[] cumX = new double[cols];
+        cumX = new double[cols];
         for (int c = 1; c < cols; c++) {
             cumX[c] = cumX[c-1] + colWidth[c-1];
         }
-        double[] cumY = new double[filas];
+        cumY = new double[filas];
         for (int f = 1; f < filas; f++) {
             cumY[f] = cumY[f-1] + rowHeight[f-1];
         }
@@ -435,47 +446,22 @@ public class PantallaJuego {
                 double w = colWidth[c];
                 double h = rowHeight[f];
 
+                // Fondo solido para toda celda (muro o no)
+                Rectangle fondo = new Rectangle(w, h);
                 if (celda.getTipo() == TipoCelda.MURO) {
-                    // Dibujar solo tiras de 5px en los bordes que limitan con celdas no MURO
-                    double left = px;
-                    double top = py;
-                    double right = px + w;
-                    double bottom = py + h;
-                    // Izquierda
-                    if (c == 0 || cueva.getCelda(f, c-1).getTipo() != TipoCelda.MURO) {
-                        Rectangle wr = new Rectangle(wallThickness, h);
-                        wr.setFill(colorMuro); wr.setStroke(null);
-                        wr.setLayoutX(left); wr.setLayoutY(top);
-                        gridWalls.getChildren().add(wr);
-                    }
-                    // Derecha
-                    if (c == cols-1 || cueva.getCelda(f, c+1).getTipo() != TipoCelda.MURO) {
-                        Rectangle wr = new Rectangle(wallThickness, h);
-                        wr.setFill(colorMuro); wr.setStroke(null);
-                        wr.setLayoutX(right - wallThickness); wr.setLayoutY(top);
-                        gridWalls.getChildren().add(wr);
-                    }
-                    // Arriba
-                    if (f == 0 || cueva.getCelda(f-1, c).getTipo() != TipoCelda.MURO) {
-                        Rectangle wr = new Rectangle(w, wallThickness);
-                        wr.setFill(colorMuro); wr.setStroke(null);
-                        wr.setLayoutX(left); wr.setLayoutY(top);
-                        gridWalls.getChildren().add(wr);
-                    }
-                    // Abajo
-                    if (f == filas-1 || cueva.getCelda(f+1, c).getTipo() != TipoCelda.MURO) {
-                        Rectangle wr = new Rectangle(w, wallThickness);
-                        wr.setFill(colorMuro); wr.setStroke(null);
-                        wr.setLayoutX(left); wr.setLayoutY(bottom - wallThickness);
-                        gridWalls.getChildren().add(wr);
-                    }
+                    fondo.setFill(colorMuro);
                 } else {
-                    Rectangle rect = new Rectangle(w, h);
-                    rect.setFill(colorParaTipo(celda.getTipo()));
-                    rect.setStroke(Color.rgb(60, 60, 60));
-                    rect.setStrokeWidth(0.5);
+                    fondo.setFill(colorParaTipo(celda.getTipo()));
+                    fondo.setStroke(Color.rgb(60, 60, 60));
+                    fondo.setStrokeWidth(0.5);
+                }
+                fondo.setLayoutX(px);
+                fondo.setLayoutY(py);
+                gridCeldas.getChildren().add(fondo);
 
-                    StackPane cellPane = new StackPane(rect);
+                if (celda.getTipo() != TipoCelda.MURO) {
+                    // StackPane para entidades y clicks sobre suelos transitables
+                    StackPane cellPane = new StackPane();
                     cellPane.setPrefSize(w, h);
                     cellPane.setLayoutX(px);
                     cellPane.setLayoutY(py);
@@ -514,9 +500,11 @@ public class PantallaJuego {
 
         gridOverlay.setPrefSize(totalWidth, totalHeight);
         gridCeldas.setPrefSize(totalWidth, totalHeight);
-        gridWalls.setPrefSize(totalWidth, totalHeight);
+        gridWalls.setPrefSize(0, 0);
+        gridFog.setPrefSize(totalWidth, totalHeight);
         StackPane.setAlignment(gridCeldas, Pos.TOP_LEFT);
         StackPane.setAlignment(gridWalls, Pos.TOP_LEFT);
+        StackPane.setAlignment(gridFog, Pos.TOP_LEFT);
         StackPane.setAlignment(gridOverlay, Pos.TOP_LEFT);
     }
 
@@ -558,12 +546,15 @@ public class PantallaJuego {
                     if (celdas[f] == null) continue;
                     for (int c = 0; c < cols && c < celdas[f].length; c++) {
                         StackPane cell = celdas[f][c];
-                        if (cell != null) {
+                        if (cell != null && cell.getChildren().size() > 1) {
                             cell.getChildren().remove(1, cell.getChildren().size());
                         }
                     }
                 }
             }
+
+            // Recalcular visibilidad (fog-of-war) desde la posicion del jugador
+            recalcularVisibilidad();
 
             // Restaurar colores de todas las celdas y aplicar flash de ataque
             if (celdas != null) {
@@ -658,6 +649,9 @@ public class PantallaJuego {
                 }
             }
         }
+
+        // Niebla de guerra: oculta celdas fuera del radio de vision
+        actualizarFog();
 
         // Barras de vida sobre entidades
         if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
@@ -796,6 +790,111 @@ public class PantallaJuego {
         }
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Sistema de vision limitada (fog-of-war)
+    // ---------------------------------------------------------------
+
+    /**
+     * Calcula que celdas son visibles desde el jugador usando BFS.
+     * La vision se propaga a traves de celdas transitables (SUELO, PUERTA, etc.)
+     * hasta RADIO_VISION de distancia. Muros y obstaculos (ROCA, ARBUSTO)
+     * bloquean la propagacion pero son marcados como visibles en el borde.
+     */
+    private void recalcularVisibilidad() {
+        CuevaEnMapa cueva = partida.getCuevaActual();
+        if (cueva == null) return;
+        int filas = cueva.getFilas();
+        int cols = cueva.getColumnas();
+
+        if (visibilidad == null || visibilidad.length != filas || visibilidad[0].length != cols) {
+            visibilidad = new int[filas][cols];
+        }
+        for (int f = 0; f < filas; f++)
+            for (int c = 0; c < cols; c++)
+                visibilidad[f][c] = -1;
+
+        Jugador j = partida.getJugador();
+        int pf = j.getFila();
+        int pc = j.getColumna();
+        if (pf < 0 || pc < 0) return;
+
+        Cola<int[]> cola = new Cola<>();
+        visibilidad[pf][pc] = 0;
+        cola.offer(new int[]{pf, pc, 0});
+
+        int[][] dirs = {{-1,0}, {1,0}, {0,-1}, {0,1}};
+
+        while (!cola.isEmpty()) {
+            int[] dato = cola.poll();
+            int f = dato[0];
+            int c = dato[1];
+            int dist = dato[2];
+
+            if (dist >= RADIO_VISION) continue;
+
+            for (int[] d : dirs) {
+                int nf = f + d[0];
+                int nc = c + d[1];
+                if (nf < 0 || nf >= filas || nc < 0 || nc >= cols) continue;
+                if (visibilidad[nf][nc] != -1) continue;
+
+                CeldaEnMapa celda = cueva.getCelda(nf, nc);
+                TipoCelda tipo = celda.getTipo();
+                int nuevaDist = dist + 1;
+
+                visibilidad[nf][nc] = nuevaDist;
+
+                if (tipo != TipoCelda.MURO && tipo != TipoCelda.ROCA && tipo != TipoCelda.ARBUSTO) {
+                    if (nuevaDist < RADIO_VISION) {
+                        cola.offer(new int[]{nf, nc, nuevaDist});
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Dibuja rectangulos de niebla sobre las celdas no visibles.
+     * La opacidad del rectangulo depende de la distancia BFS:
+     *   dist 0 (jugador): 0%
+     *   dist 1:          15%
+     *   dist 2:          40%
+     *   dist 3:          75%
+     *   -1 (no visible): 100%
+     * La niebla se situa encima de gridCeldas (suelos + entidades)
+     * y debajo de gridOverlay, tapando automaticamente lo que no
+     * debe verse sin necesidad de modificar la logica de entidades.
+     */
+    private void actualizarFog() {
+        gridFog.getChildren().clear();
+        if (visibilidad == null || cumX == null) return;
+
+        CuevaEnMapa cueva = partida.getCuevaActual();
+        if (cueva == null) return;
+        int filas = cueva.getFilas();
+        int cols = cueva.getColumnas();
+
+        for (int f = 0; f < filas && f < cumY.length; f++) {
+            for (int c = 0; c < cols && c < cumX.length; c++) {
+                int dist = visibilidad[f][c];
+                double opacidad;
+                if (dist < 0 || dist >= OPACIDAD_FOG.length) {
+                    opacidad = 1.0;
+                } else {
+                    opacidad = OPACIDAD_FOG[dist];
+                }
+
+                if (opacidad > 0) {
+                    Rectangle fogRect = new Rectangle(colWidth[c], rowHeight[f]);
+                    fogRect.setFill(Color.rgb(0, 0, 0, opacidad));
+                    fogRect.setLayoutX(cumX[c]);
+                    fogRect.setLayoutY(cumY[f]);
+                    gridFog.getChildren().add(fogRect);
+                }
+            }
         }
     }
 
