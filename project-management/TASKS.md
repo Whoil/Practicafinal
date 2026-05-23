@@ -31,6 +31,7 @@ HECHA
 ### Resumen de tareas pendientes (Parte C)
 
 - **C-09** Pulido audiovisual (sonidos/musica/animaciones/menu pausa) - PENDIENTE
+- **C-10** Ataque direccional, ataque especial cargable y revision de turnos - PENDIENTE
 - **R-01** Revision de restricciones (colecciones prohibidas, arrays) - PENDIENTE
 - **R-02** Revision de codigo y tests para cada PR - PENDIENTE
 
@@ -178,6 +179,16 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Terminado cuando el jugador pueda elegir la direccion u objetivo del ataque si hay varios enemigos adyacentes, y solo reciba dano el enemigo elegido.
 - Propuesta tecnica: exponer un metodo tipo `atacarDireccion(df, dc)` o reutilizar `atacar(fila, columna)` desde JavaFX.
 - Tests minimos: varios enemigos adyacentes, ataque hacia una direccion concreta, direccion sin enemigo devuelve `false`.
+
+### C-10 Ataque direccional, ataque especial cargable y revision de turnos
+
+- Responsable: Hector / Parte C
+- Estado: PENDIENTE
+- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/vista/`, `test/`, `project-management/`
+- Terminado cuando:
+  1. El jugador pueda elegir la direccion del ataque si hay varios enemigos adyacentes (ataque direccional).
+  2. Exista un ataque especial que se vaya cargando a lo largo de la partida (cada cierto numero de turnos) y pueda ejecutarse cuando este cargado.
+  3. Se haya revisado y ajustado la cantidad de turnos totales de la partida y los turnos por cueva.
 
 ### C-09 Pulido audiovisual y presentacion
 
