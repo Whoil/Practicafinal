@@ -796,22 +796,38 @@ public class EscapeMazmorraApp extends Application {
      * partida actual. Configura los callbacks para cambio de cueva
      * y fin de partida.
      */
+    private void logDirecto(String msg) {
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter("direct_debug.log", true);
+            fw.write(java.time.LocalDateTime.now() + " " + msg + "\n");
+            fw.close();
+        } catch (Exception ign) {}
+    }
+
     private void mostrarJuego() {
-        PantallaJuego pj = new PantallaJuego(partida, stage, this::volverAlMenu);
-
-        // Callback al cambiar de cueva: mostrar transicion a la siguiente
-        pj.setAlCambiarCueva(() -> {
-            mostrarTransicion(partida.getCuevaActual().getId());
-        });
-
-        // Callback al terminar la partida: mostrar pantalla final
-        pj.setAlTerminarPartida(() -> {
-            boolean victoria = partida.getEstado() == modelo.juego.EstadoPartida.VICTORIA;
-            mostrarFinal(victoria);
-        });
-
-        Scene gameScene = pj.crearScene();
-        stage.setScene(gameScene);
+        logDirecto("mostrarJuego() INICIO");
+        try {
+            PantallaJuego pj = new PantallaJuego(partida, stage, this::volverAlMenu);
+            logDirecto("PantallaJuego creado");
+            pj.setAlCambiarCueva(() -> {
+                logDirecto("Callback cambiar cueva: " + partida.getCuevaActual().getId());
+                mostrarTransicion(partida.getCuevaActual().getId());
+            });
+            pj.setAlTerminarPartida(() -> {
+                boolean victoria = partida.getEstado() == modelo.juego.EstadoPartida.VICTORIA;
+                logDirecto("Callback fin partida: " + (victoria ? "VICTORIA" : "DERROTA"));
+                mostrarFinal(victoria);
+            });
+            Scene gameScene = pj.crearScene();
+            logDirecto("crearScene() completado");
+            stage.setScene(gameScene);
+            logDirecto("stage.setScene() completado");
+        } catch (Throwable t) {
+            logDirecto("EXCEPCION EN mostrarJuego: " + t.getClass().getName() + " - " + t.getMessage());
+            for (StackTraceElement ste : t.getStackTrace()) {
+                logDirecto("  at " + ste.toString());
+            }
+        }
     }
 
     /**

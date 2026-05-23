@@ -1818,3 +1818,53 @@ Pendiente de autorizacion humana.
 - Hacer commit del cambio de `PantallaJuego.java`.
 - Hacer push a `origin/feature/a-iconos`.
 - Hacer merge a `main` cuando se autorice.
+
+## 2026-05-23 - Alvaro / Parte A - Depuracion cierre + tareas iconos
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A (coordinacion general)
+Agente: opencode-agente
+
+### Contexto
+
+Se depuro un cierre inesperado al entrar a la primera cueva tras merge de `origin/main`.
+La causa no era una excepcion no capturada, sino que el catch solo capturaba `Exception`
+y no `Throwable`. Se anadio logging directo a archivo (`direct_debug.log`, `crash_detail.log`)
+y se cambiaron los catch a `catch (Throwable)`. Tras la correccion, el cierre dejo de ocurrir.
+
+### Sincronizacion
+
+Rama: `feature/a-iconos`
+Cambio remoto revisado: si, rama actualizada con `origin/main` en sesiones previas.
+Documentos leidos/modificados: `TASKS.md`, `SCRATCHPAD.md`, `IA_DIARY.md`.
+
+### Tareas trabajadas
+
+1. Depuracion del cierre al entrar a cueva tras merge con `origin/main`.
+2. Anadido logging directo a archivo en `PantallaJuego.java` y `EscapeMazmorraApp.java`.
+3. Cambiados catch de `Exception` a `Throwable` en `actualizar()` y `crearScene()`.
+4. Anadidas sub-tareas de iconos a `TASKS.md` (C-09.13 a C-09.16).
+
+### Archivos modificados
+
+- `src/vista/PantallaJuego.java` — anadido `logError()`, catch `Throwable`, logging en excepciones.
+- `src/vista/EscapeMazmorraApp.java` — anadido `logDirecto()`, `mostrarJuego()` envuelto en try-catch(Throwable).
+- `project-management/TASKS.md` — anadidas sub-tareas C-09.13 a C-09.16.
+- `project-management/SCRATCHPAD.md` — actualizado.
+- `project-management/IA_DIARY.md` — actualizado.
+
+### Commits y push realizados
+
+Pendiente de autorizacion humana (esta sesion).
+
+### Pruebas ejecutadas
+
+- Compilacion completa del proyecto con `scripts\run.ps1 -CompileOnly`: correcta.
+- Juego ejecutado y verificado que ya no se cierra al entrar a la cueva.
+
+### Pendiente para la siguiente sesion
+
+- Ejecutar tareas C-09.13 a C-09.16 (encontrar/crear iconos para puerta, escudo, tesoro, salida, itch.io).
+- Probar iconos en el juego tras implementarlos.

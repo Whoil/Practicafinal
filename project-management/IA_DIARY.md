@@ -860,3 +860,25 @@ Sesion larga pero productiva. El guardado completo requirio modificar varias cla
 
 **Tests**: 182/182 OK.
 
+## 2026-05-23 — Depuracion cierre al entrar a cueva + tareas iconos
+
+**Problema**: Tras merge de `origin/main`, el juego se cerraba al hacer clic en "Entrar" en la pantalla de transicion. El `crash.log` aparecia vacio.
+
+**Diagnostico**: Los catch capturaban solo `Exception`, no `Throwable`. Un posible `Error` (como `StackOverflowError`) no era capturado y el uncaught exception handler cerraba el stage. Se anadio logging directo a archivo (`direct_debug.log`, `crash_detail.log`) para diagnosticar.
+
+**Correccion**: 
+- `PantallaJuego.java`: anadido `logError()` que escribe a `crash_detail.log`; catch cambiado de `Exception` a `Throwable` en `actualizar()` y `crearScene()`; logging detallado en excepciones.
+- `EscapeMazmorraApp.java`: anadido `logDirecto()` que escribe a `direct_debug.log`; `mostrarJuego()` envuelto en try-catch(Throwable).
+
+**Hallazgos adicionales**:
+- No hay icono para celda PUERTA (solo color amarillo).
+- El icono de ESCUDO usa `staff2.png` (un baston).
+- No hay iconos para TESORO ni SALIDA.
+- Faltan assets de pociones, puertas, escudos, cofres y bosses (buscar en itch.io).
+
+**Tareas anadidas**: C-09.13 a C-09.16 en `TASKS.md`.
+
+**Archivos**: `PantallaJuego.java`, `EscapeMazmorraApp.java`, `TASKS.md`, `SCRATCHPAD.md`, `IA_DIARY.md`.
+
+**Tests**: Compilacion OK. Juego verificado que ya no se cierra.
+

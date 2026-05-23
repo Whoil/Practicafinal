@@ -413,8 +413,16 @@ public class PantallaJuego {
         rootStack.getChildren().add(ayudaPane);
 
         // Construir grid inicial y paneles
-        construirGrid();
-        actualizar();
+        try {
+            construirGrid();
+            actualizar();
+        } catch (Throwable e) {
+            logError("Error en crearScene: " + e.getClass().getName() + " - " + e.getMessage());
+            for (StackTraceElement ste : e.getStackTrace()) {
+                logError("  at " + ste.toString());
+            }
+            e.printStackTrace();
+        }
         root.requestFocus();
 
         return scene;
@@ -576,8 +584,17 @@ public class PantallaJuego {
     // Actualizacion (redibujar cada vez que cambia el estado)
     // ---------------------------------------------------------------
 
+    private void logError(String msg) {
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter("crash_detail.log", true);
+            fw.write(java.time.LocalDateTime.now() + " " + msg + "\n");
+            fw.close();
+        } catch (Exception ignored) {}
+    }
+
     private void actualizar() {
         try {
+            logError("actualizar() inicio");
             // Detectar fin de partida (victoria o derrota)
             if (!partidaFinalizada && partida.getEstado() != modelo.juego.EstadoPartida.EN_CURSO) {
                 partidaFinalizada = true;
@@ -834,7 +851,11 @@ public class PantallaJuego {
 
         // Log estilizado
         actualizarLogEstilizado();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
+            logError("Error en actualizar: " + ex.getClass().getName() + " - " + ex.getMessage());
+            for (StackTraceElement ste : ex.getStackTrace()) {
+                logError("  at " + ste.toString());
+            }
             ex.printStackTrace();
         }
     }
