@@ -1728,3 +1728,57 @@ N/A.
 - C-09.8 Transiciones
 - C-09.9 Alertas visuales
 - C-09.10 Modo antorcha
+
+---
+
+## Cierre de sesion — 2026-05-23
+
+### Humano y parte
+Humano no identificado explicitamente. Trabajo en rama feature/a-iconos (Parte A/C).
+
+### Rama usada
+`feature/a-iconos`
+
+### Tareas trabajadas
+1. Aumentar turnos 40→60 y auto-avance en PUERTA con llave.
+2. Correccion de revisor independiente: flag `movio` para evitar auto-avance al atacar desde PUERTA.
+3. Mensaje "Hay una pared" al chocar con obstaculos (MURO/ROCA/ARBUSTO).
+4. Dialogo de error en boton Cargar partida (Alert).
+
+### Archivos modificados
+- `src/modelo/juego/FabricaPartida.java` — TURNOS_INICIALES 40→60
+- `src/vista/PantallaJuego.java` — auto-avance, flag movio, esObstaculo(), mensajes de pared
+- `src/vista/EscapeMazmorraApp.java` — Alert en boton Cargar partida
+- `test/modelo/juego/FabricaPartidaTest.java` — expected 40→60
+- `test/modelo/juego/PartidaTest.java` — expected 40→60, loop agotamiento 40→60
+- `project-management/SCRATCHPAD.md` — actualizado
+- `project-management/TASKS.md` — C-09.11 anadida HECHA
+- `project-management/IA_DIARY.md` — entrada anadida
+
+### Cambios realizados
+- TURNOS_INICIALES 40→60 en FabricaPartida.
+- Auto-avance en PUERTA solo tras movimiento real (movio).
+- esObstaculo() para detectar MURO/ROCA/ARBUSTO.
+- Mensaje "Hay una pared" en teclado, click y botones de movimiento.
+- Alert error en Cargar partida cuando no hay archivo.
+
+### Commits y push realizados
+- `1dd621f` — Aumentar turnos 40→60 y auto-avance en PUERTA con llave
+- `86c0dbd` — Corregir mensaje de pared y dialogo de carga de partida
+- Ambos pusheados a `origin/feature/a-iconos`.
+
+### Pruebas ejecutadas
+Tests JUnit: 182/182 OK en ambos commits.
+
+### Pendiente para la siguiente sesion
+- C-09.3 Animaciones
+- C-09.4 Efectos visuales
+- C-09.5 Sonidos
+- C-09.7 SFX
+- C-09.8 Transiciones
+- C-09.9 Alertas visuales
+- C-09.10 Modo antorcha
+
+### Riesgos o avisos
+- El auto-avance deja `accionRealizada=true`, por lo que el primer input tras la transicion dispara auto-turn (mismo comportamiento que el boton manual "CAMBIAR CUEVA").
+- Los commits estan en `feature/a-iconos`, no mergeados a `main`. Pendiente de PR y revisor independiente antes de merge.
