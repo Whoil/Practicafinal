@@ -147,8 +147,8 @@ class PartidaTest {
         assertTrue(p.moverJugador(5, 9));
         p.terminarTurno();
         assertTrue(p.moverJugador(6, 11));
-        assertTrue(p.hayObjetoEnPosicion());
-        assertTrue(p.recogerObjeto());
+        assertFalse(p.hayObjetoEnPosicion());
+        assertEquals(1, p.getJugador().getCantidadObjetosInventario());
     }
 
     @Test

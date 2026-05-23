@@ -74,10 +74,11 @@ public class PantallaJuego {
     private Pane gridWalls;
     private Pane gridOverlay;
     private StackPane[][] celdas;
-    private Text txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado;
+    private Text txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase;
     private VBox inventarioBox;
     private VBox logBox;
     private Text txtCuevaNombre;
+    private Text btnArriba, btnAbajo, btnIzq, btnDer, btnAtacar;
 
     // Acciones desactivables
     private VBox accionesBox;
@@ -221,7 +222,8 @@ public class PantallaJuego {
         txtTurnos = labelStats("Turnos");
         txtCueva = labelStats("Cueva");
         txtEstado = labelStats("Estado");
-        statsBox.getChildren().addAll(tituloStats, txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado);
+        txtFase = labelStats("Fase");
+        statsBox.getChildren().addAll(tituloStats, txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase);
         panelDer.getChildren().add(statsBox);
 
         // Inventario
@@ -685,6 +687,8 @@ public class PantallaJuego {
         txtTurnos.setText("Turnos restantes: " + partida.getTurnosRestantes());
         txtCueva.setText("Cueva: " + cueva.getId());
         txtEstado.setText("Estado: " + partida.getEstado());
+        actualizarFase();
+        actualizarBotonesAccion();
         txtCuevaNombre.setText("CUEVA: " + cueva.getId().toUpperCase());
 
         // Inventario
@@ -721,19 +725,24 @@ public class PantallaJuego {
 
         // Acciones
         accionesBox.getChildren().clear();
-        agregarBotonAccion("ARRIBA [W]", () -> ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno"));
+        btnArriba = crearBotonTexto("ARRIBA [W]");
+        btnArriba.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno"));
+        accionesBox.getChildren().add(btnArriba);
         HBox movHoriz = new HBox(4);
         movHoriz.setAlignment(Pos.CENTER);
-        Text btnIzq = crearBotonTexto("< IZQ [A]");
+        btnIzq = crearBotonTexto("< IZQ [A]");
         btnIzq.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno"));
-        Text btnDer = crearBotonTexto("DER [D] >");
+        btnDer = crearBotonTexto("DER [D] >");
         btnDer.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno"));
         movHoriz.getChildren().addAll(btnIzq, btnDer);
         accionesBox.getChildren().add(movHoriz);
-        agregarBotonAccion("ABAJO [S]", () -> ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno"));
+        btnAbajo = crearBotonTexto("ABAJO [S]");
+        btnAbajo.setOnMouseClicked(e -> ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno"));
+        accionesBox.getChildren().add(btnAbajo);
 
-        agregarBotonAccion("ATACAR [ESPACIO]", () -> ejecutarAccion(partida.atacar(), "No hay enemigo para atacar"));
-        agregarBotonAccion("RECOGER [R]", () -> ejecutarAccion(partida.recogerObjeto(), "No hay objeto que recoger"));
+        btnAtacar = crearBotonTexto("ATACAR [ESPACIO]");
+        btnAtacar.setOnMouseClicked(e -> ejecutarAccion(partida.atacar(), "No hay enemigo para atacar"));
+        accionesBox.getChildren().add(btnAtacar);
 
         // Boton Terminar Turno destacado
         Text btnTurno = crearBotonTexto("=== TERMINAR TURNO [T] ===");
@@ -958,10 +967,47 @@ public class PantallaJuego {
         return t;
     }
 
-    private void agregarBotonAccion(String texto, Runnable accion) {
-        Text t = crearBotonTexto(texto);
-        t.setOnMouseClicked(e -> accion.run());
-        accionesBox.getChildren().add(t);
+    private void actualizarFase() {
+        boolean mov = partida.isMovimientoRealizado();
+        boolean acc = partida.isAccionRealizada();
+        modelo.juego.EstadoPartida est = partida.getEstado();
+        if (est != modelo.juego.EstadoPartida.EN_CURSO) {
+            txtFase.setText("Fase: —");
+            txtFase.setFill(Color.GRAY);
+        } else if (mov && acc) {
+            txtFase.setText("Fase: Listo \u2713\u2713");
+            txtFase.setFill(Color.GOLD);
+        } else if (mov) {
+            txtFase.setText("Fase: Movido \u2713");
+            txtFase.setFill(Color.LIGHTGREEN);
+        } else if (acc) {
+            txtFase.setText("Fase: Atacado \u2713");
+            txtFase.setFill(Color.LIGHTGREEN);
+        } else {
+            txtFase.setText("Fase: Pendiente");
+            txtFase.setFill(Color.web("#CCCCCC"));
+        }
+    }
+
+    private void actualizarBotonesAccion() {
+        boolean mov = partida.isMovimientoRealizado();
+        boolean acc = partida.isAccionRealizada();
+        aplicarEstiloBoton(btnArriba, !mov);
+        aplicarEstiloBoton(btnAbajo, !mov);
+        aplicarEstiloBoton(btnIzq, !mov);
+        aplicarEstiloBoton(btnDer, !mov);
+        aplicarEstiloBoton(btnAtacar, !acc);
+    }
+
+    private void aplicarEstiloBoton(Text t, boolean habilitado) {
+        if (t == null) return;
+        if (habilitado) {
+            t.setOpacity(1.0);
+            t.setCursor(Cursor.HAND);
+        } else {
+            t.setOpacity(0.35);
+            t.setCursor(Cursor.DEFAULT);
+        }
     }
 
     /**

@@ -52,7 +52,6 @@ class FabricaPartidaTest {
         assertTrue(partida.moverJugador(8, 4));
         assertTrue(partida.pasarTurno());
         assertTrue(partida.moverJugador(8, 2));
-        assertTrue(partida.recogerObjeto("llave-cueva-media"));
         assertTrue(partida.pasarTurno());
         assertTrue(partida.moverJugador(10, 2));
         assertTrue(partida.pasarTurno());
