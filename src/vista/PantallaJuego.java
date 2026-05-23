@@ -25,6 +25,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.geometry.Rectangle2D;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -102,6 +108,10 @@ public class PantallaJuego {
     // Efecto visual cuando el jugador recibe dano
     private int recibirAtaqueFila = -1, recibirAtaqueCol = -1;
     private Timeline recibirAtaqueTimer;
+
+    // Cache de imagenes para los assets del Dungeon Asset Pack
+    private static final Map<String, Image> IMAGE_CACHE = new HashMap<>();
+    private static final String ASSETS_BASE = "Dungeon Asset Pack" + File.separator;
 
     // Sistema de vision limitada (fog-of-war)
     private static final int RADIO_VISION = 3;
@@ -590,62 +600,58 @@ public class PantallaJuego {
         DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaIdActual);
         double emojiSize = Math.min(cellSize * 0.65, 40);
 
-        // Jugador (emoji de mago)
+        // Jugador (icono del asset pack: knight)
         Jugador j = partida.getJugador();
-        Text playerEmoji = crearEmoji("\uD83E\uDDD9", emojiSize);
-        DropShadow sombraP = new DropShadow();
-        sombraP.setRadius(6);
-        sombraP.setColor(Color.rgb(0, 0, 0, 0.6));
-        playerEmoji.setEffect(sombraP);
+        ImageView playerIcon = crearSpriteAssets("characters" + File.separator + "Spritesheets" + File.separator + "knight_idle.png", emojiSize);
         if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
-            celdas[j.getFila()][j.getColumna()].getChildren().add(playerEmoji);
+            celdas[j.getFila()][j.getColumna()].getChildren().add(playerIcon);
         }
 
-        // Enemigos (emoji segun tematica y tipo)
+        // Enemigos (icono del asset pack segun tematica y tipo)
         ListaDE<Enemigo> enemigos = partida.getEnemigosActuales();
         MiIterador<Enemigo> itE = enemigos.getIterador();
         while (itE.hasNext()) {
             Enemigo e = itE.next();
             boolean esBoss = e instanceof modelo.personajes.Boss;
-            String emoji = esBoss ? tema.getEmojiBoss() : tema.getEmojiEnemigo();
-            Text enemyEmoji = crearEmoji(emoji, emojiSize);
+            String asset = esBoss ? tema.getAssetBoss() : tema.getAssetEnemigo();
+            ImageView enemyIcon = crearSpriteAssets(asset, emojiSize);
             if (esBoss) {
                 DropShadow sombraBoss = new DropShadow();
                 sombraBoss.setRadius(10);
                 sombraBoss.setColor(Color.rgb(200, 50, 50, 0.5));
-                enemyEmoji.setEffect(sombraBoss);
+                enemyIcon.setEffect(sombraBoss);
             }
             if (e.getFila() >= 0 && e.getFila() < filas && e.getColumna() >= 0 && e.getColumna() < cols) {
-                celdas[e.getFila()][e.getColumna()].getChildren().add(enemyEmoji);
+                celdas[e.getFila()][e.getColumna()].getChildren().add(enemyIcon);
             }
         }
 
-        // Objetos en el mapa (emoji segun tipo)
+        // Objetos en el mapa (icono del asset pack segun tipo)
         ListaDE<ObjetoEnMapa> objetos = partida.getObjetosActuales();
         MiIterador<ObjetoEnMapa> itO = objetos.getIterador();
         while (itO.hasNext()) {
             ObjetoEnMapa om = itO.next();
-            String emoji = emojiParaObjeto(om.getObjeto());
-            Text itemEmoji = crearEmoji(emoji, emojiSize * 0.6);
+            String asset = assetParaObjeto(om.getObjeto());
+            ImageView itemIcon = crearSpriteAssets(asset, emojiSize * 0.6);
             if (om.getFila() >= 0 && om.getFila() < filas && om.getColumna() >= 0 && om.getColumna() < cols) {
-                celdas[om.getFila()][om.getColumna()].getChildren().add(itemEmoji);
+                celdas[om.getFila()][om.getColumna()].getChildren().add(itemIcon);
             }
         }
 
-        // Obstaculos (roca, arbusto) — emoji permanente sobre la celda
+        // Obstaculos (roca, arbusto) — icono del asset pack sobre la celda
         for (int f = 0; f < filas; f++) {
             for (int c = 0; c < cols; c++) {
                 if (celdas[f][c] == null) continue;
                 TipoCelda tc = cueva.getCelda(f, c).getTipo();
-                String obsEmoji = null;
+                String obsAsset = null;
                 if (tc == TipoCelda.ROCA) {
-                    obsEmoji = "\uD83E\uDEA8";
+                    obsAsset = "objects" + File.separator + "chest2.png";
                 } else if (tc == TipoCelda.ARBUSTO) {
-                    obsEmoji = "\uD83C\uDF3F";
+                    obsAsset = "objects" + File.separator + "chest3.png";
                 }
-                if (obsEmoji != null) {
-                    Text emojiT = crearEmoji(obsEmoji, emojiSize * 0.7);
-                    celdas[f][c].getChildren().add(emojiT);
+                if (obsAsset != null) {
+                    ImageView obsIcon = crearSpriteAssets(obsAsset, emojiSize * 0.7);
+                    celdas[f][c].getChildren().add(obsIcon);
                 }
             }
         }
@@ -952,24 +958,54 @@ public class PantallaJuego {
     }
 
     /**
-     * Devuelve el emoji correspondiente a un tipo de objeto.
+     * Devuelve la ruta del asset (relativa a ASSETS_BASE) para un tipo de objeto.
      */
-    private String emojiParaObjeto(Objeto obj) {
-        if (obj instanceof modelo.objetos.Pocion) return "\uD83E\uDDEA";
-        if (obj instanceof modelo.objetos.Llave) return "\uD83D\uDD11";
-        if (obj instanceof modelo.objetos.Escudo) return "\uD83D\uDEE1\uFE0F";
-        if (obj instanceof modelo.objetos.Arco) return "\uD83C\uDFF9";
-        if (obj instanceof modelo.objetos.Arma) return "\uD83D\uDDE1\uFE0F";
-        return "\uD83D\uDC8E";
+    private String assetParaObjeto(Objeto obj) {
+        if (obj instanceof modelo.objetos.Pocion) return "objects" + File.separator + "chest1.png";
+        if (obj instanceof modelo.objetos.Llave) return "objects" + File.separator + "key.png";
+        if (obj instanceof modelo.objetos.Escudo) return "weapons" + File.separator + "staff2.png";
+        if (obj instanceof modelo.objetos.Arco) return "weapons" + File.separator + "bow1.png";
+        if (obj instanceof modelo.objetos.Arma) return "weapons" + File.separator + "sword1.png";
+        return "objects" + File.separator + "chest4.png";
     }
 
     /**
-     * Crea un Text con emoji centrado para meter en una celda.
+     * Carga un PNG del Dungeon Asset Pack y devuelve un ImageView.
+     * Para spritesheets con varias frames, muestra solo la primera frame.
      */
-    private Text crearEmoji(String emoji, double tamanio) {
-        Text t = new Text(emoji);
-        t.setFont(Font.font("Segoe UI Emoji", FontWeight.NORMAL, tamanio));
-        return t;
+    private ImageView crearSpriteAssets(String assetPath, double tamanio) {
+        String fullPath = ASSETS_BASE + assetPath;
+        Image img = IMAGE_CACHE.get(fullPath);
+        if (img == null) {
+            try {
+                File f = new File(fullPath);
+                img = new Image(f.toURI().toString());
+                IMAGE_CACHE.put(fullPath, img);
+            } catch (Exception e) {
+                return new ImageView();
+            }
+        }
+        ImageView iv = new ImageView(img);
+
+        double imgW = img.getWidth();
+        double imgH = img.getHeight();
+
+        // Spritesheets de personajes tienen altura > 18px; objetos individuales son mas pequenos
+        if (imgH > 18) {
+            int numFrames = (imgW > imgH * 2.5) ? 4 : 2;
+            double frameW = imgW / numFrames;
+            iv.setViewport(new Rectangle2D(0, 0, frameW, imgH));
+            double scale = tamanio / Math.max(frameW, imgH);
+            iv.setFitWidth(frameW * scale);
+            iv.setFitHeight(imgH * scale);
+        } else {
+            // Objeto individual: escalado uniforme
+            double scale = tamanio / Math.max(imgW, imgH);
+            iv.setFitWidth(imgW * scale);
+            iv.setFitHeight(imgH * scale);
+        }
+        iv.setPreserveRatio(true);
+        return iv;
     }
 
     private void iniciarEfectoAtaque() {

@@ -24,8 +24,8 @@ public enum DatosTemaCueva {
           + "las puertas hacia lo profundo.",
             "radial-gradient(center 50% 50%, radius 60%, #2e2e2e 0%, #0a0a0a 100%)",
             Color.rgb(210, 205, 195),
-            "\uD83D\uDC80",
-            "\u2620\uFE0F",
+            "characters/Spritesheets/skeleton_idle.png",
+            "characters/Spritesheets/shaman1_idle.png",
             "\uD83D\uDD2A"),
 
     PARAMO("cueva_media",
@@ -39,8 +39,8 @@ public enum DatosTemaCueva {
           + "La criatura que lidera esta putrefaccion te espera al final.",
             "radial-gradient(center 50% 50%, radius 60%, #192819 0%, #050a05 100%)",
             Color.rgb(70, 130, 70),
-            "\uD83E\uDDDF",
-            "\uD83E\uDDCC",
+            "characters/Spritesheets/orc1_idle.png",
+            "characters/Spritesheets/orc2_idle.png",
             "\uD83E\uDDEA"),
 
     ABISMO("cueva_dificil",
@@ -56,8 +56,8 @@ public enum DatosTemaCueva {
           + "final y escapar con vida de la mazmorra.",
             "radial-gradient(center 50% 50%, radius 60%, #3a0d0d 0%, #0a0202 100%)",
             Color.rgb(170, 45, 45),
-            "\uD83D\uDC79",
-            "\uD83D\uDE08",
+            "characters/Spritesheets/demon_idle.png",
+            "characters/Spritesheets/warlock_idle.png",
             "\uD83D\uDD25");
 
     private final String cuevaId;
@@ -65,21 +65,21 @@ public enum DatosTemaCueva {
     private final String texto;
     private final String fondoCSS;
     private final Color colorMuro;
-    private final String emojiEnemigo;
-    private final String emojiBoss;
+    private final String assetEnemigo;
+    private final String assetBoss;
     private final String emojiDecoracion;
 
     DatosTemaCueva(String cuevaId, String titulo, String texto,
                    String fondoCSS, Color colorMuro,
-                   String emojiEnemigo, String emojiBoss,
+                   String assetEnemigo, String assetBoss,
                    String emojiDecoracion) {
         this.cuevaId = cuevaId;
         this.titulo = titulo;
         this.texto = texto;
         this.fondoCSS = fondoCSS;
         this.colorMuro = colorMuro;
-        this.emojiEnemigo = emojiEnemigo;
-        this.emojiBoss = emojiBoss;
+        this.assetEnemigo = assetEnemigo;
+        this.assetBoss = assetBoss;
         this.emojiDecoracion = emojiDecoracion;
     }
 
@@ -103,12 +103,12 @@ public enum DatosTemaCueva {
         return colorMuro;
     }
 
-    public String getEmojiEnemigo() {
-        return emojiEnemigo;
+    public String getAssetEnemigo() {
+        return assetEnemigo;
     }
 
-    public String getEmojiBoss() {
-        return emojiBoss;
+    public String getAssetBoss() {
+        return assetBoss;
     }
 
     public String getEmojiDecoracion() {
