@@ -1868,3 +1868,81 @@ Pendiente de autorizacion humana (esta sesion).
 
 - Ejecutar tareas C-09.13 a C-09.16 (encontrar/crear iconos para puerta, escudo, tesoro, salida, itch.io).
 - Probar iconos en el juego tras implementarlos.
+
+## 2026-05-23 - Guillermo / Parte B ayudando a C-09
+
+### Contexto
+
+Guillermo pidio ayudar primero a las tareas visuales/audiovisuales pendientes antes de volver a B-04/B-05. Se reviso `TASKS.md` actualizado tras PR #13 y se acordo trabajar hoy sobre menu de pausa, iconos pendientes y SFX minimos.
+
+### Decisiones cerradas
+
+- Menu de pausa con las teclas previstas en tareas: `P` o `ESC`.
+- El menu de pausa incluye Continuar, Guardar partida y Volver al menu.
+- Volver al menu pide confirmacion.
+- La puerta puede ser un icono creado localmente.
+- La salida se representa como una puerta mas grande para no complicar el diseno.
+- TESORO usa cofres del `Dungeon Asset Pack`.
+- ESCUDO deja de usar `staff2.png`; si no hay asset real, se acepta un icono simple propio.
+- Sonidos: se aceptan efectos basicos para recoger, ataque, dano, puerta, guardar y pausa.
+
+### Cambios realizados
+
+- `src/vista/PantallaJuego.java`: anadido overlay de pausa, confirmacion al volver al menu, iconos decorativos para PUERTA/TESORO/SALIDA, icono simple de ESCUDO y reproduccion de SFX en acciones clave.
+- `src/vista/ReproductorSfx.java`: nuevo reproductor de efectos cortos con `AudioClip`.
+- `datos/audio/sfx/`: generados WAV locales para recoger, ataque, dano, puerta, guardar y pausa.
+- `test/vista/ReproductorSfxTest.java`: test de existencia y cabecera WAV de los SFX.
+- `project-management/TASKS.md`: C-09.7, C-09.12, C-09.13, C-09.14 y C-09.15 pasan a REVISION hasta probar en IntelliJ.
+
+### Verificacion
+
+- Compilacion con `scripts/run.ps1 -CompileOnly`: bloqueada en este entorno por `JAVA_HOME` apuntando a `C:\Users\UAH\.jdks\ms-21.0.10`.
+- Compilacion manual con `javac` disponible: bloqueada porque el proceso de Codex no puede leer los JAR de JavaFX en `.m2` del usuario.
+- Pendiente: compilar/probar desde IntelliJ o PowerShell del usuario, donde JavaFX ya esta configurado.
+
+### Pendiente
+
+- Probar en juego: abrir/cerrar pausa con P/ESC, guardar desde pausa, confirmar volver al menu, ver iconos de puerta/salida/tesoro/escudo y escuchar SFX.
+- Si los sonidos generados no convencen, sustituir WAV por sonidos descargados de Freesound u otra fuente compatible.
+
+### Ajustes tras prueba de Guillermo
+
+- Ataque y puerta sonaban demasiado bajo: se aumento el volumen general de `ReproductorSfx` y se regeneraron `ataque.wav` y `puerta.wav` con mas amplitud/duracion.
+- Tras atacar, la UI podia dar sensacion de que habia que moverse antes de volver a atacar. No se cambio la regla de turnos; ahora si la accion ya esta usada, `ESPACIO` y el boton de ataque avisan que hay que terminar turno con `T`.
+- La barra de vida sobre personajes ya no muestra texto numerico encima de la celda; queda como barra corta para evitar el bloque visual.
+- El inventario marca los objetos equipados con borde dorado y etiqueta `EQ`, y las ranuras de equipo quedan resaltadas.
+- Se reviso el `Dungeon Asset Pack` local por nombres tipo shield/door/gate/portal; no hay assets claros de escudo o puerta en el pack actual.
+
+### Ajustes adicionales de turno e inventario
+
+- Se elimino el auto-fin de turno desde teclado y clic. El turno vuelve a terminar siempre con `T` o con el boton `TERMINAR TURNO`, evitando que atacar a veces cerrara turno y a veces no.
+- La vida vuelve a mostrar puntos numericos sobre la entidad y mantiene la barra abajo.
+- El bloque de equipo se redistribuye con ranuras etiquetadas `ARMA` y `ESCUDO`, y las ranuras equipadas muestran texto `EQUIPADA/EQUIPADO`.
+
+### Ajustes de iconos, controles y ventana
+
+- Se crearon iconos PNG locales en `datos/iconos/`: `puerta.png`, `salida.png`, `escudo.png` y `tesoro.png`.
+- `PantallaJuego` usa esos PNG para PUERTA, SALIDA, ESCUDO y TESORO.
+- Los numeros de vida pasan a fuente Arial en negrita, color claro y contorno negro mas fuerte para mejorar lectura.
+- La confirmacion de volver al menu ya no usa `Alert`; ahora es un panel propio dentro del menu de pausa, con estilo del juego.
+- En la pantalla de controles se oculta el cofre decorativo para que no tape el boton Volver.
+- La ventana principal pasa a ser redimensionable, con tamano minimo 960x540.
+- Se anadio `IconosVisualesTest` para comprobar que los PNG existen y tienen cabecera PNG valida.
+
+### Ajuste final antes de PR
+
+- Se vuelve a mostrar la accion `RECOGER OBJETO [R]` en el panel de acciones.
+- Si la accion ya esta usada, atacar/recoger quedan deshabilitados sin mostrar feedback intrusivo encima del juego.
+
+### Correcciones tras revision independiente
+
+- El boton lateral `VOLVER AL MENU` ahora abre y muestra correctamente el panel propio de confirmacion aunque la partida no estuviera pausada.
+- El estilo de botones se aplica despues de reconstruir el panel de acciones, evitando botones visualmente activos cuando la accion/movimiento ya esta usado.
+- `datos/partida_guardada.json` se anade a `.gitignore` para no subir partidas locales generadas durante pruebas.
+- Los SFX pasan a generarse desde codigo en `ReproductorSfx`, evitando subir WAV binarios y depender de assets externos.
+
+### Ultimo ajuste solicitado por Guillermo
+
+- La accion `RECOGER OBJETO [R]` queda visible en el panel y disponible tambien por teclado.
+- Al pulsar `R` con la accion ya usada no aparece feedback flotante intrusivo.
+- Al terminar turno con `T` o con el boton ya no aparece el aviso verde `Turno terminado`; el turno sigue siendo explicito, pero sin cartel repetitivo.

@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
@@ -97,6 +98,11 @@ public class PantallaJuego {
     // Ayuda overlay
     private StackPane ayudaPane;
     private boolean ayudaVisible = false;
+
+    // Menu de pausa overlay
+    private StackPane pausaPane;
+    private VBox pausaContenido;
+    private boolean pausaVisible = false;
 
     // Callbacks para navegacion narrativa
     private Runnable alCambiarCueva;
@@ -264,6 +270,15 @@ public class PantallaJuego {
         scene.setOnKeyPressed(e -> {
             try {
                 KeyCode k = e.getCode();
+                if (k == KeyCode.P || k == KeyCode.ESCAPE) {
+                    togglePausa();
+                    e.consume();
+                    return;
+                }
+                if (pausaVisible) {
+                    e.consume();
+                    return;
+                }
                 boolean ok = true;
                 boolean movio = false;
                 String msg = null;
@@ -286,23 +301,38 @@ public class PantallaJuego {
                     else if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorDerecha(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.SPACE) {
-                    Enemigo target = partida.getEnemigoAdyacente();
-                    if (target != null) {
-                        ataqueFila = target.getFila();
-                        ataqueCol = target.getColumna();
-                        ok = partida.atacar();
-                        if (ok) {
-                            iniciarEfectoAtaque();
-                        } else {
-                            ataqueFila = ataqueCol = -1;
-                            msg = "No puedes atacar ahora";
-                        }
-                    } else {
+                    if (partida.isAccionRealizada()) {
                         ok = false;
-                        msg = "No hay enemigo para atacar";
+                        msg = null;
+                    } else {
+                        Enemigo target = partida.getEnemigoAdyacente();
+                        if (target != null) {
+                            ataqueFila = target.getFila();
+                            ataqueCol = target.getColumna();
+                            ok = partida.atacar();
+                            if (ok) {
+                                ReproductorSfx.getInstancia().reproducirAtaque();
+                                iniciarEfectoAtaque();
+                            } else {
+                                ataqueFila = ataqueCol = -1;
+                                msg = "No puedes atacar ahora";
+                            }
+                        } else {
+                            ok = false;
+                            msg = "No hay enemigo para atacar";
+                        }
                     }
                 }
-                else if (k == KeyCode.R) { ok = partida.recogerObjeto(); if (!ok) msg = "No hay objeto que recoger aqui"; }
+                else if (k == KeyCode.R) {
+                    if (partida.isAccionRealizada()) {
+                        ok = false;
+                        msg = null;
+                    } else {
+                        ok = partida.recogerObjeto();
+                        if (ok) ReproductorSfx.getInstancia().reproducirRecoger();
+                        if (!ok) msg = "No hay objeto que recoger aqui";
+                    }
+                }
                 else if (k == KeyCode.H) { toggleAyuda(); return; }
                 else if (k == KeyCode.T) {
                     int hpAntes = partida.getJugador().getVidaActual();
@@ -310,9 +340,10 @@ public class PantallaJuego {
                     if (ok) {
                         if (partida.getJugador().getVidaActual() < hpAntes) {
                             Jugador j2 = partida.getJugador();
+                            ReproductorSfx.getInstancia().reproducirDano();
                             iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
                         }
-                        msg = "Turno terminado";
+                        msg = null;
                     } else {
                         msg = "No puedes terminar el turno ahora";
                     }
@@ -328,33 +359,13 @@ public class PantallaJuego {
                 if (movio && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
                         && partida.puedeCambiarCueva()) {
                     if (partida.cambiarCueva()) {
+                        ReproductorSfx.getInstancia().reproducirPuerta();
                         if (alCambiarCueva != null) {
                             // Cambia la escena (transicion), salir del handler
                             alCambiarCueva.run();
                             return;
                         }
                         actualizar();
-                    }
-                }
-
-                // Auto-terminar turno
-                if (partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
-                    boolean autoTurno = partida.isMovimientoRealizado() && partida.isAccionRealizada();
-                    autoTurno = autoTurno || (partida.isMovimientoRealizado()
-                            && msg != null && msg.contains("No puedes moverte mas"));
-                    if (autoTurno) {
-                        int hpAntes = partida.getJugador().getVidaActual();
-                        boolean turnoOk = partida.terminarTurno();
-                        if (turnoOk) {
-                            if (partida.getJugador().getVidaActual() < hpAntes) {
-                                Jugador j2 = partida.getJugador();
-                                iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
-                            }
-                            actualizar();
-                        }
-                        if (msg != null && msg.contains("No puedes moverte mas")) {
-                            msg = null;
-                        }
                     }
                 }
 
@@ -411,6 +422,10 @@ public class PantallaJuego {
         ayudaPane.setAlignment(Pos.CENTER);
         ayudaPane.setVisible(false);
         rootStack.getChildren().add(ayudaPane);
+
+        pausaPane = construirMenuPausa();
+        pausaPane.setVisible(false);
+        rootStack.getChildren().add(pausaPane);
 
         // Construir grid inicial y paneles
         try {
@@ -519,6 +534,9 @@ public class PantallaJuego {
                     // Click para moverse
                     final int ff = f, cc = c;
                     cellPane.setOnMouseClicked(e -> {
+                        if (pausaVisible) {
+                            return;
+                        }
                         boolean ok;
                         String clickMsg = null;
                         if (partida.hayEnemigoEn(ff, cc)) {
@@ -539,23 +557,10 @@ public class PantallaJuego {
                         if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
                                 && partida.puedeCambiarCueva()) {
                             if (partida.cambiarCueva()) {
+                                ReproductorSfx.getInstancia().reproducirPuerta();
                                 if (alCambiarCueva != null) {
                                     alCambiarCueva.run();
                                     return;
-                                }
-                                actualizar();
-                            }
-                        }
-                        boolean autoClick = (ok && partida.isMovimientoRealizado() && partida.isAccionRealizada())
-                                         || (partida.isMovimientoRealizado() && clickMsg != null
-                                              && clickMsg.contains("No puedes moverte"));
-                        if (autoClick && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
-                            int hpAntes = partida.getJugador().getVidaActual();
-                            boolean turnoOk = partida.terminarTurno();
-                            if (turnoOk) {
-                                if (partida.getJugador().getVidaActual() < hpAntes) {
-                                    Jugador j2 = partida.getJugador();
-                                    iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
                                 }
                                 actualizar();
                             }
@@ -671,6 +676,18 @@ public class PantallaJuego {
         DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaIdActual);
         double emojiSize = Math.min(cellSize * 0.65, 40);
 
+        // Iconos decorativos de celdas especiales.
+        for (int f = 0; f < filas; f++) {
+            for (int c = 0; c < cols; c++) {
+                if (celdas[f][c] == null) continue;
+                TipoCelda tipo = cueva.getCelda(f, c).getTipo();
+                Node iconoCelda = crearIconoCeldaEspecial(tipo, emojiSize);
+                if (iconoCelda != null) {
+                    celdas[f][c].getChildren().add(iconoCelda);
+                }
+            }
+        }
+
         // Jugador (icono del asset pack: knight)
         Jugador j = partida.getJugador();
         ImageView playerIcon = crearSpriteAssets("characters" + File.separator + "Spritesheets" + File.separator + "knight_idle.png", emojiSize);
@@ -702,8 +719,7 @@ public class PantallaJuego {
         MiIterador<ObjetoEnMapa> itO = objetos.getIterador();
         while (itO.hasNext()) {
             ObjetoEnMapa om = itO.next();
-            String asset = assetParaObjeto(om.getObjeto());
-            ImageView itemIcon = crearSpriteAssets(asset, emojiSize * 0.6);
+            Node itemIcon = crearIconoObjeto(om.getObjeto(), emojiSize * 0.6);
             if (om.getFila() >= 0 && om.getFila() < filas && om.getColumna() >= 0 && om.getColumna() < cols) {
                 celdas[om.getFila()][om.getColumna()].getChildren().add(itemIcon);
             }
@@ -750,7 +766,6 @@ public class PantallaJuego {
         txtCueva.setText("Cueva: " + cueva.getId());
         txtEstado.setText("Estado: " + partida.getEstado());
         actualizarFase();
-        actualizarBotonesAccion();
         txtCuevaNombre.setText("CUEVA: " + cueva.getId().toUpperCase());
 
         // Inventario visual
@@ -789,9 +804,32 @@ public class PantallaJuego {
         });
         accionesBox.getChildren().add(btnAbajo);
 
-        btnAtacar = crearBotonTexto("ATACAR [ESPACIO]");
-        btnAtacar.setOnMouseClicked(e -> ejecutarAccion(partida.atacar(), "No hay enemigo para atacar"));
+        btnAtacar = crearBotonTexto(partida.isAccionRealizada()
+                ? "ATACAR [ACCION USADA]"
+                : "ATACAR [ESPACIO]");
+        btnAtacar.setOnMouseClicked(e -> {
+            if (partida.isAccionRealizada()) {
+                return;
+            }
+            boolean ok = partida.atacar();
+            if (ok) ReproductorSfx.getInstancia().reproducirAtaque();
+            ejecutarAccion(ok, "No hay enemigo para atacar");
+        });
         accionesBox.getChildren().add(btnAtacar);
+
+        Text btnRecoger = crearBotonTexto(partida.isAccionRealizada()
+                ? "RECOGER OBJETO [ACCION USADA]"
+                : "RECOGER OBJETO [R]");
+        btnRecoger.setOnMouseClicked(e -> {
+            if (partida.isAccionRealizada()) {
+                return;
+            }
+            boolean ok = partida.recogerObjeto();
+            if (ok) ReproductorSfx.getInstancia().reproducirRecoger();
+            ejecutarAccion(ok, "No hay objeto que recoger aqui");
+        });
+        aplicarEstiloBoton(btnRecoger, !partida.isAccionRealizada());
+        accionesBox.getChildren().add(btnRecoger);
 
         // Boton Terminar Turno destacado
         Text btnTurno = crearBotonTexto("=== TERMINAR TURNO [T] ===");
@@ -803,9 +841,9 @@ public class PantallaJuego {
             if (ok) {
                 if (partida.getJugador().getVidaActual() < hpAntes) {
                     Jugador j2 = partida.getJugador();
+                    ReproductorSfx.getInstancia().reproducirDano();
                     iniciarEfectoRecibirAtaque(j2.getFila(), j2.getColumna());
                 }
-                mostrarFeedback("Turno terminado", Color.LIGHTGREEN);
             } else {
                 mostrarFeedback("No puedes terminar el turno ahora", Color.rgb(255, 120, 100));
             }
@@ -817,6 +855,7 @@ public class PantallaJuego {
         btnPuerta.setOnMouseClicked(e -> {
             boolean cambioRealizado = partida.cambiarCueva();
             if (cambioRealizado && alCambiarCueva != null) {
+                ReproductorSfx.getInstancia().reproducirPuerta();
                 alCambiarCueva.run();
             } else {
                 ejecutarAccion(false, "Necesitas estar en la puerta y tener su llave");
@@ -825,17 +864,7 @@ public class PantallaJuego {
         accionesBox.getChildren().add(btnPuerta);
 
         Text btnGuardar = crearBotonTexto("GUARDAR PARTIDA");
-        btnGuardar.setOnMouseClicked(e -> {
-            try {
-                partida.guardar("datos/partida_guardada.json");
-                partida.getMensajes().addLast("Partida guardada.");
-                mostrarFeedback("Partida guardada", Color.LIGHTGREEN);
-            } catch (Exception ex) {
-                partida.getMensajes().addLast("Error al guardar: " + ex.getMessage());
-                mostrarFeedback("Error al guardar", Color.rgb(255, 120, 100));
-            }
-            actualizar();
-        });
+        btnGuardar.setOnMouseClicked(e -> guardarPartida());
         accionesBox.getChildren().add(btnGuardar);
 
         Text btnAyuda = crearBotonTexto("AYUDA [H]");
@@ -843,8 +872,9 @@ public class PantallaJuego {
         accionesBox.getChildren().add(btnAyuda);
 
         Text btnMenu = crearBotonTexto("VOLVER AL MENU");
-        btnMenu.setOnMouseClicked(e -> volverAlMenu.run());
+        btnMenu.setOnMouseClicked(e -> confirmarVolverAlMenu());
         accionesBox.getChildren().add(btnMenu);
+        actualizarBotonesAccion();
 
         // Atajos de teclado adicionales
         // (Ya estan los WASD/flechas en la Scene)
@@ -974,6 +1004,90 @@ public class PantallaJuego {
         ayudaPane.setVisible(ayudaVisible);
     }
 
+    private StackPane construirMenuPausa() {
+        pausaContenido = new VBox(14);
+        pausaContenido.setAlignment(Pos.CENTER);
+        pausaContenido.setPadding(new Insets(28));
+        pausaContenido.setMaxWidth(360);
+        pausaContenido.setStyle("-fx-background-color: rgba(18,14,12,0.94);"
+                + "-fx-border-color: #C89D65; -fx-border-width: 2;"
+                + "-fx-border-radius: 10; -fx-background-radius: 10;");
+        mostrarContenidoPausaPrincipal();
+
+        StackPane overlay = new StackPane(pausaContenido);
+        overlay.setAlignment(Pos.CENTER);
+        overlay.setBackground(new Background(new BackgroundFill(
+                Color.rgb(0, 0, 0, 0.55), CornerRadii.EMPTY, Insets.EMPTY)));
+        return overlay;
+    }
+
+    private void mostrarContenidoPausaPrincipal() {
+        pausaContenido.getChildren().clear();
+
+        Text titulo = new Text("PAUSA");
+        titulo.setFont(Font.font(FONT, FontWeight.BOLD, 28));
+        titulo.setFill(Color.web("#FFD700"));
+
+        Text continuar = crearBotonTexto("CONTINUAR [P/ESC]");
+        continuar.setOnMouseClicked(e -> togglePausa());
+
+        Text guardar = crearBotonTexto("GUARDAR PARTIDA");
+        guardar.setOnMouseClicked(e -> guardarPartida());
+
+        Text menu = crearBotonTexto("VOLVER AL MENU");
+        menu.setOnMouseClicked(e -> confirmarVolverAlMenu());
+
+        pausaContenido.getChildren().addAll(titulo, continuar, guardar, menu);
+    }
+
+    private void togglePausa() {
+        pausaVisible = !pausaVisible;
+        if (ayudaVisible) {
+            ayudaVisible = false;
+            ayudaPane.setVisible(false);
+        }
+        pausaPane.setVisible(pausaVisible);
+        ReproductorSfx.getInstancia().reproducirPausa();
+    }
+
+    private void guardarPartida() {
+        try {
+            partida.guardar("datos/partida_guardada.json");
+            partida.getMensajes().addLast("Partida guardada.");
+            ReproductorSfx.getInstancia().reproducirGuardar();
+            mostrarFeedback("Partida guardada", Color.LIGHTGREEN);
+        } catch (Exception ex) {
+            partida.getMensajes().addLast("Error al guardar: " + ex.getMessage());
+            mostrarFeedback("Error al guardar", Color.rgb(255, 120, 100));
+        }
+        actualizar();
+    }
+
+    private void confirmarVolverAlMenu() {
+        pausaVisible = true;
+        if (ayudaVisible) {
+            ayudaVisible = false;
+            ayudaPane.setVisible(false);
+        }
+        pausaPane.setVisible(true);
+        pausaContenido.getChildren().clear();
+        Text titulo = new Text("VOLVER AL MENU");
+        titulo.setFont(Font.font(FONT, FontWeight.BOLD, 22));
+        titulo.setFill(Color.web("#FFD700"));
+
+        Text aviso = new Text("Guarda antes si quieres conservar el progreso.");
+        aviso.setFont(Font.font(FONT, FontWeight.NORMAL, 13));
+        aviso.setFill(Color.WHITE);
+
+        Text volver = crearBotonTexto("CONFIRMAR");
+        volver.setOnMouseClicked(e -> volverAlMenu.run());
+
+        Text cancelar = crearBotonTexto("CANCELAR");
+        cancelar.setOnMouseClicked(e -> mostrarContenidoPausaPrincipal());
+
+        pausaContenido.getChildren().addAll(titulo, aviso, volver, cancelar);
+    }
+
     /**
      * Comprueba si una celda es un obstaculo que bloquea el paso
      * (MURO, ROCA o ARBUSTO).
@@ -1080,10 +1194,10 @@ public class PantallaJuego {
         Text tituloEquipo = new Text("Equipo:");
         tituloEquipo.setFont(Font.font(FONT, FontWeight.NORMAL, 11));
         tituloEquipo.setFill(Color.web("#C89D65"));
-        HBox equipoBox = new HBox(6);
+        HBox equipoBox = new HBox(8);
         slotArma = crearSlotInventario();
         slotEscudo = crearSlotInventario();
-        equipoBox.getChildren().addAll(slotArma, slotEscudo);
+        equipoBox.getChildren().addAll(crearBloqueEquipo("ARMA", slotArma), crearBloqueEquipo("ESCUDO", slotEscudo));
         invBox.getChildren().addAll(tituloEquipo, equipoBox);
 
         inventarioGrid = new GridPane();
@@ -1100,13 +1214,32 @@ public class PantallaJuego {
         return invBox;
     }
 
+    private VBox crearBloqueEquipo(String etiqueta, StackPane slot) {
+        VBox bloque = new VBox(3);
+        bloque.setAlignment(Pos.CENTER);
+        Text texto = new Text(etiqueta);
+        texto.setFont(Font.font("Monospaced", FontWeight.BOLD, 9));
+        texto.setFill(Color.web("#FFD700"));
+        bloque.getChildren().addAll(slot, texto);
+        return bloque;
+    }
+
     private StackPane crearSlotInventario() {
         StackPane slot = new StackPane();
         slot.setPrefSize(58, 58);
         slot.setMinSize(58, 58);
         slot.setMaxSize(58, 58);
-        slot.setStyle("-fx-border-color: #4a3b32; -fx-border-width: 3px; -fx-background-color: #2b221e; -fx-border-radius: 4px; -fx-background-radius: 4px;");
+        aplicarEstiloSlotInventario(slot, false, false);
         return slot;
+    }
+
+    private void aplicarEstiloSlotInventario(StackPane slot, boolean equipado, boolean equipoPrincipal) {
+        String borde = equipado || equipoPrincipal ? "#FFD700" : "#4a3b32";
+        String fondo = equipoPrincipal ? "#201814" : "#2b221e";
+        String grosor = equipado || equipoPrincipal ? "4px" : "3px";
+        slot.setStyle("-fx-border-color: " + borde + "; -fx-border-width: " + grosor + ";"
+                + "-fx-background-color: " + fondo + "; -fx-border-radius: 4px;"
+                + "-fx-background-radius: 4px;");
     }
 
     private void actualizarInventarioVisual() {
@@ -1115,20 +1248,36 @@ public class PantallaJuego {
 
         for (StackPane slot : inventarioSlots) {
             slot.getChildren().clear();
+            aplicarEstiloSlotInventario(slot, false, false);
             slot.setUserData(null);
             slot.setOnMouseClicked(null);
             slot.setCursor(Cursor.DEFAULT);
         }
+        aplicarEstiloSlotInventario(slotArma, false, true);
+        aplicarEstiloSlotInventario(slotEscudo, false, true);
+        mostrarSlotEquipoVacio(slotArma, "ARMA");
+        mostrarSlotEquipoVacio(slotEscudo, "ESC");
 
         MiIterador<Objeto> it = inv.getIterador();
         int idx = 0;
         while (it.hasNext() && idx < 12) {
             Objeto obj = it.next();
             StackPane slot = inventarioSlots[idx];
-            String asset = assetParaObjeto(obj);
-            ImageView iv = crearSpriteAssets(asset, 42);
-            iv.setSmooth(false);
-            slot.getChildren().add(iv);
+            slot.getChildren().add(crearIconoObjeto(obj, 42));
+            boolean equipado = objetoEstaEquipado(obj, jug);
+            if (equipado) {
+                aplicarEstiloSlotInventario(slot, true, false);
+                Text marca = new Text("EQ");
+                marca.setFont(Font.font("Monospaced", FontWeight.BOLD, 10));
+                marca.setFill(Color.BLACK);
+                StackPane etiqueta = new StackPane(marca);
+                etiqueta.setBackground(new Background(new BackgroundFill(
+                        Color.web("#FFD700"), new CornerRadii(3), Insets.EMPTY)));
+                etiqueta.setPadding(new Insets(1, 3, 1, 3));
+                StackPane.setAlignment(etiqueta, Pos.TOP_RIGHT);
+                StackPane.setMargin(etiqueta, new Insets(2));
+                slot.getChildren().add(etiqueta);
+            }
             slot.setUserData(obj);
             final String objId = obj.getId();
             final boolean esConsumible = obj instanceof Pocion;
@@ -1143,6 +1292,11 @@ public class PantallaJuego {
                         ok = partida.equiparItem(objId);
                     }
                     if (ok) {
+                        if (esConsumible) {
+                            ReproductorSfx.getInstancia().reproducirRecoger();
+                        } else {
+                            ReproductorSfx.getInstancia().reproducirGuardar();
+                        }
                         mostrarFeedback(obj.getNombre() + " " + (esConsumible ? "usado" : "equipado"), Color.LIGHTGREEN);
                     } else {
                         mostrarFeedback("No puedes " + (esConsumible ? "usar" : "equipar") + " esto ahora", Color.rgb(255, 120, 100));
@@ -1158,15 +1312,50 @@ public class PantallaJuego {
         Arma arma = jug.getArmaEquipada();
         Escudo escudo = jug.getEscudoEquipado();
         if (arma != null) {
-            ImageView iv = crearSpriteAssets(assetParaObjeto(arma), 42);
-            iv.setSmooth(false);
-            slotArma.getChildren().add(iv);
+            slotArma.getChildren().clear();
+            slotArma.getChildren().add(crearIconoObjeto(arma, 42));
+            Text marca = new Text("EQUIPADA");
+            marca.setFont(Font.font("Monospaced", FontWeight.BOLD, 8));
+            marca.setFill(Color.web("#FFD700"));
+            StackPane.setAlignment(marca, Pos.BOTTOM_CENTER);
+            StackPane.setMargin(marca, new Insets(0, 0, 2, 0));
+            slotArma.getChildren().add(marca);
+        } else {
+            mostrarSlotEquipoVacio(slotArma, "ARMA");
         }
         if (escudo != null) {
-            ImageView iv = crearSpriteAssets(assetParaObjeto(escudo), 42);
-            iv.setSmooth(false);
-            slotEscudo.getChildren().add(iv);
+            slotEscudo.getChildren().clear();
+            slotEscudo.getChildren().add(crearIconoObjeto(escudo, 42));
+            Text marca = new Text("EQUIPADO");
+            marca.setFont(Font.font("Monospaced", FontWeight.BOLD, 8));
+            marca.setFill(Color.web("#FFD700"));
+            StackPane.setAlignment(marca, Pos.BOTTOM_CENTER);
+            StackPane.setMargin(marca, new Insets(0, 0, 2, 0));
+            slotEscudo.getChildren().add(marca);
+        } else {
+            mostrarSlotEquipoVacio(slotEscudo, "ESC");
         }
+    }
+
+    private void mostrarSlotEquipoVacio(StackPane slot, String texto) {
+        slot.getChildren().clear();
+        Text marca = new Text(texto);
+        marca.setFont(Font.font("Monospaced", FontWeight.BOLD, 11));
+        marca.setFill(Color.web("#6f5a42"));
+        slot.getChildren().add(marca);
+    }
+
+    private boolean objetoEstaEquipado(Objeto obj, Jugador jug) {
+        if (obj == null || jug == null) {
+            return false;
+        }
+        Arma arma = jug.getArmaEquipada();
+        Escudo escudo = jug.getEscudoEquipado();
+        return mismoObjeto(obj, arma) || mismoObjeto(obj, escudo);
+    }
+
+    private boolean mismoObjeto(Objeto a, Objeto b) {
+        return a != null && b != null && a.getId().equals(b.getId());
     }
 
     // ---------------------------------------------------------------
@@ -1217,10 +1406,32 @@ public class PantallaJuego {
     /**
      * Devuelve la ruta del asset (relativa a ASSETS_BASE) para un tipo de objeto.
      */
+    private Node crearIconoObjeto(Objeto obj, double tamanio) {
+        if (obj instanceof modelo.objetos.Escudo) {
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "escudo.png", tamanio);
+        }
+        ImageView icono = crearSpriteAssets(assetParaObjeto(obj), tamanio);
+        icono.setSmooth(false);
+        return icono;
+    }
+
+    private Node crearIconoCeldaEspecial(TipoCelda tipo, double tamanio) {
+        if (tipo == TipoCelda.PUERTA) {
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "puerta.png", tamanio * 1.05);
+        }
+        if (tipo == TipoCelda.SALIDA) {
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "salida.png", tamanio * 1.2);
+        }
+        if (tipo == TipoCelda.TESORO) {
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "tesoro.png", tamanio);
+        }
+        return null;
+    }
+
     private String assetParaObjeto(Objeto obj) {
         if (obj instanceof modelo.objetos.Pocion) return "objects" + File.separator + "chest1.png";
         if (obj instanceof modelo.objetos.Llave) return "objects" + File.separator + "key.png";
-        if (obj instanceof modelo.objetos.Escudo) return "weapons" + File.separator + "staff2.png";
+        if (obj instanceof modelo.objetos.Escudo) return "objects" + File.separator + "chest2.png";
         if (obj instanceof modelo.objetos.Arco) return "weapons" + File.separator + "bow1.png";
         if (obj instanceof modelo.objetos.Arma) return "weapons" + File.separator + "sword1.png";
         return "objects" + File.separator + "chest4.png";
@@ -1244,6 +1455,10 @@ public class PantallaJuego {
      */
     private ImageView crearSpriteAssets(String assetPath, double tamanio) {
         String fullPath = ASSETS_BASE + assetPath;
+        return crearSpriteArchivo(fullPath, tamanio);
+    }
+
+    private ImageView crearSpriteArchivo(String fullPath, double tamanio) {
         Image img = buscarEnCache(fullPath);
         if (img == null) {
             try {
@@ -1304,9 +1519,17 @@ public class PantallaJuego {
     }
 
     private void agregarBarraVida(StackPane cell, int vidaActual, int vidaMaxima, double cellSize) {
-        double anchoBarra = cellSize * 0.8;
-        double altoBarra = 5;
-        double yBarra = cellSize * 0.15;
+        double anchoBarra = cellSize * 0.72;
+        double altoBarra = 4;
+        double yBarra = 2;
+
+        Text hpText = new Text(vidaActual + "/" + vidaMaxima);
+        hpText.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 10));
+        hpText.setFill(Color.web("#FFF2A8"));
+        hpText.setStroke(Color.BLACK);
+        hpText.setStrokeWidth(0.9);
+        StackPane.setAlignment(hpText, Pos.TOP_CENTER);
+        StackPane.setMargin(hpText, new Insets(-1, 0, 0, 0));
 
         Rectangle fondo = new Rectangle(anchoBarra, altoBarra);
         fondo.setFill(Color.rgb(40, 40, 40));
@@ -1319,16 +1542,11 @@ public class PantallaJuego {
         Rectangle relleno = new Rectangle(anchoBarra * pct, altoBarra);
         Color colorBarra = pct > 0.5 ? Color.LIGHTGREEN : (pct > 0.25 ? Color.ORANGE : Color.RED);
         relleno.setFill(colorBarra);
-        StackPane.setAlignment(relleno, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(relleno, new Insets(0, 0, yBarra, cellSize * 0.1));
+        StackPane.setAlignment(relleno, Pos.BOTTOM_CENTER);
+        double margenDerecho = anchoBarra * (1 - pct);
+        StackPane.setMargin(relleno, new Insets(0, margenDerecho, yBarra, 0));
 
-        Text hpText = new Text(vidaActual + "/" + vidaMaxima);
-        hpText.setFont(Font.font("Monospaced", FontWeight.BOLD, 9));
-        hpText.setFill(Color.WHITE);
-        StackPane.setAlignment(hpText, Pos.BOTTOM_CENTER);
-        StackPane.setMargin(hpText, new Insets(0, 0, yBarra - 10, 0));
-
-        cell.getChildren().addAll(fondo, relleno, hpText);
+        cell.getChildren().addAll(hpText, fondo, relleno);
     }
 
     /**

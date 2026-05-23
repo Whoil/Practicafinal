@@ -882,3 +882,67 @@ Sesion larga pero productiva. El guardado completo requirio modificar varias cla
 
 **Tests**: Compilacion OK. Juego verificado que ya no se cierra.
 
+## 2026-05-23 - Guillermo / apoyo Parte C-09
+
+Guillermo decidio ayudar primero a las tareas audiovisuales pendientes antes de retomar las mejoras de Parte B. Se acordo implementar una version practica para hoy: menu de pausa, iconos pendientes y SFX minimos, sin tocar reglas de combate ni logica de partida.
+
+Decisiones aplicadas:
+- Pausa con `P` o `ESC`.
+- Menu de pausa con Continuar, Guardar partida y Volver al menu.
+- Volver al menu requiere confirmacion.
+- Puerta y salida se dibujan como iconos locales; salida es una puerta mas grande.
+- Tesoro usa cofre del `Dungeon Asset Pack`.
+- Escudo usa icono simple propio para dejar de mostrarse como `staff2.png`.
+- SFX basicos generados localmente para recoger, ataque, dano, puerta, guardar y pausa.
+
+Cambios:
+- `PantallaJuego.java`: overlay de pausa, confirmacion de salida al menu, iconos para PUERTA/TESORO/SALIDA/ESCUDO y llamadas a SFX en acciones clave.
+- `ReproductorSfx.java`: nuevo reproductor de efectos cortos con `AudioClip`.
+- `datos/audio/sfx/*.wav`: efectos WAV basicos generados localmente.
+- `ReproductorSfxTest.java`: comprueba existencia y cabecera RIFF/WAVE de los efectos.
+- `TASKS.md`: C-09.7, C-09.12, C-09.13, C-09.14 y C-09.15 pasan a REVISION.
+
+Verificacion:
+- No se pudo completar compilacion desde Codex por entorno local: `scripts/run.ps1` busca el JDK de `C:\Users\UAH`, y la compilacion manual no puede leer los JAR de JavaFX del usuario desde el proceso sandbox.
+- Queda pendiente validar en IntelliJ o PowerShell local del usuario.
+
+### Ajustes tras primera prueba visual
+
+Guillermo probo el juego y confirmo que la mayor parte funcionaba, pero detecto mejoras necesarias: ataque y puerta sonaban poco, la accion de atacar podia confundirse tras haber atacado ya, la vida se leia mal encima de la celda y el inventario no distinguia claramente objetos equipados.
+
+Se aplicaron ajustes:
+- `ReproductorSfx` sube volumen por defecto.
+- `ataque.wav` y `puerta.wav` se regeneran mas fuertes y largos.
+- `PantallaJuego` muestra aviso claro si se intenta atacar con la accion ya usada: hay que terminar turno con `T`.
+- La barra de vida sobre entidades queda sin texto numerico para no tapar iconos.
+- Los objetos equipados en inventario se marcan con borde dorado y etiqueta `EQ`.
+- Se reviso el `Dungeon Asset Pack` local y no aparecieron assets claros con nombres de shield/door/gate/portal.
+
+Nuevo ajuste tras segunda prueba:
+- Se elimina el auto-fin de turno de `PantallaJuego`; atacar ya no termina a veces automaticamente segun si antes hubo movimiento. El jugador termina siempre con `T` o el boton correspondiente.
+- La vida vuelve a mostrar numeros arriba de la entidad y barra abajo.
+- El equipo se presenta con ranuras etiquetadas para arma y escudo, separadas visualmente del inventario general.
+
+Nuevo ajuste de pulido:
+- Se generan iconos PNG propios en `datos/iconos/` para puerta, salida, escudo y tesoro, y `PantallaJuego` los usa en lugar de figuras dibujadas en codigo.
+- Los numeros de vida se hacen mas legibles con Arial extra bold, color claro y contorno negro.
+- La confirmacion de volver al menu se integra como panel del menu de pausa, evitando el `Alert` nativo.
+- La pantalla de controles oculta el cofre decorativo para que no tape el boton Volver.
+- La ventana principal se marca como redimensionable y se fija minimo 960x540.
+- Se anade `IconosVisualesTest` para validar cabecera PNG de los iconos.
+
+Ultimo ajuste antes de preparar PR:
+- Se recupera el boton visible `RECOGER OBJETO [R]` en el panel de acciones.
+- Atacar o recoger con la accion ya usada deja de mostrar aviso flotante intrusivo; la UI lo comunica mediante el estado/deshabilitado de la accion.
+
+Correcciones tras revision independiente:
+- `VOLVER AL MENU` desde el panel lateral muestra correctamente la confirmacion propia aunque no estuviera abierto el menu de pausa.
+- `actualizarBotonesAccion()` se ejecuta despues de reconstruir los botones para que opacidad/cursor reflejen el estado real.
+- `datos/partida_guardada.json` queda ignorado en `.gitignore` como artefacto local de prueba.
+- `ReproductorSfx` genera los WAV en tiempo de ejecucion como archivos temporales, asi no se versionan SFX binarios.
+
+Ajuste final antes de PR:
+- Guillermo pidio confirmar que recoger objetos no se habia perdido y quitar el feedback repetitivo al terminar turno.
+- `RECOGER OBJETO [R]` queda visible y el atajo `R` respeta el estado de accion usada sin cartel intrusivo.
+- Terminar turno sigue siendo manual, pero deja de mostrar el aviso verde `Turno terminado`.
+
