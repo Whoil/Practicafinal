@@ -31,6 +31,8 @@ import javafx.geometry.Rectangle2D;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.Platform;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -43,6 +45,8 @@ import modelo.juego.CuevaEnMapa;
 import modelo.juego.ObjetoEnMapa;
 import modelo.juego.Partida;
 import modelo.mapa.TipoCelda;
+import modelo.objetos.Arma;
+import modelo.objetos.Escudo;
 import modelo.objetos.Objeto;
 import modelo.objetos.Pocion;
 import modelo.personajes.Enemigo;
@@ -75,8 +79,12 @@ public class PantallaJuego {
     private Pane gridOverlay;
     private StackPane[][] celdas;
     private Text txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase;
-    private VBox inventarioBox;
-    private VBox logBox;
+    private GridPane inventarioGrid;
+    private StackPane[] inventarioSlots;
+    private StackPane slotArma, slotEscudo;
+    private VBox logContainer;
+    private ScrollPane logScrollStyled;
+    private int ultimosMensajesLog;
     private Text txtCuevaNombre;
     private Text btnArriba, btnAbajo, btnIzq, btnDer, btnAtacar;
 
@@ -183,18 +191,18 @@ public class PantallaJuego {
         gridLayer.getChildren().add(feedbackPane);
         gridConLog.getChildren().add(gridLayer);
 
-        // --- Log (debajo del grid) ---
-        logBox = new VBox(2);
-        logBox.setPrefHeight(120);
-        logBox.setMaxHeight(120);
-        logBox.setStyle("-fx-background-color: rgba(0,0,0,0.6); -fx-padding: 6; -fx-border-color: #444; -fx-border-width: 1;");
-        ScrollPane logScroll = new ScrollPane(logBox);
-        logScroll.setPrefHeight(120);
-        logScroll.setMaxHeight(120);
-        logScroll.setFitToWidth(true);
-        logScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-        logScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        gridConLog.getChildren().add(logScroll);
+        // --- Log estilizado (debajo del grid) ---
+        logContainer = new VBox(2);
+        logContainer.setStyle("-fx-padding: 4;");
+        logScrollStyled = new ScrollPane(logContainer);
+        logScrollStyled.setPrefHeight(140);
+        logScrollStyled.setMaxHeight(140);
+        logScrollStyled.setFitToWidth(true);
+        logScrollStyled.setStyle("-fx-background: transparent; -fx-background-color: #1a1410; -fx-border-color: #4a3b32; -fx-border-width: 2;");
+        logScrollStyled.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        logScrollStyled.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        ultimosMensajesLog = 0;
+        gridConLog.getChildren().add(logScrollStyled);
 
         centro.getChildren().add(gridConLog);
 
@@ -226,20 +234,8 @@ public class PantallaJuego {
         statsBox.getChildren().addAll(tituloStats, txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase);
         panelDer.getChildren().add(statsBox);
 
-        // Inventario
-        VBox invBox = new VBox(2);
-        invBox.setStyle("-fx-background-color: rgba(0,0,0,0.3); -fx-padding: 6; -fx-border-color: #555; -fx-border-width: 1;");
-        Text tituloInv = new Text("INVENTARIO");
-        tituloInv.setFont(Font.font(FONT, FontWeight.BOLD, 14));
-        tituloInv.setFill(Color.web("#FFD700"));
-        inventarioBox = new VBox(2);
-        ScrollPane invScroll = new ScrollPane(inventarioBox);
-        invScroll.setPrefHeight(120);
-        invScroll.setMaxHeight(120);
-        invScroll.setFitToWidth(true);
-        invScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-        invBox.getChildren().addAll(tituloInv, invScroll);
-        panelDer.getChildren().add(invBox);
+        // Inventario (ranuras de equipo + grid)
+        panelDer.getChildren().add(construirInventarioVisual());
 
         // Acciones
         VBox accBox = new VBox(4);
@@ -691,37 +687,8 @@ public class PantallaJuego {
         actualizarBotonesAccion();
         txtCuevaNombre.setText("CUEVA: " + cueva.getId().toUpperCase());
 
-        // Inventario
-        inventarioBox.getChildren().clear();
-        ListaDE<Objeto> inv = j.getInventario();
-        MiIterador<Objeto> itInv = inv.getIterador();
-        while (itInv.hasNext()) {
-            Objeto obj = itInv.next();
-            HBox itemRow = new HBox(5);
-            Text txtObj = new Text(obj.getNombre());
-            txtObj.setFont(Font.font(FONT, FontWeight.NORMAL, 13));
-            txtObj.setFill(Color.WHITE);
-            itemRow.getChildren().add(txtObj);
-
-            if (obj instanceof Pocion) {
-                Text btnUsar = crearBotonTexto("[USAR]");
-                btnUsar.setOnMouseClicked(e -> ejecutarAccion(partida.usarPocion(obj.getId()), "No puedes usar esto ahora"));
-                itemRow.getChildren().add(btnUsar);
-            }
-            if (obj.esEquipable()) {
-                Text btnEquip = crearBotonTexto("[EQUIPAR]");
-                btnEquip.setOnMouseClicked(e -> ejecutarAccion(partida.equiparItem(obj.getId()), "No puedes equipar esto ahora"));
-                itemRow.getChildren().add(btnEquip);
-            }
-
-            inventarioBox.getChildren().add(itemRow);
-        }
-        if (inv.getSize() == 0) {
-            Text vacio = new Text("(vacio)");
-            vacio.setFont(Font.font(FONT, FontWeight.NORMAL, 12));
-            vacio.setFill(Color.GRAY);
-            inventarioBox.getChildren().add(vacio);
-        }
+        // Inventario visual
+        actualizarInventarioVisual();
 
         // Acciones
         accionesBox.getChildren().clear();
@@ -800,16 +767,8 @@ public class PantallaJuego {
         // Atajos de teclado adicionales
         // (Ya estan los WASD/flechas en la Scene)
 
-        // Log
-        logBox.getChildren().clear();
-        ListaSE<String> msgs = partida.getMensajes();
-        int inicio = Math.max(0, msgs.getSize() - 6);
-        for (int i = inicio; i < msgs.getSize(); i++) {
-            Text msg = new Text("> " + msgs.get(i));
-            msg.setFont(Font.font("Monospaced", FontWeight.NORMAL, 11));
-            msg.setFill(Color.rgb(180, 220, 180));
-            logBox.getChildren().add(msg);
-        }
+        // Log estilizado
+        actualizarLogEstilizado();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -1008,6 +967,156 @@ public class PantallaJuego {
             t.setOpacity(0.35);
             t.setCursor(Cursor.DEFAULT);
         }
+    }
+
+    // ---------------------------------------------------------------
+    // Inventario visual con ranuras
+    // ---------------------------------------------------------------
+
+    private VBox construirInventarioVisual() {
+        VBox invBox = new VBox(4);
+        invBox.setStyle("-fx-background-color: rgba(0,0,0,0.3); -fx-padding: 6; -fx-border-color: #555; -fx-border-width: 1;");
+
+        Text tituloInv = new Text("INVENTARIO");
+        tituloInv.setFont(Font.font(FONT, FontWeight.BOLD, 14));
+        tituloInv.setFill(Color.web("#FFD700"));
+        invBox.getChildren().add(tituloInv);
+
+        Text tituloEquipo = new Text("Equipo:");
+        tituloEquipo.setFont(Font.font(FONT, FontWeight.NORMAL, 11));
+        tituloEquipo.setFill(Color.web("#C89D65"));
+        HBox equipoBox = new HBox(6);
+        slotArma = crearSlotInventario();
+        slotEscudo = crearSlotInventario();
+        equipoBox.getChildren().addAll(slotArma, slotEscudo);
+        invBox.getChildren().addAll(tituloEquipo, equipoBox);
+
+        inventarioGrid = new GridPane();
+        inventarioGrid.setHgap(4);
+        inventarioGrid.setVgap(4);
+        inventarioSlots = new StackPane[12];
+        for (int i = 0; i < 12; i++) {
+            StackPane slot = crearSlotInventario();
+            inventarioSlots[i] = slot;
+            inventarioGrid.add(slot, i % 4, i / 4);
+        }
+        invBox.getChildren().add(inventarioGrid);
+
+        return invBox;
+    }
+
+    private StackPane crearSlotInventario() {
+        StackPane slot = new StackPane();
+        slot.setPrefSize(58, 58);
+        slot.setMinSize(58, 58);
+        slot.setMaxSize(58, 58);
+        slot.setStyle("-fx-border-color: #4a3b32; -fx-border-width: 3px; -fx-background-color: #2b221e; -fx-border-radius: 4px; -fx-background-radius: 4px;");
+        return slot;
+    }
+
+    private void actualizarInventarioVisual() {
+        Jugador jug = partida.getJugador();
+        ListaDE<Objeto> inv = jug.getInventario();
+
+        for (StackPane slot : inventarioSlots) {
+            slot.getChildren().clear();
+            slot.setUserData(null);
+            slot.setOnMouseClicked(null);
+            slot.setCursor(Cursor.DEFAULT);
+        }
+
+        MiIterador<Objeto> it = inv.getIterador();
+        int idx = 0;
+        while (it.hasNext() && idx < 12) {
+            Objeto obj = it.next();
+            StackPane slot = inventarioSlots[idx];
+            String asset = assetParaObjeto(obj);
+            ImageView iv = crearSpriteAssets(asset, 42);
+            iv.setSmooth(false);
+            slot.getChildren().add(iv);
+            slot.setUserData(obj);
+            final String objId = obj.getId();
+            final boolean esConsumible = obj instanceof Pocion;
+            final boolean esEquipable = obj.esEquipable();
+            if (esConsumible || esEquipable) {
+                slot.setCursor(Cursor.HAND);
+                slot.setOnMouseClicked(e -> {
+                    boolean ok;
+                    if (esConsumible) {
+                        ok = partida.usarPocion(objId);
+                    } else {
+                        ok = partida.equiparItem(objId);
+                    }
+                    if (ok) {
+                        mostrarFeedback(obj.getNombre() + " " + (esConsumible ? "usado" : "equipado"), Color.LIGHTGREEN);
+                    } else {
+                        mostrarFeedback("No puedes " + (esConsumible ? "usar" : "equipar") + " esto ahora", Color.rgb(255, 120, 100));
+                    }
+                    actualizar();
+                });
+            }
+            idx++;
+        }
+
+        slotArma.getChildren().clear();
+        slotEscudo.getChildren().clear();
+        Arma arma = jug.getArmaEquipada();
+        Escudo escudo = jug.getEscudoEquipado();
+        if (arma != null) {
+            ImageView iv = crearSpriteAssets(assetParaObjeto(arma), 42);
+            iv.setSmooth(false);
+            slotArma.getChildren().add(iv);
+        }
+        if (escudo != null) {
+            ImageView iv = crearSpriteAssets(assetParaObjeto(escudo), 42);
+            iv.setSmooth(false);
+            slotEscudo.getChildren().add(iv);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Log estilizado con colores por tipo de evento
+    // ---------------------------------------------------------------
+
+    private void actualizarLogEstilizado() {
+        ListaSE<String> msgs = partida.getMensajes();
+        int total = msgs.getSize();
+        if (total <= ultimosMensajesLog) return;
+
+        for (int i = ultimosMensajesLog; i < total; i++) {
+            String texto = msgs.get(i);
+            String tipo = clasificarMensaje(texto);
+            TextFlow linea = new TextFlow();
+            Text txt = new Text("> " + texto + "\n");
+            txt.setFont(Font.font("Monospaced", FontWeight.NORMAL, 11));
+            switch (tipo) {
+                case "JUGADOR": txt.setFill(Color.web("#64B5F6")); break;
+                case "ENEMIGO": txt.setFill(Color.web("#EF5350")); break;
+                case "OBJETO":  txt.setFill(Color.web("#FFD700")); break;
+                default:        txt.setFill(Color.web("#CCCCCC")); break;
+            }
+            linea.getChildren().add(txt);
+            logContainer.getChildren().add(linea);
+        }
+        ultimosMensajesLog = total;
+
+        Platform.runLater(() -> logScrollStyled.setVvalue(1.0));
+    }
+
+    private String clasificarMensaje(String msg) {
+        if (msg == null) return "SISTEMA";
+        String m = msg.toLowerCase();
+        if (m.contains("ataca al jugador") || m.contains("se acerca al jugador")) {
+            return "ENEMIGO";
+        }
+        if (m.contains("ataca a ") || m.contains("inflige") || m.contains("derrotado")) {
+            return "JUGADOR";
+        }
+        if (m.contains("objeto recogido") || m.contains("objeto equipado")
+                || m.contains("objeto usado") || m.contains("llave")) {
+            return "OBJETO";
+        }
+        return "SISTEMA";
     }
 
     /**
