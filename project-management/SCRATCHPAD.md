@@ -1675,3 +1675,196 @@ Pendiente de autorizacion humana para commit+push.
 
 - El fog-of-war cubre entidades (escondiendolas hasta que el jugador se acerque).
 - Los enemigos con danio/vida (formato simple sin ataque/defensa/movimiento) tienen movimiento=0 pero la IA los mueve igual mediante getCaminoMinimo().
+
+---
+
+## Sesion 2026-05-23 — Turnos 40→60 y auto-avance en puerta
+
+### Humano y parte
+No se identifico explicitamente, pero las instrucciones indican seguir con la rama feature/a-iconos (Parte A/C).
+
+### Rama usada
+`feature/a-iconos`
+
+### Tareas trabajadas
+- Aumentar turnos disponibles de 40 a 60
+- Auto-avance automatico al pisar PUERTA con llave (sin clic en "CAMBIAR CUEVA")
+- Pasar revisor independiente y arreglar hallazgo
+
+### Archivos modificados
+- `src/modelo/juego/FabricaPartida.java`: TURNOS_INICIALES 40→60
+- `src/vista/PantallaJuego.java`: auto-avance en keyboard + click handler, flag `movio` para evitar auto-avance tras ataque en PUERTA
+- `test/modelo/juego/FabricaPartidaTest.java`: expected 40→60
+- `test/modelo/juego/PartidaTest.java`: expected 40→60, loop turnosAgotados 40→60
+
+### Cambios realizados
+1. `FabricaPartida.TURNOS_INICIALES` de 40 a 60.
+2. Codigo de auto-avance en ambos handlers: solo cuando `movio==true` (movimiento real, no ataque/recoger).
+3. Auto-avance invoca `alCambiarCueva` para transicion de escena.
+4. Comentarios detallados segun AGENTS.md.
+
+### Pruebas ejecutadas
+Tests JUnit: 182/182 OK.
+
+### Pruebas no ejecutadas y motivo
+N/A.
+
+### Riesgos o posibles problemas
+- Auto-avance comparte el mismo comportamiento post-transicion que el boton manual "CAMBIAR CUEVA" (accionRealizada queda true, el primer input en la nueva cueva dispara auto-turn).
+- La flag `movio` evita auto-avance si el jugador ataca/recoge objeto estando sobre PUERTA.
+
+### Archivos compartidos tocados o solicitados
+- `FabricaPartida.java` (Parte B, solo constante)
+- `PantallaJuego.java` (Parte C)
+
+### Estado de TASKS.md
+- C-09.11 anadida como HECHA.
+
+### Pendiente para la proxima sesion
+- C-09.3 Animaciones
+- C-09.4 Efectos visuales
+- C-09.5 Sonidos
+- C-09.7 SFX
+- C-09.8 Transiciones
+- C-09.9 Alertas visuales
+- C-09.10 Modo antorcha
+
+---
+
+## Cierre de sesion — 2026-05-23
+
+### Humano y parte
+Humano no identificado explicitamente. Trabajo en rama feature/a-iconos (Parte A/C).
+
+### Rama usada
+`feature/a-iconos`
+
+### Tareas trabajadas
+1. Aumentar turnos 40→60 y auto-avance en PUERTA con llave.
+2. Correccion de revisor independiente: flag `movio` para evitar auto-avance al atacar desde PUERTA.
+3. Mensaje "Hay una pared" al chocar con obstaculos (MURO/ROCA/ARBUSTO).
+4. Dialogo de error en boton Cargar partida (Alert).
+
+### Archivos modificados
+- `src/modelo/juego/FabricaPartida.java` — TURNOS_INICIALES 40→60
+- `src/vista/PantallaJuego.java` — auto-avance, flag movio, esObstaculo(), mensajes de pared
+- `src/vista/EscapeMazmorraApp.java` — Alert en boton Cargar partida
+- `test/modelo/juego/FabricaPartidaTest.java` — expected 40→60
+- `test/modelo/juego/PartidaTest.java` — expected 40→60, loop agotamiento 40→60
+- `project-management/SCRATCHPAD.md` — actualizado
+- `project-management/TASKS.md` — C-09.11 anadida HECHA
+- `project-management/IA_DIARY.md` — entrada anadida
+
+### Cambios realizados
+- TURNOS_INICIALES 40→60 en FabricaPartida.
+- Auto-avance en PUERTA solo tras movimiento real (movio).
+- esObstaculo() para detectar MURO/ROCA/ARBUSTO.
+- Mensaje "Hay una pared" en teclado, click y botones de movimiento.
+- Alert error en Cargar partida cuando no hay archivo.
+
+### Commits y push realizados
+- `1dd621f` — Aumentar turnos 40→60 y auto-avance en PUERTA con llave
+- `86c0dbd` — Corregir mensaje de pared y dialogo de carga de partida
+- Ambos pusheados a `origin/feature/a-iconos`.
+
+### Pruebas ejecutadas
+Tests JUnit: 182/182 OK en ambos commits.
+
+### Pendiente para la siguiente sesion
+- C-09.3 Animaciones
+- C-09.4 Efectos visuales
+- C-09.5 Sonidos
+- C-09.7 SFX
+- C-09.8 Transiciones
+- C-09.9 Alertas visuales
+- C-09.10 Modo antorcha
+
+### Riesgos o avisos
+- El auto-avance deja `accionRealizada=true`, por lo que el primer input tras la transicion dispara auto-turn (mismo comportamiento que el boton manual "CAMBIAR CUEVA").
+- Los commits estan en `feature/a-iconos`, no mergeados a `main`. Pendiente de PR y revisor independiente antes de merge.
+
+---
+
+## Cierre de sesion — Revisor Independiente 2026-05-23
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A
+Agente: Agente Revisor Independiente
+
+### Rama usada
+
+`feature/a-iconos`
+
+### Tareas trabajadas
+
+1. Revision independiente de la rama `feature/a-iconos` antes de merge.
+2. Corregido `HashMap` en `PantallaJuego.java` -> sustituido por `ListaDE<EntradaImagen>`.
+3. Merge de `origin/main` en `feature/a-iconos` (sin conflictos).
+4. Ejecucion de tests: 182/182 OK.
+
+### Archivos modificados
+
+- `src/vista/PantallaJuego.java` — eliminado `HashMap`, reemplazado por cache con `ListaDE` propia.
+- `project-management/SCRATCHPAD.md` — actualizado.
+
+### Commits y push realizados
+
+Pendiente de autorizacion humana.
+
+### Pendiente para la siguiente sesion
+
+- Hacer commit del cambio de `PantallaJuego.java`.
+- Hacer push a `origin/feature/a-iconos`.
+- Hacer merge a `main` cuando se autorice.
+
+## 2026-05-23 - Alvaro / Parte A - Depuracion cierre + tareas iconos
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A (coordinacion general)
+Agente: opencode-agente
+
+### Contexto
+
+Se depuro un cierre inesperado al entrar a la primera cueva tras merge de `origin/main`.
+La causa no era una excepcion no capturada, sino que el catch solo capturaba `Exception`
+y no `Throwable`. Se anadio logging directo a archivo (`direct_debug.log`, `crash_detail.log`)
+y se cambiaron los catch a `catch (Throwable)`. Tras la correccion, el cierre dejo de ocurrir.
+
+### Sincronizacion
+
+Rama: `feature/a-iconos`
+Cambio remoto revisado: si, rama actualizada con `origin/main` en sesiones previas.
+Documentos leidos/modificados: `TASKS.md`, `SCRATCHPAD.md`, `IA_DIARY.md`.
+
+### Tareas trabajadas
+
+1. Depuracion del cierre al entrar a cueva tras merge con `origin/main`.
+2. Anadido logging directo a archivo en `PantallaJuego.java` y `EscapeMazmorraApp.java`.
+3. Cambiados catch de `Exception` a `Throwable` en `actualizar()` y `crearScene()`.
+4. Anadidas sub-tareas de iconos a `TASKS.md` (C-09.13 a C-09.16).
+
+### Archivos modificados
+
+- `src/vista/PantallaJuego.java` — anadido `logError()`, catch `Throwable`, logging en excepciones.
+- `src/vista/EscapeMazmorraApp.java` — anadido `logDirecto()`, `mostrarJuego()` envuelto en try-catch(Throwable).
+- `project-management/TASKS.md` — anadidas sub-tareas C-09.13 a C-09.16.
+- `project-management/SCRATCHPAD.md` — actualizado.
+- `project-management/IA_DIARY.md` — actualizado.
+
+### Commits y push realizados
+
+Pendiente de autorizacion humana (esta sesion).
+
+### Pruebas ejecutadas
+
+- Compilacion completa del proyecto con `scripts\run.ps1 -CompileOnly`: correcta.
+- Juego ejecutado y verificado que ya no se cierra al entrar a la cueva.
+
+### Pendiente para la siguiente sesion
+
+- Ejecutar tareas C-09.13 a C-09.16 (encontrar/crear iconos para puerta, escudo, tesoro, salida, itch.io).
+- Probar iconos en el juego tras implementarlos.

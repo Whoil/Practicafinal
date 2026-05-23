@@ -30,7 +30,7 @@ HECHA
 
 ### Resumen de tareas pendientes (Parte C)
 
-- **C-09** Pulido audiovisual (sonidos/musica/animaciones) - PENDIENTE
+- **C-09** Pulido audiovisual (sonidos/musica/animaciones/menu pausa) - PENDIENTE
 - **R-01** Revision de restricciones (colecciones prohibidas, arrays) - PENDIENTE
 - **R-02** Revision de codigo y tests para cada PR - PENDIENTE
 
@@ -198,6 +198,12 @@ Sub-tareas:
 - **C-09.8** Anadir animaciones de transicion fluida (fade in/out) entre pantallas - PENDIENTE
 - **C-09.9** Desarrollar sistema de alertas visuales temporales: textos flotantes de dano y cura - PENDIENTE
 - **C-09.10** Crear modo antorcha / filtro de contraste accesible mediante CSS dinamico - PENDIENTE
+- **C-09.11** Aumentar turnos de 40 a 60 y auto-avance en PUERTA con llave - HECHA
+- **C-09.12** Menu de pausa durante la partida (P o ESC) con opciones: Continuar, Guardar, Volver al menu - PENDIENTE
+- **C-09.13** Encontrar/crear icono para celda PUERTA (actualmente solo color amarillo) - PENDIENTE
+- **C-09.14** Encontrar/crear icono para ESCUDO (reemplazar `staff2.png` por un asset tipo escudo) - PENDIENTE
+- **C-09.15** Añadir iconos decorativos para TESORO y SALIDA (actualmente solo color) - PENDIENTE
+- **C-09.16** Buscar assets adicionales en itch.io: pociones, puertas, escudos, cofres y bosses - PENDIENTE
 
 ### R-01 Revision de restricciones
 

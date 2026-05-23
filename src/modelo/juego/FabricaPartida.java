@@ -32,7 +32,7 @@ public class FabricaPartida {
     public static final int ATAQUE_JUGADOR = 15;
     public static final int DEFENSA_JUGADOR = 5;
     public static final int MOVIMIENTO_JUGADOR = 3;
-    public static final int TURNOS_INICIALES = 40;
+    public static final int TURNOS_INICIALES = 60;
 
     public Partida crearPartida(ResultadoCarga resultadoCarga) {
         validarResultado(resultadoCarga);

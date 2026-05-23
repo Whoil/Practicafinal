@@ -300,6 +300,15 @@ public class Partida implements InterfazPartida {
         jugador.cambiarPosicion(fila, columna);
         movimientoRealizado = true;
         registrarLog("Jugador movido a " + fila + ", " + columna);
+
+        // Auto-recoger objeto si hay uno en la misma celda (no gasta accion)
+        ObjetoEnMapa objSuelo = getObjetoEn(fila, columna);
+        if (objSuelo != null && !jugador.tieneObjetoConId(objSuelo.getObjeto().getId())) {
+            jugador.agregarObjeto(objSuelo.getObjeto());
+            obtenerOCrearContenidoActual().getObjetosEnSuelo().del(objSuelo);
+            registrarLog("Objeto recogido: " + objSuelo.getObjeto().getNombre());
+        }
+
         comprobarVictoriaODerrota();
         return true;
     }

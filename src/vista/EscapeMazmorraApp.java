@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
@@ -568,8 +569,12 @@ public class EscapeMazmorraApp extends Application {
                 partida = modelo.juego.Partida.cargarPartida("datos/partida_guardada.json");
                 mostrarIntroduccion();
             } catch (Exception ex) {
-                System.err.println("Error al cargar partida: " + ex.getMessage());
-                ex.printStackTrace();
+                Alert alerta = new Alert(Alert.AlertType.ERROR);
+                alerta.setTitle("Error al cargar");
+                alerta.setHeaderText("No se pudo cargar la partida");
+                alerta.setContentText("No existe una partida guardada en datos/partida_guardada.json.\n\n" +
+                    "Primero debes jugar y guardar la partida desde el menu de juego.");
+                alerta.showAndWait();
             }
         }));
         vbox.getChildren().add(crearBotonOpcion("Controles", e -> {
@@ -791,22 +796,38 @@ public class EscapeMazmorraApp extends Application {
      * partida actual. Configura los callbacks para cambio de cueva
      * y fin de partida.
      */
+    private void logDirecto(String msg) {
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter("direct_debug.log", true);
+            fw.write(java.time.LocalDateTime.now() + " " + msg + "\n");
+            fw.close();
+        } catch (Exception ign) {}
+    }
+
     private void mostrarJuego() {
-        PantallaJuego pj = new PantallaJuego(partida, stage, this::volverAlMenu);
-
-        // Callback al cambiar de cueva: mostrar transicion a la siguiente
-        pj.setAlCambiarCueva(() -> {
-            mostrarTransicion(partida.getCuevaActual().getId());
-        });
-
-        // Callback al terminar la partida: mostrar pantalla final
-        pj.setAlTerminarPartida(() -> {
-            boolean victoria = partida.getEstado() == modelo.juego.EstadoPartida.VICTORIA;
-            mostrarFinal(victoria);
-        });
-
-        Scene gameScene = pj.crearScene();
-        stage.setScene(gameScene);
+        logDirecto("mostrarJuego() INICIO");
+        try {
+            PantallaJuego pj = new PantallaJuego(partida, stage, this::volverAlMenu);
+            logDirecto("PantallaJuego creado");
+            pj.setAlCambiarCueva(() -> {
+                logDirecto("Callback cambiar cueva: " + partida.getCuevaActual().getId());
+                mostrarTransicion(partida.getCuevaActual().getId());
+            });
+            pj.setAlTerminarPartida(() -> {
+                boolean victoria = partida.getEstado() == modelo.juego.EstadoPartida.VICTORIA;
+                logDirecto("Callback fin partida: " + (victoria ? "VICTORIA" : "DERROTA"));
+                mostrarFinal(victoria);
+            });
+            Scene gameScene = pj.crearScene();
+            logDirecto("crearScene() completado");
+            stage.setScene(gameScene);
+            logDirecto("stage.setScene() completado");
+        } catch (Throwable t) {
+            logDirecto("EXCEPCION EN mostrarJuego: " + t.getClass().getName() + " - " + t.getMessage());
+            for (StackTraceElement ste : t.getStackTrace()) {
+                logDirecto("  at " + ste.toString());
+            }
+        }
     }
 
     /**

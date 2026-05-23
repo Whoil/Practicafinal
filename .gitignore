@@ -32,3 +32,6 @@ crash.log
 
 ### Mac OS ###
 .DS_Store
+
+crash_detail.log
+direct_debug.log

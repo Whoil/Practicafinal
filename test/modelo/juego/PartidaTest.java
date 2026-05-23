@@ -31,7 +31,7 @@ class PartidaTest {
         Partida p = Partida.crearPartidaNueva();
         assertNotNull(p);
         assertEquals(EstadoPartida.EN_CURSO, p.getEstado());
-        assertEquals(40, p.getTurnosRestantes());
+        assertEquals(60, p.getTurnosRestantes());
         assertNotNull(p.getJugador());
         assertEquals("Jugador", p.getJugador().getNombre());
         assertEquals(100, p.getJugador().getVidaActual());
@@ -147,8 +147,8 @@ class PartidaTest {
         assertTrue(p.moverJugador(5, 9));
         p.terminarTurno();
         assertTrue(p.moverJugador(6, 11));
-        assertTrue(p.hayObjetoEnPosicion());
-        assertTrue(p.recogerObjeto());
+        assertFalse(p.hayObjetoEnPosicion());
+        assertEquals(1, p.getJugador().getCantidadObjetosInventario());
     }
 
     @Test
@@ -197,7 +197,7 @@ class PartidaTest {
     @Test
     void turnosAgotadosCambianEstadoADerrota() throws Exception {
         Partida p = Partida.crearPartidaNueva();
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 60; i++) {
             p.terminarTurno();
         }
         assertEquals(EstadoPartida.DERROTA, p.getEstado());
