@@ -1675,3 +1675,56 @@ Pendiente de autorizacion humana para commit+push.
 
 - El fog-of-war cubre entidades (escondiendolas hasta que el jugador se acerque).
 - Los enemigos con danio/vida (formato simple sin ataque/defensa/movimiento) tienen movimiento=0 pero la IA los mueve igual mediante getCaminoMinimo().
+
+---
+
+## Sesion 2026-05-23 — Turnos 40→60 y auto-avance en puerta
+
+### Humano y parte
+No se identifico explicitamente, pero las instrucciones indican seguir con la rama feature/a-iconos (Parte A/C).
+
+### Rama usada
+`feature/a-iconos`
+
+### Tareas trabajadas
+- Aumentar turnos disponibles de 40 a 60
+- Auto-avance automatico al pisar PUERTA con llave (sin clic en "CAMBIAR CUEVA")
+- Pasar revisor independiente y arreglar hallazgo
+
+### Archivos modificados
+- `src/modelo/juego/FabricaPartida.java`: TURNOS_INICIALES 40→60
+- `src/vista/PantallaJuego.java`: auto-avance en keyboard + click handler, flag `movio` para evitar auto-avance tras ataque en PUERTA
+- `test/modelo/juego/FabricaPartidaTest.java`: expected 40→60
+- `test/modelo/juego/PartidaTest.java`: expected 40→60, loop turnosAgotados 40→60
+
+### Cambios realizados
+1. `FabricaPartida.TURNOS_INICIALES` de 40 a 60.
+2. Codigo de auto-avance en ambos handlers: solo cuando `movio==true` (movimiento real, no ataque/recoger).
+3. Auto-avance invoca `alCambiarCueva` para transicion de escena.
+4. Comentarios detallados segun AGENTS.md.
+
+### Pruebas ejecutadas
+Tests JUnit: 182/182 OK.
+
+### Pruebas no ejecutadas y motivo
+N/A.
+
+### Riesgos o posibles problemas
+- Auto-avance comparte el mismo comportamiento post-transicion que el boton manual "CAMBIAR CUEVA" (accionRealizada queda true, el primer input en la nueva cueva dispara auto-turn).
+- La flag `movio` evita auto-avance si el jugador ataca/recoge objeto estando sobre PUERTA.
+
+### Archivos compartidos tocados o solicitados
+- `FabricaPartida.java` (Parte B, solo constante)
+- `PantallaJuego.java` (Parte C)
+
+### Estado de TASKS.md
+- C-09.11 anadida como HECHA.
+
+### Pendiente para la proxima sesion
+- C-09.3 Animaciones
+- C-09.4 Efectos visuales
+- C-09.5 Sonidos
+- C-09.7 SFX
+- C-09.8 Transiciones
+- C-09.9 Alertas visuales
+- C-09.10 Modo antorcha

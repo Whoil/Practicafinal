@@ -256,21 +256,22 @@ public class PantallaJuego {
             try {
                 KeyCode k = e.getCode();
                 boolean ok = true;
+                boolean movio = false;
                 String msg = null;
                 Jugador jug = partida.getJugador();
                 int pf = jug.getFila(), pc = jug.getColumna();
                 if (k == KeyCode.W || k == KeyCode.UP) {
                     if (partida.hayEnemigoEn(pf - 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
-                    else { ok = partida.moverJugadorArriba(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                    else { ok = partida.moverJugadorArriba(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.S || k == KeyCode.DOWN) {
                     if (partida.hayEnemigoEn(pf + 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
-                    else { ok = partida.moverJugadorAbajo(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                    else { ok = partida.moverJugadorAbajo(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.A || k == KeyCode.LEFT) {
                     if (partida.hayEnemigoEn(pf, pc - 1)) { ok = false; msg = "Hay un enemigo ahi"; }
-                    else { ok = partida.moverJugadorIzquierda(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                    else { ok = partida.moverJugadorIzquierda(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.D || k == KeyCode.RIGHT) {
                     if (partida.hayEnemigoEn(pf, pc + 1)) { ok = false; msg = "Hay un enemigo ahi"; }
-                    else { ok = partida.moverJugadorDerecha(); if (!ok) msg = "No puedes moverte mas este turno"; }
+                    else { ok = partida.moverJugadorDerecha(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.SPACE) {
                     Enemigo target = partida.getEnemigoAdyacente();
                     if (target != null) {
@@ -304,6 +305,24 @@ public class PantallaJuego {
                     }
                 }
                 actualizar();
+
+                // Auto-avance en PUERTA con llave: si el movimiento
+                // acabo de poner al jugador sobre una puerta con la
+                // llave correcta, transicionar automaticamente a la
+                // siguiente cueva sin esperar clic en "CAMBIAR CUEVA".
+                // Solo se dispara tras tecla de movimiento (movio),
+                // no tras atacar/recoger desde una PUERTA.
+                if (movio && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
+                        && partida.puedeCambiarCueva()) {
+                    if (partida.cambiarCueva()) {
+                        if (alCambiarCueva != null) {
+                            // Cambia la escena (transicion), salir del handler
+                            alCambiarCueva.run();
+                            return;
+                        }
+                        actualizar();
+                    }
+                }
 
                 // Auto-terminar turno
                 if (partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
@@ -489,6 +508,20 @@ public class PantallaJuego {
                             if (!ok) clickMsg = "No puedes moverte alli";
                         }
                         actualizar();
+                        // Auto-avance en PUERTA con llave: si el clic de
+                        // movimiento acabo de poner al jugador sobre una
+                        // puerta con la llave correcta, transicionar
+                        // automaticamente a la siguiente cueva.
+                        if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
+                                && partida.puedeCambiarCueva()) {
+                            if (partida.cambiarCueva()) {
+                                if (alCambiarCueva != null) {
+                                    alCambiarCueva.run();
+                                    return;
+                                }
+                                actualizar();
+                            }
+                        }
                         boolean autoClick = (ok && partida.isMovimientoRealizado() && partida.isAccionRealizada())
                                          || (partida.isMovimientoRealizado() && clickMsg != null
                                               && clickMsg.contains("No puedes moverte"));

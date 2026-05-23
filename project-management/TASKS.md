@@ -198,6 +198,7 @@ Sub-tareas:
 - **C-09.8** Anadir animaciones de transicion fluida (fade in/out) entre pantallas - PENDIENTE
 - **C-09.9** Desarrollar sistema de alertas visuales temporales: textos flotantes de dano y cura - PENDIENTE
 - **C-09.10** Crear modo antorcha / filtro de contraste accesible mediante CSS dinamico - PENDIENTE
+- **C-09.11** Aumentar turnos de 40 a 60 y auto-avance en PUERTA con llave - HECHA
 
 ### R-01 Revision de restricciones
 

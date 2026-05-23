@@ -839,3 +839,14 @@ Sesion larga pero productiva. El guardado completo requirio modificar varias cla
 - C-09.3: Animaciones (movimiento suave, ataque, muerte, etc.)
 - C-09.4: Efectos visuales (partículas, brillos, etc.)
 - C-09.5: Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) — pendiente de grabar assets
+
+## 2026-05-23 — Turnos 40→60 y auto-avance en PUERTA
+
+**Cambio**: Aumento de TURNOS_INICIALES (40→60) y auto-avance automatico al pisar PUERTA con llave.
+
+**Archivos**: `FabricaPartida.java`, `PantallaJuego.java`, `FabricaPartidaTest.java`, `PartidaTest.java`, `TASKS.md`, `SCRATCHPAD.md`, `IA_DIARY.md`.
+
+**Hallazgo del revisor**: El auto-avance usaba `ok` en lugar de `movio`, lo que provocaria que atacar desde una PUERTA tambien avanzara. Corregido con flag `boolean movio`.
+
+**Tests**: 182/182 OK.
+

@@ -20,7 +20,7 @@ class FabricaPartidaTest {
         Partida partida = new FabricaPartida().crearPartida(resultado);
 
         assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
-        assertEquals(40, partida.getTurnosRestantes());
+        assertEquals(60, partida.getTurnosRestantes());
         assertEquals("cueva_facil", partida.getCuevaActual().getId());
         assertEquals(2, partida.getJugadorEnMapa().getFila());
         assertEquals(2, partida.getJugadorEnMapa().getColumna());
