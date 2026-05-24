@@ -32,7 +32,7 @@ class IconosVisualesTest {
                     primerosBytes(contenido, 0, 4));
         }
         for (String archivo : ASSETS_PACK) {
-            Path ruta = Path.of("Dungeon Asset Pack", archivo);
+            Path ruta = Path.of("datos", "dungeon-asset-pack", archivo);
             assertTrue(Files.size(ruta) > 100, "El asset debe existir y tener contenido: " + archivo);
 
             byte[] contenido = Files.readAllBytes(ruta);

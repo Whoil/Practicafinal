@@ -158,7 +158,7 @@ public class PantallaJuego {
 
     // Cache de imagenes para los assets del Dungeon Asset Pack
     private static final ListaDE<EntradaImagen> IMAGE_CACHE = new ListaDE<>();
-    private static final String ASSETS_BASE = "Dungeon Asset Pack" + File.separator;
+    private static final String ASSETS_BASE = "datos" + File.separator + "dungeon-asset-pack" + File.separator;
 
     // Sistema de vision limitada (fog-of-war)
     private int[][] visibilidad;
@@ -629,10 +629,10 @@ public class PantallaJuego {
                 if (celdas[f][c] == null) continue;
                 TipoCelda tc = cueva.getCelda(f, c).getTipo();
                 if (tc == TipoCelda.ROCA) {
-                    ImageView obsIcon = crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "rocks.png", spriteSize * 0.7, false);
+                    ImageView obsIcon = crearSpriteArchivo(ASSETS_BASE + "rocks.png", spriteSize * 0.7, false);
                     celdas[f][c].getChildren().add(obsIcon);
                 } else if (tc == TipoCelda.ARBUSTO) {
-                    ImageView obsIcon = crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "bush.png", spriteSize * 0.7, false);
+                    ImageView obsIcon = crearSpriteArchivo(ASSETS_BASE + "bush.png", spriteSize * 0.7, false);
                     celdas[f][c].getChildren().add(obsIcon);
                 }
             }
@@ -1447,7 +1447,7 @@ public class PantallaJuego {
 
     private Node crearIconoCeldaEspecial(TipoCelda tipo, double tamanio) {
         if (tipo == TipoCelda.PUERTA) {
-            return crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "door_closed.png", tamanio * 1.05, false);
+            return crearSpriteArchivo(ASSETS_BASE + "door_closed.png", tamanio * 1.05, false);
         }
         if (tipo == TipoCelda.SALIDA) {
             return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "salida.png", tamanio * 1.2, false);
