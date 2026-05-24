@@ -81,6 +81,7 @@ public class PantallaJuego {
     private Pane gridOverlay;
     private StackPane[][] celdas;
     private Text txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase;
+    private Text txtDistPuerta, txtDistSalida;
     private GridPane inventarioGrid;
     private StackPane[] inventarioSlots;
     private StackPane slotArma, slotEscudo;
@@ -269,7 +270,9 @@ public class PantallaJuego {
         txtCueva = labelStats("Cueva");
         txtEstado = labelStats("Estado");
         txtFase = labelStats("Fase");
-        statsBox.getChildren().addAll(tituloStats, txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase);
+        txtDistPuerta = labelStats("Puerta");
+        txtDistSalida = labelStats("Salida");
+        statsBox.getChildren().addAll(tituloStats, txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase, txtDistPuerta, txtDistSalida);
         panelDer.getChildren().add(statsBox);
 
         // Inventario (ranuras de equipo + grid)
@@ -836,6 +839,35 @@ public class PantallaJuego {
             }
         }
 
+        // Path overlay (C-10): dibujar el camino comprado sobre el grid
+        if (partida.isVisionCaminoComprada() && cumX != null && colWidth != null && rowHeight != null) {
+            ListaSE<CeldaEnMapa> camino = partida.getCaminoComprado();
+            if (camino != null) {
+                for (int i = 0; i < camino.getSize(); i++) {
+                    CeldaEnMapa celdaCamino = camino.get(i);
+                    int cf = celdaCamino.getFila();
+                    int cc = celdaCamino.getColumna();
+                    if (cf >= 0 && cf < cumY.length && cc >= 0 && cc < cumX.length) {
+                        boolean esDestino = (i == camino.getSize() - 1);
+                        Rectangle pathRect = new Rectangle(colWidth[cc], rowHeight[cf]);
+                        if (esDestino) {
+                            pathRect.setFill(Color.rgb(255, 215, 0, 0.45));
+                            pathRect.setStroke(Color.rgb(255, 215, 0, 1.0));
+                            pathRect.setStrokeWidth(3);
+                        } else {
+                            pathRect.setFill(Color.rgb(100, 200, 255, 0.30));
+                            pathRect.setStroke(Color.rgb(100, 200, 255, 0.7));
+                            pathRect.setStrokeWidth(1.5);
+                        }
+                        pathRect.setLayoutX(cumX[cc]);
+                        pathRect.setLayoutY(cumY[cf]);
+                        pathRect.setMouseTransparent(true);
+                        gridOverlay.getChildren().add(pathRect);
+                    }
+                }
+            }
+        }
+
         // Stats
         txtVida.setText("Vida: " + j.getVidaActual() + "/" + j.getVidaMaxima());
         txtAtaque.setText("Ataque: " + j.getAtaqueTotal() + (j.getArmaEquipada() != null ? " (" + j.getArmaEquipada().getNombre() + ")" : ""));
@@ -843,6 +875,26 @@ public class PantallaJuego {
         txtTurnos.setText("Turnos restantes: " + partida.getTurnosRestantes());
         txtCueva.setText("Cueva: " + cueva.getId());
         txtEstado.setText("Estado: " + partida.getEstado());
+        int distPuerta = partida.getDistanciaAPuerta();
+        txtDistPuerta.setText("Puerta: " + (distPuerta >= 0 ? distPuerta + " pasos" : "N/A"));
+        int distSalida = partida.getDistanciaMinimaCuevasASalida();
+        String rutaSalida;
+        if (distSalida < 0) {
+            rutaSalida = "N/A";
+        } else if (distSalida == 0) {
+            rutaSalida = "AQUI";
+        } else if (partida.isVisionCaminoComprada()) {
+            ListaSE<String> cuevas = partida.getCaminoCompradoCuevas();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < cuevas.getSize(); i++) {
+                if (sb.length() > 0) sb.append(" > ");
+                sb.append(cuevas.get(i));
+            }
+            rutaSalida = sb.toString();
+        } else {
+            rutaSalida = distSalida + " cuevas";
+        }
+        txtDistSalida.setText("Salida: " + rutaSalida);
         actualizarFase();
         txtCuevaNombre.setText("CUEVA: " + cueva.getId().toUpperCase());
 
@@ -951,6 +1003,33 @@ public class PantallaJuego {
         });
         aplicarEstiloBoton(btnRecoger, !partida.isAccionRealizada());
         accionesBox.getChildren().add(btnRecoger);
+
+        // Boton Ver Camino (C-10)
+        boolean yaComprado = partida.isVisionCaminoComprada();
+        Text btnVerCamino = crearBotonTexto(yaComprado ? "CAMINO REVELADO ✓" : "VER CAMINO (5 TURNOS)");
+        if (yaComprado) {
+            btnVerCamino.setFill(Color.LIGHTGREEN);
+        }
+        btnVerCamino.setOnMouseClicked(e -> {
+            if (partida.isVisionCaminoComprada()) {
+                mostrarFeedback("Ya has comprado la vision del camino", Color.web("#C89D65"));
+                return;
+            }
+            if (partida.getTurnosRestantes() < 5) {
+                mostrarFeedback("No tienes suficientes turnos (necesitas 5)", Color.rgb(255, 120, 100));
+                return;
+            }
+            boolean ok = partida.comprarVisionCamino();
+            if (ok) {
+                ReproductorSfx.getInstancia().reproducirRecoger();
+                mostrarFeedback("Camino revelado por 5 turnos", Color.LIGHTGREEN);
+            } else {
+                mostrarFeedback("No se pudo comprar la vision", Color.rgb(255, 120, 100));
+            }
+            actualizar();
+        });
+        aplicarEstiloBoton(btnVerCamino, !yaComprado);
+        accionesBox.getChildren().add(btnVerCamino);
 
         // Boton Terminar Turno destacado
         Text btnTurno = crearBotonTexto("=== TERMINAR TURNO [T] ===");
