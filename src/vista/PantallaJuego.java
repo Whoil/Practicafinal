@@ -43,6 +43,7 @@ import modelo.juego.CeldaEnMapa;
 import modelo.juego.CuevaEnMapa;
 import modelo.juego.ObjetoEnMapa;
 import modelo.juego.Partida;
+import modelo.juego.PersonajeEnMapa;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Arma;
 import modelo.objetos.Escudo;
@@ -284,7 +285,22 @@ public class PantallaJuego {
                 String msg = null;
                 Jugador jug = partida.getJugador();
                 int pf = jug.getFila(), pc = jug.getColumna();
-                if (k == KeyCode.W || k == KeyCode.UP) {
+                if (e.isShiftDown() && esTeclaDireccion(k)) {
+                    int df = deltaFila(k);
+                    int dc = deltaColumna(k);
+                    if (partida.isAccionRealizada()) {
+                        ok = false;
+                        msg = "Ya has usado la accion";
+                    } else if (!partida.hayEnemigoEnDireccion(df, dc)) {
+                        ok = false;
+                        msg = "No hay enemigo en esa direccion";
+                    } else {
+                        ok = atacarCelda(pf + df, pc + dc);
+                        if (!ok) {
+                            msg = "No puedes atacar ahora";
+                        }
+                    }
+                } else if (k == KeyCode.W || k == KeyCode.UP) {
                     if (partida.hayEnemigoEn(pf - 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
                     else if (esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorArriba(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
@@ -538,15 +554,24 @@ public class PantallaJuego {
                             return;
                         }
                         boolean ok;
+                        boolean movimientoPorClick = false;
                         String clickMsg = null;
                         if (partida.hayEnemigoEn(ff, cc)) {
-                            ok = false;
-                            clickMsg = "Hay un enemigo ahi";
+                            if (partida.isAccionRealizada()) {
+                                ok = false;
+                                clickMsg = "Ya has usado la accion";
+                            } else {
+                                ok = atacarCelda(ff, cc);
+                                if (!ok) {
+                                    clickMsg = "No puedes atacar ahora";
+                                }
+                            }
                         } else if (esObstaculo(cueva.getCelda(ff, cc))) {
                             ok = false;
                             clickMsg = "Hay una pared";
                         } else {
                             ok = partida.moverJugador(ff, cc);
+                            movimientoPorClick = ok;
                             if (!ok) clickMsg = "No puedes moverte alli";
                         }
                         actualizar();
@@ -554,7 +579,7 @@ public class PantallaJuego {
                         // movimiento acabo de poner al jugador sobre una
                         // puerta con la llave correcta, transicionar
                         // automaticamente a la siguiente cueva.
-                        if (ok && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
+                        if (movimientoPorClick && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
                                 && partida.puedeCambiarCueva()) {
                             if (partida.cambiarCueva()) {
                                 ReproductorSfx.getInstancia().reproducirPuerta();
@@ -642,36 +667,6 @@ public class PantallaJuego {
             // Recalcular visibilidad (fog-of-war) desde la posicion del jugador
             recalcularVisibilidad();
 
-            // Restaurar colores de todas las celdas y aplicar flash de ataque
-            if (celdas != null) {
-                for (int f = 0; f < filas && f < celdas.length; f++) {
-                    if (celdas[f] == null) continue;
-                    for (int c = 0; c < cols && c < celdas[f].length; c++) {
-                        StackPane cell = celdas[f][c];
-                        if (cell != null && !cell.getChildren().isEmpty()
-                                && cell.getChildren().get(0) instanceof Rectangle) {
-                            Rectangle r = (Rectangle) cell.getChildren().get(0);
-                            CeldaEnMapa celdaActual = cueva.getCelda(f, c);
-                            r.setFill(celdaActual != null ? colorParaTipo(celdaActual.getTipo()) : Color.TRANSPARENT);
-                        }
-                    }
-                }
-                if (ataqueFila >= 0 && ataqueFila < filas && ataqueCol >= 0 && ataqueCol < cols) {
-                    StackPane cell = celdas[ataqueFila][ataqueCol];
-                    if (cell != null && !cell.getChildren().isEmpty()
-                            && cell.getChildren().get(0) instanceof Rectangle) {
-                        ((Rectangle) cell.getChildren().get(0)).setFill(Color.rgb(255, 200, 200));
-                    }
-                }
-                if (recibirAtaqueFila >= 0 && recibirAtaqueFila < filas && recibirAtaqueCol >= 0 && recibirAtaqueCol < cols) {
-                    StackPane cell = celdas[recibirAtaqueFila][recibirAtaqueCol];
-                    if (cell != null && !cell.getChildren().isEmpty()
-                            && cell.getChildren().get(0) instanceof Rectangle) {
-                        ((Rectangle) cell.getChildren().get(0)).setFill(Color.rgb(255, 80, 80));
-                    }
-                }
-            }
-
         // Obtener tema visual segun la cueva actual
         DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaIdActual);
         double emojiSize = Math.min(cellSize * 0.65, 40);
@@ -713,6 +708,9 @@ public class PantallaJuego {
                 celdas[e.getFila()][e.getColumna()].getChildren().add(enemyIcon);
             }
         }
+        agregarResaltadoEnemigosAdyacentes(filas, cols, cellSize);
+        agregarFlashCelda(ataqueFila, ataqueCol, filas, cols, cellSize, Color.rgb(255, 220, 120, 0.32), Color.rgb(255, 230, 160, 0.95));
+        agregarFlashCelda(recibirAtaqueFila, recibirAtaqueCol, filas, cols, cellSize, Color.rgb(255, 80, 80, 0.30), Color.rgb(255, 80, 80, 0.90));
 
         // Objetos en el mapa (icono del asset pack segun tipo)
         ListaDE<ObjetoEnMapa> objetos = partida.getObjetosActuales();
@@ -1490,6 +1488,79 @@ public class PantallaJuego {
         }
         iv.setPreserveRatio(true);
         return iv;
+    }
+
+    private boolean esTeclaDireccion(KeyCode k) {
+        return k == KeyCode.W || k == KeyCode.UP
+                || k == KeyCode.S || k == KeyCode.DOWN
+                || k == KeyCode.A || k == KeyCode.LEFT
+                || k == KeyCode.D || k == KeyCode.RIGHT;
+    }
+
+    private int deltaFila(KeyCode k) {
+        if (k == KeyCode.W || k == KeyCode.UP) {
+            return -1;
+        }
+        if (k == KeyCode.S || k == KeyCode.DOWN) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private int deltaColumna(KeyCode k) {
+        if (k == KeyCode.A || k == KeyCode.LEFT) {
+            return -1;
+        }
+        if (k == KeyCode.D || k == KeyCode.RIGHT) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private boolean atacarCelda(int fila, int columna) {
+        ataqueFila = fila;
+        ataqueCol = columna;
+        boolean ok = partida.atacar(fila, columna);
+        if (ok) {
+            ReproductorSfx.getInstancia().reproducirAtaque();
+            iniciarEfectoAtaque();
+        } else {
+            ataqueFila = ataqueCol = -1;
+        }
+        return ok;
+    }
+
+    private void agregarResaltadoEnemigosAdyacentes(int filas, int cols, double cellSize) {
+        if (partida.isAccionRealizada()) {
+            return;
+        }
+        ListaSE<PersonajeEnMapa> enemigosAdyacentes = partida.getEnemigosAdyacentes();
+        for (int i = 0; i < enemigosAdyacentes.getSize(); i++) {
+            PersonajeEnMapa enemigo = enemigosAdyacentes.get(i);
+            agregarAnilloCelda(enemigo.getFila(), enemigo.getColumna(), filas, cols, cellSize,
+                    Color.rgb(255, 215, 0, 0.16), Color.rgb(255, 215, 0, 0.95), 3.0);
+        }
+    }
+
+    private void agregarFlashCelda(int fila, int columna, int filas, int cols, double cellSize,
+            Color relleno, Color borde) {
+        agregarAnilloCelda(fila, columna, filas, cols, cellSize, relleno, borde, 4.0);
+    }
+
+    private void agregarAnilloCelda(int fila, int columna, int filas, int cols, double cellSize,
+            Color relleno, Color borde, double grosor) {
+        if (fila < 0 || fila >= filas || columna < 0 || columna >= cols
+                || celdas == null || celdas[fila] == null || celdas[fila][columna] == null) {
+            return;
+        }
+        Rectangle anillo = new Rectangle(cellSize * 0.82, cellSize * 0.82);
+        anillo.setFill(relleno);
+        anillo.setStroke(borde);
+        anillo.setStrokeWidth(grosor);
+        anillo.setArcWidth(8);
+        anillo.setArcHeight(8);
+        anillo.setMouseTransparent(true);
+        celdas[fila][columna].getChildren().add(anillo);
     }
 
     private void iniciarEfectoAtaque() {

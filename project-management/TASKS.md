@@ -174,11 +174,12 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### B-05 Ataque direccional cuando haya varios enemigos cerca
 
 - Responsable: Guille / Parte B
-- Estado: PENDIENTE
+- Estado: REVISION
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `test/modelo/juego/`, `project-management/`
 - Terminado cuando el jugador pueda elegir la direccion u objetivo del ataque si hay varios enemigos adyacentes, y solo reciba dano el enemigo elegido.
 - Propuesta tecnica: exponer un metodo tipo `atacarDireccion(df, dc)` o reutilizar `atacar(fila, columna)` desde JavaFX.
 - Tests minimos: varios enemigos adyacentes, ataque hacia una direccion concreta, direccion sin enemigo devuelve `false`.
+- Verificacion: `scripts/test.ps1` pasado el 2026-05-24 con 189/189 tests correctos. Pendiente revision independiente antes de marcar HECHA.
 
 ### C-10 Ataque direccional, ataque especial cargable y revision de turnos
 
@@ -186,7 +187,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Estado: PENDIENTE
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/vista/`, `test/`, `project-management/`
 - Terminado cuando:
-  1. El jugador pueda elegir la direccion del ataque si hay varios enemigos adyacentes (ataque direccional).
+  1. El jugador pueda elegir la direccion del ataque si hay varios enemigos adyacentes (ataque direccional). Avance 2026-05-24: implementado para clic sobre enemigo y Shift+WASD/flechas; pendiente revision independiente.
   2. Exista un ataque especial que se vaya cargando a lo largo de la partida (cada cierto numero de turnos) y pueda ejecutarse cuando este cargado.
   3. Se haya revisado y ajustado la cantidad de turnos totales de la partida y los turnos por cueva.
 

@@ -158,6 +158,21 @@ public class Partida implements InterfazPartida {
     }
 
     @Override
+    public ListaSE<PersonajeEnMapa> getEnemigosAdyacentes() {
+        ListaSE<PersonajeEnMapa> vistas = new ListaSE<>();
+        ListaSE<Enemigo> enemigos = obtenerOCrearContenidoActual().getEnemigos();
+        for (int indice = 0; indice < enemigos.getSize(); indice++) {
+            Enemigo enemigo = enemigos.get(indice);
+            if (enemigo != null && enemigo.estaVivo()
+                    && !jugadorEstaEn(enemigo.getFila(), enemigo.getColumna())
+                    && estaEnCeldaCercanaAlJugador(enemigo.getFila(), enemigo.getColumna())) {
+                vistas.addLast(crearVistaEnemigo(enemigo));
+            }
+        }
+        return vistas;
+    }
+
+    @Override
     public ListaSE<ObjetoEnMapa> getObjetosEnSuelo() {
         return obtenerOCrearContenidoActual().getObjetosEnSuelo().copy();
     }
@@ -783,6 +798,11 @@ public class Partida implements InterfazPartida {
         Cueva cueva = getCuevaActualInterna();
         if (cueva == null) return false;
         return hayEnemigoEn(cueva, fila, columna);
+    }
+
+    @Override
+    public boolean hayEnemigoEnDireccion(int df, int dc) {
+        return hayEnemigoEn(jugador.getFila() + df, jugador.getColumna() + dc);
     }
 
     public boolean hayObjetoEnPosicion() {
