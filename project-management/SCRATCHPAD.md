@@ -2259,3 +2259,31 @@ Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se
 ### Pendiente
 
 - (ninguno)
+
+## 2026-05-25 - Alvaro y Codex-A / Diagramas UML
+
+### Trabajo realizado
+
+- Correccion de sintaxis en diagrama de clases PlantUML (parentesis en relaciones causaban error).
+- Division del diagrama grande (~900 lineas) en 9 archivos independientes por paquete.
+- Reorganizacion en subcarpetas: `clases/`, `casos-de-uso/`, `secuencia/`, `estados/`, `actividad/`.
+- Creacion de 4 diagramas nuevos:
+  - `casos-de-uso/diagrama_casos_uso.puml` (12 casos, 5 categorias)
+  - `secuencia/diagrama_secuencia_ataque.puml` (flujo ataque SPACE)
+  - `estados/diagrama_estados.puml` (INICIO/EN_CURSO/VICTORIA/DERROTA + sub-estados)
+  - `actividad/diagrama_actividad_turno.puml` (ciclo completo de turno)
+- Simplificacion de los 4 para evitar solapamiento de elementos.
+- Correccion de ñ en texto (`daño`).
+- Actualizacion de TASKS.md con tareas NC-01 a NC-13.
+
+### Archivos modificados
+
+- `project-management/TASKS.md`
+- `project-management/SCRATCHPAD.md`
+- `diagramas uml/` (toda la carpeta reorganizada con subcarpetas)
+
+### Pendiente
+
+- NC-10 a NC-13: Revision de diagramas.
+- NC-06: Planificar memoria.
+- NC-08: Planificar guion video.

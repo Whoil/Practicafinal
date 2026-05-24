@@ -67,6 +67,101 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 
 - Revisar toda PR que contenga codigo antes de merge a `main`.
 
+## Tareas no-code (diagramas, memoria y video)
+
+Estas tareas corresponden a la documentacion y entregables no-code del proyecto. No estan asignadas a una parte concreta; requieren coordinacion entre los tres integrantes.
+
+### NC-01 Revisar diagramas UML de clases
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/`, `project-management/`
+- Terminado cuando cada uno de los 8 diagramas independientes se renderice correctamente en IntelliJ y refleje fielmente las clases del codigo actual.
+
+### NC-02 Diagrama de casos de uso
+
+- Responsable: Por asignar
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/`, `project-management/`
+- Terminado cuando exista un archivo PlantUML con el diagrama de casos de uso del juego, identificando actores y casos principales.
+
+### NC-03 Diagrama de secuencia
+
+- Responsable: Por asignar
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/`, `project-management/`
+- Terminado cuando exista un archivo PlantUML con al menos un diagrama de secuencia representativo (ej. flujo de un turno de combate).
+
+### NC-04 Diagrama de estados
+
+- Responsable: Por asignar
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/`, `project-management/`
+- Terminado cuando exista un archivo PlantUML con el diagrama de estados de la partida (EN_CURSO, VICTORIA, DERROTA).
+
+### NC-05 Diagrama de actividad
+
+- Responsable: Por asignar
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/`, `project-management/`
+- Terminado cuando exista un archivo PlantUML con un diagrama de actividad del juego (ej. flujo de interaccion del jugador en un turno).
+
+### NC-06 Planificar estructura de la memoria/PDF
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `docs/`, `project-management/`
+- Terminado cuando exista un documento con el indice y las secciones previstas para la memoria.
+
+### NC-07 Redactar contenido de la memoria
+
+- Responsable: Por asignar
+- Estado: PENDIENTE
+- Archivos permitidos: `docs/`, `diagramas uml/`
+- Terminado cuando exista un borrador completo de la memoria del proyecto en PDF.
+
+### NC-08 Planificar guion del video
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `docs/`, `project-management/`
+- Terminado cuando exista un documento con la estructura y puntos clave del video de presentacion.
+
+### NC-09 Redactar guion del video
+
+- Responsable: Por asignar
+- Estado: PENDIENTE
+- Archivos permitidos: `docs/`
+- Terminado cuando exista un guion completo del video, con tiempos estimados y reparto de intervenciones.
+
+### NC-10 Revisar diagrama de casos de uso
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/casos-de-uso/`, `project-management/`
+- Terminado cuando `diagrama_casos_uso.puml` se renderice correctamente y refleje todos los actores y casos del juego.
+
+### NC-11 Revisar diagrama de secuencia
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/secuencia/`, `project-management/`
+- Terminado cuando `diagrama_secuencia_ataque.puml` se renderice correctamente y el flujo de ataque sea fiel a `Partida.atacar()`.
+
+### NC-12 Revisar diagrama de estados
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/estados/`, `project-management/`
+- Terminado cuando `diagrama_estados.puml` se renderice correctamente y los estados/transiciones reflejen el codigo (`EstadoPartida`, `comprobarVictoriaODerrota`).
+
+### NC-13 Revisar diagrama de actividad
+
+- Responsable: Coordinador
+- Estado: PENDIENTE
+- Archivos permitidos: `diagramas uml/actividad/`, `project-management/`
+- Terminado cuando `diagrama_actividad_turno.puml` se renderice correctamente y el flujo de turno refleje la logica real del juego (acciones por turno, IA enemiga, condiciones de fin).
+
 ## Pendientes urgentes
 
 ### A-01 Revisar estructuras propias existentes
