@@ -2239,26 +2239,51 @@ Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se
 - El helper de assets de menu recorta spritesheets al primer frame y usa `setSmooth(false)`.
 - El boton principal y el menu de opciones mantienen un estilo pergamino limpio.
 
-### Pruebas
-
-Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
-Resultado: 213/213 tests correctos.
-Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
-
-### Pendiente
-
-- Validacion visual manual en JavaFX/IntelliJ para confirmar que la composicion pixel art convence.
-
-## 2026-05-24 - Alvaro / Revertir primera pantalla de inicio
+## 2026-05-25 - opencode / Limpieza de assets no referenciados
 
 ### Trabajo realizado
 
-- `mostrarPantallaInicio()` vuelve al titulo original en tres lineas.
-- `crearBotonInicio()` vuelve al boton dorado con globo.
-- No se tocaron mecanicas ni flujos de menu.
+- Eliminado `MATCOMP-ED-EL2-Arboles-master/` (proyecto externo de arboles, 0 referencias).
+- Eliminados 16 GIFs de `Dungeon Asset Pack/characters/GIFs/` (ningun `.gif` usado en codigo).
+- Eliminados 8 `*_run.png` de `characters/Spritesheets/` (solo `*_idle.png` se usan).
+- Eliminados 13 PNGs de `weapons/` (solo `sword1.png` y `bow1.png` referenciados).
+- Eliminados `chest1-3.png` y `tilemap.png` de `objects/`.
+- Eliminado `datos/iconos/puerta.png` (no referenciado; juego usa `door_closed.png`).
+- Conservado `datos/iconos/pocion.png` (referenciado por `IconosVisualesTest.java`).
 
 ### Pruebas
 
-Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
-Resultado: 213/213 tests correctos.
-Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
+- Compilacion: 0 errores (javac con todas las fuentes + JavaFX + Gson).
+- Revisor independiente: APROBADO sin bloqueos.
+
+### Pendiente
+
+- (ninguno)
+
+## 2026-05-25 - Alvaro y Codex-A / Diagramas UML
+
+### Trabajo realizado
+
+- Correccion de sintaxis en diagrama de clases PlantUML (parentesis en relaciones causaban error).
+- Division del diagrama grande (~900 lineas) en 9 archivos independientes por paquete.
+- Reorganizacion en subcarpetas: `clases/`, `casos-de-uso/`, `secuencia/`, `estados/`, `actividad/`.
+- Creacion de 4 diagramas nuevos:
+  - `casos-de-uso/diagrama_casos_uso.puml` (12 casos, 5 categorias)
+  - `secuencia/diagrama_secuencia_ataque.puml` (flujo ataque SPACE)
+  - `estados/diagrama_estados.puml` (INICIO/EN_CURSO/VICTORIA/DERROTA + sub-estados)
+  - `actividad/diagrama_actividad_turno.puml` (ciclo completo de turno)
+- Simplificacion de los 4 para evitar solapamiento de elementos.
+- Correccion de ñ en texto (`daño`).
+- Actualizacion de TASKS.md con tareas NC-01 a NC-13.
+
+### Archivos modificados
+
+- `project-management/TASKS.md`
+- `project-management/SCRATCHPAD.md`
+- `diagramas uml/` (toda la carpeta reorganizada con subcarpetas)
+
+### Pendiente
+
+- NC-10 a NC-13: Revision de diagramas.
+- NC-06: Planificar memoria.
+- NC-08: Planificar guion video.

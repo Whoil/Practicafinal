@@ -11,5 +11,6 @@ public enum TipoEnemigo {
     ESQUELETO,
     ORCO,
     MAGO,
+    ARQUERO,
     BOSS
 }

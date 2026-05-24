@@ -1,0 +1,179 @@
+@startuml
+title json - DTOs y serializadores
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "json" #FFFFFF {
+
+  class CargadorConfiguracion {
+    + ResultadoCarga cargar(String ruta)
+  }
+
+  class SerializadorPartida {
+    ..
+    + guardar(DatosPartidaDTO d, String ruta)
+    + DatosPartidaDTO cargar(String ruta)
+    + Mazmorra dtoAMazmorra(DatosMazmorraDTO d)
+    + Jugador dtoAJugador(DatosJugadorDTO d)
+    + Cueva dtoACueva(DatosCuevaDTO d)
+    + Enemigo dtoAEnemigo(DatosEnemigoDTO d)
+    + Objeto dtoAObjeto(DatosObjetoDTO d)
+  }
+
+  class SerializadorRanking {
+    ..
+    + guardarResultado(ResultadoPartidaDTO r)
+    + ResultadoPartidaDTO[] leerRanking()
+    + ResultadoPartidaDTO[] obtenerTop10()
+  }
+
+  class ResultadoCarga {
+    - Mazmorra mazmorra
+    - ConfiguracionEnemigoDTO[] enemigos
+    - ConfiguracionObjetoDTO[] objetos
+    - ConexionDTO[] conexiones
+  }
+
+  class ResultadoPartidaDTO {
+    - String nombreJugador
+    - boolean victoria
+    - int turnosJugados
+    - int danoRecibido
+    - int danoEjercido
+    - int enemigosMuertos
+    - int bossesMuertos
+    - int puntuacion
+    - String titulo
+    - String fecha
+  }
+
+  class DatosPartidaDTO {
+    - String version
+    - DatosMazmorraDTO mazmorra
+    - DatosJugadorDTO jugador
+    - String estado
+    - int turnosRestantes
+    - DatosPuertaDTO[] puertas
+  }
+
+  class DatosMazmorraDTO {
+    - String cuevaActual
+    - DatosCuevaDTO[] cuevas
+    - ConexionDTO[] conexiones
+  }
+
+  class DatosCuevaDTO {
+    - String id
+    - String nombre
+    - int filas
+    - int columnas
+    - String[][] matriz
+    - DatosEnemigoDTO[] enemigos
+    - DatosObjetoDTO[] objetos
+  }
+
+  class DatosJugadorDTO {
+    - String nombre
+    - int vidaActual
+    - int vidaMaxima
+    - int ataqueBase
+    - int defensaBase
+    - int movimiento
+    - int fila
+    - int columna
+    - String[] inventario
+  }
+
+  class DatosEnemigoDTO {
+    - String tipo
+    - String nombre
+    - int vidaActual
+    - int vidaMaxima
+    - int ataqueBase
+    - int defensaBase
+    - int movimiento
+    - int fila
+    - int columna
+    - boolean vivo
+  }
+
+  class DatosObjetoDTO {
+    - String id
+    - String tipo
+    - String nombre
+    - int fila
+    - int columna
+    - int cura
+    - int bonificacionAtaque
+    - int bonificacionDefensa
+  }
+
+  class DatosPuertaDTO {
+    - String id
+    - String origen
+    - String destino
+    - String codigoLlave
+    - boolean abierta
+  }
+
+  class ConfiguracionMazmorra {
+    - String nombre
+    - ConfiguracionCuevaDTO[] cuevas
+    - ConexionDTO[] conexiones
+  }
+
+  class ConfiguracionCuevaDTO {
+    - String id
+    - String nombre
+    - String dificultad
+    - int filas
+    - int columnas
+    - String[][] matriz
+    - ConfiguracionEnemigoDTO[] enemigos
+    - ConfiguracionObjetoDTO[] objetos
+  }
+
+  class ConfiguracionEnemigoDTO {
+    - String idCueva
+    - String tipo
+    - int fila
+    - int columna
+    - int vida
+    - int ataque
+    - int defensa
+    - int movimiento
+  }
+
+  class ConfiguracionObjetoDTO {
+    - String idCueva
+    - String id
+    - String tipo
+    - int fila
+    - int columna
+    - String nombre
+    - int cura
+    - int ataque
+    - int defensa
+  }
+
+  class ConexionDTO {
+    - String origen
+    - String destino
+    - String etiqueta
+  }
+
+  CargadorConfiguracion ..> ResultadoCarga : crea
+  SerializadorPartida ..> DatosPartidaDTO
+  SerializadorRanking ..> ResultadoPartidaDTO
+  DatosPartidaDTO --> DatosMazmorraDTO
+  DatosPartidaDTO --> DatosJugadorDTO
+  DatosPartidaDTO --> DatosPuertaDTO
+  DatosMazmorraDTO --> DatosCuevaDTO
+  DatosMazmorraDTO --> ConexionDTO
+  DatosCuevaDTO --> DatosEnemigoDTO
+  DatosCuevaDTO --> DatosObjetoDTO
+  ConfiguracionMazmorra --> ConfiguracionCuevaDTO
+  ConfiguracionMazmorra --> ConexionDTO
+}
+@enduml

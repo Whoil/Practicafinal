@@ -198,8 +198,10 @@ src/vista/
   └── PanelAcciones.java         — Botones de accion
   └── PanelLog.java              — TextArea de eventos
 
-src/controlador/
-  └── ControladorJuego.java      — Conecta vista con Partida
+src/control/
+  └── ControladorFlujo.java      — Orquestación de pantallas (menú → juego → final)
+  └── JuegoController.java       — Maneja entrada de teclado/ratón en la partida
+  └── EscapeMazmorraApp.java     — Menú principal + lanzador Application
 ```
 
 ### 6.1 Responsabilidades
@@ -238,11 +240,20 @@ src/controlador/
 - TextArea no editable.
 - Metodo `anadirEvento(String)` para agregar lineas.
 
-**ControladorJuego.java**
-- Implementa `EventHandler<ActionEvent>` y `MouseEventHandler`.
-- Recibe la referencia a Partida.
-- Cada handler llama al metodo correspondiente de Partida.
-- Despues de cada accion, llama a `VentanaPrincipal.refrescar()`.
+**ControladorFlujo.java**
+- Orquesta la navegación entre pantallas (introducción, transición, juego, final).
+- Recibe `Stage` y un callback `volverAlMenu`.
+- Crea las escenas y las asigna al stage.
+
+**JuegoController.java**
+- Implementa `EventHandler` para teclado y ratón.
+- Recibe referencia a `PantallaJuego` y `Partida`.
+- Cada handler llama al método correspondiente y luego a `PantallaJuego.actualizar()`.
+
+**EscapeMazmorraApp.java**
+- `Application` principal de JavaFX.
+- Renderiza el menú principal (fondo, antorchas, botones, tesoro).
+- Crea el `ControladorFlujo` para la navegación del juego.
 
 ### 6.2 Ciclo de una accion tipica
 

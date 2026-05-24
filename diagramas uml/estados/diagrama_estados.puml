@@ -1,0 +1,16 @@
+@startuml
+title Estados - Partida
+skinparam shadowing false
+
+[*] --> INICIO
+INICIO --> EN_CURSO
+
+EN_CURSO --> TURNO_JUGADOR
+TURNO_JUGADOR --> TURNO_ENEMIGO : pasarTurno()
+TURNO_ENEMIGO --> TURNO_JUGADOR : actuar enemigos
+
+EN_CURSO --> VICTORIA : llaveFinal + SALIDA
+EN_CURSO --> DERROTA : muerto || turnos <= 0
+VICTORIA --> [*]
+DERROTA --> [*]
+@enduml
