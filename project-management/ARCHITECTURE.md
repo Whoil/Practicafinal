@@ -59,25 +59,21 @@ arriba, abajo, izquierda, derecha
 
 Cada celda actua como nodo conceptual durante el BFS, pero no se almacena necesariamente un `Grafo<Celda>` permanente.
 
-## 4. Paquetes propuestos
-
-Pendiente de adaptar al proyecto real, pero se recomienda:
+## 4. Paquetes actuales
 
 ```text
-src/estructuras
+src/Estructuras
 src/modelo/juego
 src/modelo/mapa
 src/modelo/personajes
 src/modelo/objetos
-src/modelo/acciones
 src/json
 src/vista
-src/controlador
-src/excepciones
+src/control
 test
+src/excepciones (sin usar)
+src/modelo/acciones (sin usar)
 ```
-
-Si se reutiliza el proyecto actual, se puede conservar `Estructuras`, `ParteA` y `ParteB.Grafo`, pero el codigo nuevo deberia estar ordenado en paquetes nuevos.
 
 ## 5. Clases principales
 

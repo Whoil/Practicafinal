@@ -393,7 +393,7 @@ Archivos permitidos inicialmente:
 
 ```text
 src/vista/
-src/controlador/
+src/control/
 src/json/
 docs/
 project-management/
