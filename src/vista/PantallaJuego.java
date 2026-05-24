@@ -2,6 +2,7 @@ package vista;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -123,6 +124,19 @@ public class PantallaJuego {
     private int recibirAtaqueFila = -1, recibirAtaqueCol = -1;
     private Timeline recibirAtaqueTimer;
 
+    // Animacion de movimiento suave: sprite reutilizado y timeline
+    private ImageView jugadorSprite;
+    private Timeline animMovimientoTimeline;
+
+    // Tamano del sprite del jugador (cache para animaciones)
+    private double spriteSizeCache;
+
+    // Capa separada para animaciones persistentes (no se limpia en actualizar)
+    private Pane animOverlay;
+
+    // Enemigo capturado antes de atacar (para animacion de muerte post-ataque)
+    private Enemigo targetAntesAtaque;
+
     /**
      * Entrada del cache de imagenes usando ListaDE propia.
      */
@@ -191,7 +205,9 @@ public class PantallaJuego {
         gridFog.setMouseTransparent(true);
         gridOverlay = new Pane();
         gridOverlay.setMouseTransparent(true);
-        gridLayer.getChildren().addAll(gridCeldas, gridWalls, gridFog, gridOverlay);
+        animOverlay = new Pane();
+        animOverlay.setMouseTransparent(true);
+        gridLayer.getChildren().addAll(gridCeldas, gridWalls, gridFog, gridOverlay, animOverlay);
 
         txtFeedback = new Text("");
         txtFeedback.setFont(Font.font(FONT, FontWeight.BOLD, 18));
@@ -327,6 +343,7 @@ public class PantallaJuego {
                     } else {
                         Enemigo target = partida.getEnemigoAdyacente();
                         if (target != null) {
+                            targetAntesAtaque = target;
                             ataqueFila = target.getFila();
                             ataqueCol = target.getColumna();
                             ok = partida.atacar();
@@ -390,6 +407,21 @@ public class PantallaJuego {
                         }
                         actualizar();
                     }
+                }
+
+                // Animacion de movimiento suave tras desplazamiento exitoso
+                if (movio && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                    animarMovimiento(pf, pc);
+                }
+
+                // Animacion visual de impacto y muerte tras ataque
+                if (ataqueFila >= 0 && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                    animarProyectil(pf, pc, ataqueFila, ataqueCol);
+                    animarAtaque(ataqueFila, ataqueCol);
+                    if (targetAntesAtaque != null && !targetAntesAtaque.estaVivo()) {
+                        animarMuerteEnemigo(ataqueFila, ataqueCol, getEnemyAssetPath(targetAntesAtaque));
+                    }
+                    targetAntesAtaque = null;
                 }
 
                 if (msg != null) {
@@ -563,6 +595,9 @@ public class PantallaJuego {
                         boolean ok;
                         boolean movimientoPorClick = false;
                         String clickMsg = null;
+                        // Capturar posicion del jugador antes de la accion
+                        int clickOldF = partida.getJugador().getFila();
+                        int clickOldC = partida.getJugador().getColumna();
                         if (partida.hayEnemigoEn(ff, cc)) {
                             if (partida.isAccionRealizada()) {
                                 ok = false;
@@ -584,10 +619,7 @@ public class PantallaJuego {
                             if (!ok) clickMsg = "No puedes moverte alli";
                         }
                         actualizar();
-                        // Auto-avance en PUERTA con llave: si el clic de
-                        // movimiento acabo de poner al jugador sobre una
-                        // puerta con la llave correcta, transicionar
-                        // automaticamente a la siguiente cueva.
+                        // Auto-avance en PUERTA con llave
                         if (movimientoPorClick && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO
                                 && partida.puedeCambiarCueva()) {
                             if (partida.cambiarCueva()) {
@@ -598,6 +630,19 @@ public class PantallaJuego {
                                 }
                                 actualizar();
                             }
+                        }
+                        // Animacion de movimiento suave
+                        if (movimientoPorClick && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                            animarMovimiento(clickOldF, clickOldC);
+                        }
+                        // Animacion visual de impacto y muerte tras ataque por clic
+                        if (ataqueFila >= 0 && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                            animarProyectil(clickOldF, clickOldC, ataqueFila, ataqueCol);
+                            animarAtaque(ataqueFila, ataqueCol);
+                            if (targetAntesAtaque != null && !targetAntesAtaque.estaVivo()) {
+                                animarMuerteEnemigo(ataqueFila, ataqueCol, getEnemyAssetPath(targetAntesAtaque));
+                            }
+                            targetAntesAtaque = null;
                         }
                         if (clickMsg != null) {
                             mostrarFeedback(clickMsg, Color.rgb(255, 120, 100));
@@ -628,7 +673,9 @@ public class PantallaJuego {
             java.io.FileWriter fw = new java.io.FileWriter("crash_detail.log", true);
             fw.write(java.time.LocalDateTime.now() + " " + msg + "\n");
             fw.close();
-        } catch (Exception ignored) {}
+        } catch (Exception e2) {
+            System.err.println("[logError] No se pudo escribir en crash_detail.log: " + e2.getMessage());
+        }
     }
 
     private void actualizar() {
@@ -678,14 +725,15 @@ public class PantallaJuego {
 
         // Obtener tema visual segun la cueva actual
         DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(cuevaIdActual);
-        double emojiSize = Math.min(cellSize * 0.65, 40);
+        this.spriteSizeCache = Math.min(cellSize * 0.65, 40);
+        double spriteSize = this.spriteSizeCache;
 
         // Iconos decorativos de celdas especiales.
         for (int f = 0; f < filas; f++) {
             for (int c = 0; c < cols; c++) {
                 if (celdas[f][c] == null) continue;
                 TipoCelda tipo = cueva.getCelda(f, c).getTipo();
-                Node iconoCelda = crearIconoCeldaEspecial(tipo, emojiSize);
+                Node iconoCelda = crearIconoCeldaEspecial(tipo, spriteSize);
                 if (iconoCelda != null) {
                     celdas[f][c].getChildren().add(iconoCelda);
                 }
@@ -694,9 +742,9 @@ public class PantallaJuego {
 
         // Jugador (icono del asset pack: knight)
         Jugador j = partida.getJugador();
-        ImageView playerIcon = crearSpriteAssets("characters" + File.separator + "Spritesheets" + File.separator + "knight_idle.png", emojiSize);
+        this.jugadorSprite = crearSpriteAssets("characters" + File.separator + "Spritesheets" + File.separator + "knight_idle.png", spriteSize);
         if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
-            celdas[j.getFila()][j.getColumna()].getChildren().add(playerIcon);
+            celdas[j.getFila()][j.getColumna()].getChildren().add(jugadorSprite);
         }
 
         // Enemigos (icono del asset pack segun tematica y tipo)
@@ -706,7 +754,7 @@ public class PantallaJuego {
             Enemigo e = itE.next();
             boolean esBoss = e instanceof modelo.personajes.Boss;
             String asset = esBoss ? tema.getAssetBoss() : tema.getAssetEnemigo();
-            ImageView enemyIcon = crearSpriteAssets(asset, emojiSize);
+            ImageView enemyIcon = crearSpriteAssets(asset, spriteSize);
             if (esBoss) {
                 DropShadow sombraBoss = new DropShadow();
                 sombraBoss.setRadius(10);
@@ -726,7 +774,7 @@ public class PantallaJuego {
         MiIterador<ObjetoEnMapa> itO = objetos.getIterador();
         while (itO.hasNext()) {
             ObjetoEnMapa om = itO.next();
-            Node itemIcon = crearIconoObjeto(om.getObjeto(), emojiSize * 0.6);
+            Node itemIcon = crearIconoObjeto(om.getObjeto(), spriteSize * 0.6);
             if (om.getFila() >= 0 && om.getFila() < filas && om.getColumna() >= 0 && om.getColumna() < cols) {
                 celdas[om.getFila()][om.getColumna()].getChildren().add(itemIcon);
             }
@@ -737,14 +785,11 @@ public class PantallaJuego {
             for (int c = 0; c < cols; c++) {
                 if (celdas[f][c] == null) continue;
                 TipoCelda tc = cueva.getCelda(f, c).getTipo();
-                String obsAsset = null;
                 if (tc == TipoCelda.ROCA) {
-                    obsAsset = "objects" + File.separator + "chest2.png";
+                    ImageView obsIcon = crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "rocks.png", spriteSize * 0.7, false);
+                    celdas[f][c].getChildren().add(obsIcon);
                 } else if (tc == TipoCelda.ARBUSTO) {
-                    obsAsset = "objects" + File.separator + "chest3.png";
-                }
-                if (obsAsset != null) {
-                    ImageView obsIcon = crearSpriteAssets(obsAsset, emojiSize * 0.7);
+                    ImageView obsIcon = crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "bush.png", spriteSize * 0.7, false);
                     celdas[f][c].getChildren().add(obsIcon);
                 }
             }
@@ -784,8 +829,13 @@ public class PantallaJuego {
         btnArriba.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
             if (esTesoro(partida.getCuevaActual().getCelda(pf - 1, pc))) { ejecutarAccion(false, null); return; }
+            int oldF = pf, oldC = pc;
             if (esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ejecutarAccion(false, "Hay una pared"); return; }
-            ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno");
+            boolean movOk = partida.moverJugadorArriba();
+            ejecutarAccion(movOk, "No puedes moverte mas este turno");
+            if (movOk && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                animarMovimiento(oldF, oldC);
+            }
         });
         accionesBox.getChildren().add(btnArriba);
         HBox movHoriz = new HBox(4);
@@ -794,15 +844,25 @@ public class PantallaJuego {
         btnIzq.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
             if (esTesoro(partida.getCuevaActual().getCelda(pf, pc - 1))) { ejecutarAccion(false, null); return; }
+            int oldF = pf, oldC = pc;
             if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc - 1))) { ejecutarAccion(false, "Hay una pared"); return; }
-            ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno");
+            boolean movOk = partida.moverJugadorIzquierda();
+            ejecutarAccion(movOk, "No puedes moverte mas este turno");
+            if (movOk && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                animarMovimiento(oldF, oldC);
+            }
         });
         btnDer = crearBotonTexto("DER [D] >");
         btnDer.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
             if (esTesoro(partida.getCuevaActual().getCelda(pf, pc + 1))) { ejecutarAccion(false, null); return; }
+            int oldF = pf, oldC = pc;
             if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ejecutarAccion(false, "Hay una pared"); return; }
-            ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno");
+            boolean movOk = partida.moverJugadorDerecha();
+            ejecutarAccion(movOk, "No puedes moverte mas este turno");
+            if (movOk && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                animarMovimiento(oldF, oldC);
+            }
         });
         movHoriz.getChildren().addAll(btnIzq, btnDer);
         accionesBox.getChildren().add(movHoriz);
@@ -810,8 +870,13 @@ public class PantallaJuego {
         btnAbajo.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
             if (esTesoro(partida.getCuevaActual().getCelda(pf + 1, pc))) { ejecutarAccion(false, null); return; }
+            int oldF = pf, oldC = pc;
             if (esObstaculo(partida.getCuevaActual().getCelda(pf + 1, pc))) { ejecutarAccion(false, "Hay una pared"); return; }
-            ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno");
+            boolean movOk = partida.moverJugadorAbajo();
+            ejecutarAccion(movOk, "No puedes moverte mas este turno");
+            if (movOk && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                animarMovimiento(oldF, oldC);
+            }
         });
         accionesBox.getChildren().add(btnAbajo);
 
@@ -822,9 +887,25 @@ public class PantallaJuego {
             if (partida.isAccionRealizada()) {
                 return;
             }
-            boolean ok = partida.atacar();
-            if (ok) ReproductorSfx.getInstancia().reproducirAtaque();
-            ejecutarAccion(ok, "No hay enemigo para atacar");
+            Enemigo targetBtn = partida.getEnemigoAdyacente();
+            if (targetBtn != null) {
+                targetAntesAtaque = targetBtn;
+                ataqueFila = targetBtn.getFila();
+                ataqueCol = targetBtn.getColumna();
+            }
+            boolean okAtq = partida.atacar();
+            actualizar();
+            if (okAtq && ataqueFila >= 0 && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                int pfj = partida.getJugador().getFila();
+                int pcj = partida.getJugador().getColumna();
+                animarProyectil(pfj, pcj, ataqueFila, ataqueCol);
+                animarAtaque(ataqueFila, ataqueCol);
+                if (targetAntesAtaque != null && !targetAntesAtaque.estaVivo()) {
+                    animarMuerteEnemigo(ataqueFila, ataqueCol, getEnemyAssetPath(targetAntesAtaque));
+                }
+                targetAntesAtaque = null;
+            }
+            ejecutarAccion(okAtq, "No hay enemigo para atacar");
         });
         accionesBox.getChildren().add(btnAtacar);
 
@@ -1426,7 +1507,7 @@ public class PantallaJuego {
      */
     private Node crearIconoObjeto(Objeto obj, double tamanio) {
         if (obj instanceof modelo.objetos.Pocion) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "pocion.png", tamanio, false);
+            return crearSpriteAssets("TinyBits Inventory Pack - Potions.png", tamanio);
         }
         if (obj instanceof modelo.objetos.Escudo) {
             return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "escudo.png", tamanio, false);
@@ -1438,7 +1519,7 @@ public class PantallaJuego {
 
     private Node crearIconoCeldaEspecial(TipoCelda tipo, double tamanio) {
         if (tipo == TipoCelda.PUERTA) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "puerta.png", tamanio * 1.05, false);
+            return crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "door_closed.png", tamanio * 1.05, false);
         }
         if (tipo == TipoCelda.SALIDA) {
             return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "salida.png", tamanio * 1.2, false);
@@ -1545,6 +1626,16 @@ public class PantallaJuego {
     private boolean atacarCelda(int fila, int columna) {
         ataqueFila = fila;
         ataqueCol = columna;
+        targetAntesAtaque = null;
+        ListaDE<Enemigo> enems = partida.getEnemigosActuales();
+        MiIterador<Enemigo> it = enems.getIterador();
+        while (it.hasNext()) {
+            Enemigo e = it.next();
+            if (e.getFila() == fila && e.getColumna() == columna) {
+                targetAntesAtaque = e;
+                break;
+            }
+        }
         boolean ok = partida.atacar(fila, columna);
         if (ok) {
             ReproductorSfx.getInstancia().reproducirAtaque();
@@ -1612,6 +1703,162 @@ public class PantallaJuego {
         }));
         recibirAtaqueTimer.setCycleCount(1);
         recibirAtaqueTimer.play();
+    }
+
+    // ---------------------------------------------------------------
+    // Animaciones: movimiento suave, ataque y muerte
+    // ---------------------------------------------------------------
+
+    /**
+     * Animacion de movimiento suave del jugador entre dos celdas.
+     * Usa translateX/Y sobre el sprite del jugador para desplazarlo
+     * visualmente desde la celda anterior a la nueva, con easing
+     * smoothstep (suave al inicio y al final).
+     */
+    private void animarMovimiento(int oldF, int oldC) {
+        if (animMovimientoTimeline != null || jugadorSprite == null || cumX == null) return;
+        int newF = partida.getJugador().getFila();
+        int newC = partida.getJugador().getColumna();
+        if (oldF == newF && oldC == newC) return;
+
+        double offsetX = (cumX[oldC] + colWidth[oldC] / 2.0) - (cumX[newC] + colWidth[newC] / 2.0);
+        double offsetY = (cumY[oldF] + rowHeight[oldF] / 2.0) - (cumY[newF] + rowHeight[newF] / 2.0);
+
+        jugadorSprite.setTranslateX(offsetX);
+        jugadorSprite.setTranslateY(offsetY);
+
+        animMovimientoTimeline = new Timeline();
+        int frames = 8;
+        double duracionMs = 150;
+        for (int i = 1; i <= frames; i++) {
+            double t = (double) i / frames;
+            double easeT = t * t * (3.0 - 2.0 * t);
+            final double tx = offsetX * (1.0 - easeT);
+            final double ty = offsetY * (1.0 - easeT);
+            KeyFrame kf = new KeyFrame(Duration.millis(duracionMs * t), e -> {
+                jugadorSprite.setTranslateX(tx);
+                jugadorSprite.setTranslateY(ty);
+            });
+            animMovimientoTimeline.getKeyFrames().add(kf);
+        }
+        animMovimientoTimeline.setOnFinished(e -> {
+            jugadorSprite.setTranslateX(0);
+            jugadorSprite.setTranslateY(0);
+            animMovimientoTimeline = null;
+        });
+        animMovimientoTimeline.setCycleCount(1);
+        animMovimientoTimeline.play();
+    }
+
+    /**
+     * Animacion visual de impacto al atacar: circulo expansivo que
+     * aparece en la celda del enemigo, crece y se desvanece.
+     */
+    private void animarProyectil(int playerF, int playerC, int enemyF, int enemyC) {
+        if (cumX == null || gridOverlay == null) return;
+        double startX = cumX[playerC] + colWidth[playerC] / 2.0;
+        double startY = cumY[playerF] + rowHeight[playerF] / 2.0;
+        double endX = cumX[enemyC] + colWidth[enemyC] / 2.0;
+        double endY = cumY[enemyF] + rowHeight[enemyF] / 2.0;
+
+        Circle bolt = new Circle(startX, startY, 5);
+        bolt.setFill(Color.rgb(255, 220, 80));
+        bolt.setStroke(Color.rgb(255, 255, 200));
+        bolt.setStrokeWidth(1.5);
+        bolt.setMouseTransparent(true);
+        gridOverlay.getChildren().add(bolt);
+
+        Timeline tl = new Timeline(
+            new KeyFrame(Duration.millis(0), e -> {
+                bolt.setCenterX(startX);
+                bolt.setCenterY(startY);
+                bolt.setOpacity(1.0);
+            }),
+            new KeyFrame(Duration.millis(140), e -> {
+                bolt.setCenterX(endX);
+                bolt.setCenterY(endY);
+                bolt.setOpacity(0.3);
+            }),
+            new KeyFrame(Duration.millis(170), e -> {
+                gridOverlay.getChildren().remove(bolt);
+            })
+        );
+        tl.setCycleCount(1);
+        tl.play();
+    }
+
+    private void animarAtaque(int enemyF, int enemyC) {
+        if (cumX == null || gridOverlay == null) return;
+        double cx = cumX[enemyC] + colWidth[enemyC] / 2.0;
+        double cy = cumY[enemyF] + rowHeight[enemyF] / 2.0;
+        double tam = Math.min(colWidth[enemyC], rowHeight[enemyF]) * 0.4;
+
+        Circle impacto = new Circle(cx, cy, tam * 0.15);
+        impacto.setFill(Color.rgb(255, 220, 80, 0.85));
+        impacto.setStroke(Color.rgb(255, 255, 200, 0.95));
+        impacto.setStrokeWidth(2.5);
+        impacto.setMouseTransparent(true);
+        gridOverlay.getChildren().add(impacto);
+
+        Timeline tl = new Timeline(
+            new KeyFrame(Duration.millis(0), e -> {
+                impacto.setRadius(tam * 0.1);
+                impacto.setOpacity(1.0);
+            }),
+            new KeyFrame(Duration.millis(120), e -> {
+                impacto.setRadius(tam * 0.7);
+                impacto.setOpacity(0.3);
+            }),
+            new KeyFrame(Duration.millis(220), e -> {
+                gridOverlay.getChildren().remove(impacto);
+            })
+        );
+        tl.setCycleCount(1);
+        tl.play();
+    }
+
+    /**
+     * Animacion de muerte de un enemigo: se crea un sprite en el
+     * overlay de animaciones en la posicion del enemigo, se desvanece
+     * con FadeTransition y se encoge con ScaleTransition.
+     * Usa animOverlay (capa no limpiada por actualizar) para que
+     * la animacion no se interrumpa al redibujar el grid.
+     */
+    private void animarMuerteEnemigo(int fila, int columna, String assetPath) {
+        if (animOverlay == null || cumX == null) return;
+
+        double px = cumX[columna] + (colWidth[columna] - spriteSizeCache) / 2.0;
+        double py = cumY[fila] + (rowHeight[fila] - spriteSizeCache) / 2.0;
+
+        ImageView sprite = crearSpriteAssets(assetPath, spriteSizeCache);
+        sprite.setLayoutX(px);
+        sprite.setLayoutY(py);
+        sprite.setMouseTransparent(true);
+        animOverlay.getChildren().add(sprite);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(400), sprite);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+
+        ScaleTransition scale = new ScaleTransition(Duration.millis(400), sprite);
+        scale.setFromX(1.0);
+        scale.setFromY(1.0);
+        scale.setToX(0.3);
+        scale.setToY(0.3);
+
+        fade.setOnFinished(e -> animOverlay.getChildren().remove(sprite));
+        fade.play();
+        scale.play();
+    }
+
+    /**
+     * Devuelve la ruta del asset sprite para un enemigo, segun
+     * si es boss o no y la tematica de la cueva actual.
+     */
+    private String getEnemyAssetPath(Enemigo e) {
+        boolean esBoss = e instanceof modelo.personajes.Boss;
+        DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(partida.getCuevaActual().getId());
+        return esBoss ? tema.getAssetBoss() : tema.getAssetEnemigo();
     }
 
     private void agregarBarraVida(StackPane cell, int vidaActual, int vidaMaxima, double cellSize) {

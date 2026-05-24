@@ -251,16 +251,6 @@
           "ataque": 10
         },
         {
-          "tipo": "LLAVE",
-          "id": "llave-final",
-          "fila": 6,
-          "columna": 3,
-          "nombre": "Llave de la salida",
-          "descripcion": "Abre la puerta para acceder a la salida final",
-          "tipoLlave": "PUERTA",
-          "codigoCerradura": "llave-final-salida"
-        },
-        {
           "tipo": "POCION",
           "id": "pocion-abismo-2",
           "fila": 14,

@@ -44,7 +44,7 @@ HECHA
 
 ### Resumen de tareas pendientes (Parte A)
 
-- **A-01** Revisar estructuras propias - PENDIENTE
+
 
 ## Peticiones urgentes entre partes
 
@@ -91,6 +91,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/json/`, `test/`, `project-management/`
 - Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
 - Verificacion: 19 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, equipo, estado, errores, conversion DTO<->modelo).
+
 ### B-03 Reglas de turno y combate
 
 - Responsable: Guille / Parte B
@@ -173,16 +174,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Terminado cuando exista Partida que cargue JSON, maneje movimiento, combate, objetos, turnos, condiciones de victoria/derrota, guardado/carga, y PantallaJuego que muestre grid coloreado con jugador/enemigos/objetos, panel de stats, inventario, acciones, log, teclado WASD/flechas y atajos SPACE/R/T.
 - Verificacion: 148 tests JUnit pasados el 2026-05-22 (24 tests de Partida + 124 existentes). Demo jugable confirmada por Hector.
 
-### B-05 Ataque direccional cuando haya varios enemigos cerca
-
-- Responsable: Guille / Parte B
-- Estado: REVISION
-- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `test/modelo/juego/`, `project-management/`
-- Terminado cuando el jugador pueda elegir la direccion u objetivo del ataque si hay varios enemigos adyacentes, y solo reciba dano el enemigo elegido.
-- Propuesta tecnica: exponer un metodo tipo `atacarDireccion(df, dc)` o reutilizar `atacar(fila, columna)` desde JavaFX.
-- Tests minimos: varios enemigos adyacentes, ataque hacia una direccion concreta, direccion sin enemigo devuelve `false`.
-- Verificacion: `scripts/test.ps1` pasado el 2026-05-24 con 189/189 tests correctos. Pendiente revision independiente antes de marcar HECHA.
-
 ### C-10 Ataque direccional, ataque especial cargable y revision de turnos
 
 - Responsable: Hector / Parte C
@@ -203,7 +194,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 Sub-tareas:
 - **C-09.1** Obstaculos (ROCA, ARBUSTO), mapas laberinticos (15x15, 19x19, 23x23), muros macizos (10px) y sistema de niebla (fog-of-war con radio 3 y opacidad progresiva) - HECHA
 - **C-09.2** Musica de fondo con javafx.media y ReproductorMusica singleton - HECHA
-- **C-09.3** Animaciones (movimiento suave, ataque, muerte) - PENDIENTE
+- **C-09.3** Animaciones (movimiento suave, ataque, muerte) - HECHA
 - **C-09.4** Efectos visuales (particulas, brillos) - PENDIENTE
 - **C-09.5** Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) - PENDIENTE
 - **C-09.6** Mejorar diseno de cuevas: mapas laberinticos con paredes de 2 celdas, 3 dificultades, mejor trazado y obstaculos - HECHA
@@ -268,6 +259,31 @@ Sub-tareas:
 - Archivos permitidos: `src/modelo/personajes/`, `test/`, `project-management/`
 - Terminado: existen `Personaje`, `Jugador`, `Enemigo` y `Boss` segun arquitectura acordada.
 - Verificacion: PR #4 mergeada en `main` el 2026-05-21; tests JUnit de `modelo.personajes` pasados y cobertura verificada en IntelliJ.
+
+### B-02 Modelo de objetos e inventario
+
+- Responsable: Guille / Parte B
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
+- Terminado: existen `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`. Equipo con ranuras de arma y escudo, arco a dos manos desequipa escudo, pocion consumible, llaves con tipo y codigo.
+- Verificacion: 16 tests JUnit de objetos/inventario + 189/189 tests globales pasados el 2026-05-24.
+- Nota: `ListaDE` adaptada para no exigir `Comparable`, necesaria para inventario sin orden natural.
+
+### A-01 Revisar estructuras propias existentes
+
+- Responsable: Alvaro / Parte A
+- Estado: HECHA
+- Archivos permitidos: `src/Estructuras/`, `project-management/`
+- Terminado: tabla detallada de las 6 estructuras (ListaSE, ListaDE, Cola, Grafo, NodoGrafo, ArcoGrafo) con almacenamiento interno, complejidad, usos concretos en el proyecto y riesgos. Documentado en `ARCHITECTURE.md` seccion 7.
+
+### B-05 Ataque direccional
+
+- Responsable: Guille / Parte B, Alvaro / Parte A (implementacion UI)
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/`, `src/vista/`, `test/`, `project-management/`
+- Terminado: el jugador puede elegir direccion con Shift+WASD/flechas o hacer clic sobre un enemigo para atacarlo. Resaltado visual dorado en enemigos adyacentes atacables. Reutiliza `atacar(fila, columna)` existente.
+- Tests: `hayEnemigoEnDireccion`, `getEnemigosAdyacentes`, `atacarDireccionConVariosEnemigosSoloDanaElElegido`, direccion sin enemigo.
+- Verificacion: 189/189 tests pasados el 2026-05-24. Commit `b9dc701` en `feature/a-estructuras`.
 
 ### C-01 Disenar JSON inicial
 

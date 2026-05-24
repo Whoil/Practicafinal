@@ -131,3 +131,24 @@ Parte responsable: Parte B / Revision independiente
 - Buscar la llave final por codigo, no depender del id fijo, y generar un id alternativo si el id por defecto ya existe.
 - Incluir fila y columna en `ObjetoEnMapa.equals()` y `hashCode()`.
 - Ampliar `PartidaTest` con casos de revision para estos defectos.
+
+### 2026-05-24 - Sprites de cofre usados para rocas y arbustos
+
+Parte responsable: Parte C / UI
+
+#### Va mal o requiere atencion
+
+- Al implementar los obstaculos ROCA y ARBUSTO en el mapa, no habia sprites adecuados en el Dungeon Asset Pack para representarlos.
+- En lugar de informar del problema o pedir assets alternativos, se usaron `chest2.png` y `chest3.png` (sprites de cofre) como placeholder para rocas y arbustos.
+- Esto provoco que en el juego aparecieran cofres sobre celdas de pared/obstaculo, confundiendo a los jugadores.
+
+#### Causa probable
+
+- Se priorizo tener un icono visible aunque fuera incorrecto en lugar de dejar la celda sin icono o pedir ayuda.
+- No se reviso si el asset pack contenia sprites adecuados antes de elegir los placeholders.
+
+#### Accion decidida
+
+- Alvaro anadio manualmente los assets correctos (`rocks.png`, `bush.png`, `door_closed.png`) al Dungeon Asset Pack.
+- El codigo se actualizo para usar estos assets en lugar de chest sprites.
+- Recordar: si no existe un asset adecuado, preguntar antes de usar uno incorrecto como placeholder permanente.

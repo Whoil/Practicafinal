@@ -112,9 +112,7 @@ public class EscapeMazmorraApp extends Application {
         Scene escena = new Scene(raiz, ANCHO, ALTO);
         stage.setTitle("ESCAPE DE LA MAZMORRA");
         stage.setScene(escena);
-        stage.setResizable(true);
-        stage.setMinWidth(960);
-        stage.setMinHeight(540);
+        stage.setResizable(false);
         stage.show();
 
         animacionIzquierda.play();
@@ -788,6 +786,7 @@ public class EscapeMazmorraApp extends Application {
         });
         Scene scene = intro.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
+        stage.setResizable(false);
         stage.setScene(scene);
     }
 
@@ -801,6 +800,7 @@ public class EscapeMazmorraApp extends Application {
         });
         Scene scene = transicion.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
+        stage.setResizable(false);
         stage.setScene(scene);
     }
 
@@ -833,6 +833,9 @@ public class EscapeMazmorraApp extends Application {
             });
             Scene gameScene = pj.crearScene();
             logDirecto("crearScene() completado");
+            stage.setResizable(true);
+            stage.setMinWidth(960);
+            stage.setMinHeight(540);
             stage.setScene(gameScene);
             logDirecto("stage.setScene() completado");
         } catch (Throwable t) {
@@ -850,6 +853,7 @@ public class EscapeMazmorraApp extends Application {
         PantallaFinal pantallaFinal = new PantallaFinal(victoria, this::volverAlMenu);
         Scene scene = pantallaFinal.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
+        stage.setResizable(false);
         stage.setScene(scene);
     }
 
@@ -871,6 +875,7 @@ public class EscapeMazmorraApp extends Application {
         raiz.getChildren().add(contenidoActual);
 
         Scene menuScene = new Scene(raiz, ANCHO, ALTO);
+        stage.setResizable(false);
         stage.setScene(menuScene);
         animacionIzquierda.play();
         animacionDerecha.play();
