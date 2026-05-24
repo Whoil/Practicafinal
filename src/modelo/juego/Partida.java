@@ -90,6 +90,21 @@ public class Partida implements InterfazPartida {
     private boolean movimientoRealizado;
     private boolean accionRealizada;
 
+    /*
+     * Cache de la vision comprada del camino.
+     *
+     * visionCaminoComprada indica si el jugador pago 5 turnos para ver
+     * la ruta a la puerta mas cercana. caminoComprado guarda la secuencia
+     * de celdas (modelo) de la cueva actual hasta la PUERTA.
+     */
+    private boolean visionCaminoComprada = false;
+    private ListaSE<Celda> caminoComprado = new ListaSE<>();
+    /*
+     * Cadena de cuevas desde la actual hasta la que contiene la SALIDA.
+     * Solo se rellena al comprar la vision (comprarVisionCamino).
+     */
+    private ListaSE<String> caminoCompradoCuevas = new ListaSE<>();
+
     public Partida(Mazmorra mazmorra, Jugador jugador, int turnosRestantes) {
         this(mazmorra, jugador, turnosRestantes, CODIGO_LLAVE_FINAL_DEFECTO);
     }
@@ -549,6 +564,9 @@ public class Partida implements InterfazPartida {
         if (avanzado) {
             jugador.cambiarPosicion(celdaEntrada.getFila(), celdaEntrada.getColumna());
             turnosRestantes = TURNOS_POR_CUEVA;
+            visionCaminoComprada = false;
+            caminoComprado = new ListaSE<>();
+            caminoCompradoCuevas = new ListaSE<>();
             registrarLog("Jugador avanza a la cueva " + destino.getId());
         }
         return avanzado;
@@ -1372,6 +1390,163 @@ public class Partida implements InterfazPartida {
 
     public EstadisticasPartida getEstadisticas() {
         return new EstadisticasPartida(estadisticas);
+    }
+
+    // ---------------------------------------------------------------
+    // Vision del camino (C-10)
+    // ---------------------------------------------------------------
+
+    @Override
+    public int getDistanciaAPuerta() {
+        Cueva cueva = getCuevaActualInterna();
+        if (cueva == null) {
+            return -1;
+        }
+        Jugador j = getJugador();
+        int mejorDist = Integer.MAX_VALUE;
+        for (int f = 0; f < cueva.getFilas(); f++) {
+            for (int c = 0; c < cueva.getColumnas(); c++) {
+                if (cueva.getCelda(f, c).getTipo() == TipoCelda.PUERTA) {
+                    int d = cueva.getDistanciaMinima(j.getFila(), j.getColumna(), f, c);
+                    if (d >= 0 && d < mejorDist) {
+                        mejorDist = d;
+                    }
+                }
+            }
+        }
+        return mejorDist == Integer.MAX_VALUE ? -1 : mejorDist;
+    }
+
+    @Override
+    public int getDistanciaMinimaCuevasASalida() {
+        Cueva actual = getCuevaActualInterna();
+        if (actual == null) {
+            return -1;
+        }
+        Cueva cuevaSalida = buscarCuevaConSalida();
+        if (cuevaSalida == null) {
+            return -1;
+        }
+        if (actual.equals(cuevaSalida)) {
+            return 0;
+        }
+        ListaSE<Cueva> camino = mazmorra.getCaminoMinimo(actual, cuevaSalida);
+        if (camino == null || camino.isEmpty()) {
+            return -1;
+        }
+        return camino.getSize() - 1;
+    }
+
+    @Override
+    public boolean comprarVisionCamino() {
+        if (visionCaminoComprada) {
+            return false;
+        }
+        if (turnosRestantes < 5) {
+            return false;
+        }
+        turnosRestantes -= 5;
+
+        Cueva cueva = getCuevaActualInterna();
+        Jugador j = getJugador();
+        Cueva cuevaSalida = buscarCuevaConSalida();
+
+        // Calcular cadena de cuevas hasta la SALIDA
+        caminoCompradoCuevas = new ListaSE<>();
+        if (cuevaSalida != null && !cueva.equals(cuevaSalida)) {
+            ListaSE<Cueva> rutaCuevas = mazmorra.getCaminoMinimo(cueva, cuevaSalida);
+            if (rutaCuevas != null) {
+                for (int i = 0; i < rutaCuevas.getSize(); i++) {
+                    caminoCompradoCuevas.addLast(rutaCuevas.get(i).getId());
+                }
+            }
+        } else if (cuevaSalida != null) {
+            caminoCompradoCuevas.addLast(cueva.getId());
+        }
+
+        // Calcular camino en la cueva actual hacia la salida
+        boolean esCuevaSalida = cuevaSalida != null && cueva.equals(cuevaSalida);
+
+        if (esCuevaSalida) {
+            // En la cueva con SALIDA — camino directo a la celda SALIDA
+            int salidaF = -1;
+            int salidaC = -1;
+            for (int f = 0; f < cueva.getFilas() && salidaF < 0; f++) {
+                for (int c = 0; c < cueva.getColumnas() && salidaF < 0; c++) {
+                    if (cueva.getCelda(f, c).getTipo() == TipoCelda.SALIDA) {
+                        salidaF = f;
+                        salidaC = c;
+                    }
+                }
+            }
+            if (salidaF >= 0) {
+                caminoComprado = cueva.getCaminoMinimo(j.getFila(), j.getColumna(), salidaF, salidaC);
+            } else {
+                caminoComprado = new ListaSE<>();
+            }
+        } else {
+            // Cueva normal — camino a la PUERTA mas cercana
+            int mejorDist = Integer.MAX_VALUE;
+            int mejorF = -1;
+            int mejorC = -1;
+            for (int f = 0; f < cueva.getFilas(); f++) {
+                for (int c = 0; c < cueva.getColumnas(); c++) {
+                    if (cueva.getCelda(f, c).getTipo() == TipoCelda.PUERTA) {
+                        int d = cueva.getDistanciaMinima(j.getFila(), j.getColumna(), f, c);
+                        if (d >= 0 && d < mejorDist) {
+                            mejorDist = d;
+                            mejorF = f;
+                            mejorC = c;
+                        }
+                    }
+                }
+            }
+            if (mejorF >= 0) {
+                caminoComprado = cueva.getCaminoMinimo(j.getFila(), j.getColumna(), mejorF, mejorC);
+            } else {
+                caminoComprado = new ListaSE<>();
+            }
+        }
+
+        visionCaminoComprada = true;
+        registrarLog("Camino a la salida revelado (5 turnos)");
+        return true;
+    }
+
+    @Override
+    public boolean isVisionCaminoComprada() {
+        return visionCaminoComprada;
+    }
+
+    @Override
+    public ListaSE<CeldaEnMapa> getCaminoComprado() {
+        if (!visionCaminoComprada || caminoComprado == null) {
+            return new ListaSE<>();
+        }
+        return crearVistasCeldas(caminoComprado);
+    }
+
+    @Override
+    public ListaSE<String> getCaminoCompradoCuevas() {
+        if (!visionCaminoComprada || caminoCompradoCuevas == null) {
+            return new ListaSE<>();
+        }
+        return caminoCompradoCuevas;
+    }
+
+    private Cueva buscarCuevaConSalida() {
+        ListaSE<Cueva> todas = mazmorra.getCuevas();
+        for (int i = 0; i < todas.getSize(); i++) {
+            Cueva c = todas.get(i);
+            for (int f = 0; f < c.getFilas(); f++) {
+                for (int col = 0; col < c.getColumnas(); col++) {
+                    if (c.getCelda(f, col).getTipo() == TipoCelda.SALIDA) {
+                        return c;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // ---------------------------------------------------------------

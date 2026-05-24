@@ -168,4 +168,56 @@ public interface InterfazPartida {
      * victoria o derrota.
      */
     boolean pasarTurno();
+
+    /**
+     * Devuelve la distancia en pasos desde el jugador a la celda PUERTA
+     * mas cercana en la cueva actual.
+     *
+     * Si no hay ninguna PUERTA accesible o la cueva no tiene PUERTA,
+     * devuelve -1.
+     */
+    int getDistanciaAPuerta();
+
+    /**
+     * Devuelve el numero minimo de cuevas que el jugador debe atravesar
+     * (contando desde la cueva actual) para llegar a la cueva que contiene
+     * la casilla de SALIDA.
+     *
+     * Devuelve -1 si no se encuentra la SALIDA o no hay camino.
+     */
+    int getDistanciaMinimaCuevasASalida();
+
+    /**
+     * Compra la vision del camino pagando 5 turnos.
+     *
+     * Calcula la ruta mas corta desde la posicion actual del jugador
+     * hasta la PUERTA mas cercana dentro de la cueva actual y la almacena
+     * para que la interfaz pueda dibujarla.
+     *
+     * Devuelve true si la compra se realizo con exito, false si no
+     * hay suficientes turnos o ya se habia comprado antes.
+     */
+    boolean comprarVisionCamino();
+
+    /**
+     * Indica si el jugador ha comprado la vision del camino.
+     */
+    boolean isVisionCaminoComprada();
+
+    /**
+     * Devuelve el camino comprado como una lista de celdas vista
+     * (CeldaEnMapa) listas para dibujar en la interfaz.
+     *
+     * Si no se ha comprado la vision o el camino esta vacio,
+     * devuelve una lista vacia.
+     */
+    ListaSE<CeldaEnMapa> getCaminoComprado();
+
+    /**
+     * Devuelve la cadena de cuevas desde la actual hasta la que
+     * contiene la SALIDA, como lista de IDs.
+     *
+     * Solo tiene contenido si se ha comprado la vision del camino.
+     */
+    ListaSE<String> getCaminoCompradoCuevas();
 }
