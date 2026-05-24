@@ -1992,3 +1992,35 @@ Resultado: 189/189 tests correctos.
 - Revision independiente pasada sin bloqueos P1/P2. Riesgos menores: `hayEnemigoEnDireccion(df, dc)` asume deltas seguros desde la UI y el boton antiguo de espacio sigue atacando el primer adyacente.
 - Marcar `B-05` como `HECHA` cuando el grupo acepte la revision.
 - Decidir en otra sesion el alcance de ataque especial cargable y revision de turnos de `C-10`.
+
+## 2026-05-24 - Guillermo / Cierre B-02 y B-03
+
+### Objetivo
+
+Revisar si `B-02` y `B-03` podian cerrarse tras los ultimos merges y corregir la regla pendiente de cambio de cueva.
+
+### Decisiones humanas
+
+- `FabricaPartida` se da por valida para el arranque desde JSON porque Guillermo la probo en el juego.
+- `ALCANCE_ARCO = 3` se acepta como alcance definitivo de la primera version.
+- Cambiar de cueva no debe consumir accion ni terminar turno; tampoco debe devolver accion o movimiento ya gastados.
+- Al cambiar de cueva se reinician los turnos disponibles a 60.
+- Equipar o cambiar objeto no debe consumir accion.
+
+### Cambios realizados
+
+- `Partida.equiparObjeto(...)` ya no marca `accionRealizada`.
+- `Partida.avanzarACueva(...)` ya no exige accion libre, no marca accion realizada y reinicia `turnosRestantes`; los flags de movimiento/accion se conservan si ya estaban gastados.
+- `Partida.TURNOS_POR_CUEVA = 60` centraliza el valor usado al entrar en una cueva nueva.
+- `TASKS.md` pasa `B-02` y `B-03` a `HECHA` y corrige el resumen de `B-05` a `REVISION`.
+
+### Tests
+
+- Anadidos tests en `PartidaTest`:
+  - cambiar de cueva no consume accion ni turno, no hace actuar enemigos y reinicia turnos.
+  - cambiar de cueva permite avanzar aunque la accion ya estuviera usada.
+  - cambiar de cueva no devuelve movimiento ya usado.
+  - equipar objeto no consume accion y permite atacar despues.
+- Verificacion dirigida sin JavaFX: `PartidaTest` + `FabricaPartidaTest`, 64/64 tests correctos.
+- Revisor independiente detecto que no consumir accion no debia borrar accion/movimiento previos; se corrigio conservando los flags.
+- El script completo sigue requiriendo JavaFX local; validar cobertura completa desde IntelliJ.

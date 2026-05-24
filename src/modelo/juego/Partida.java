@@ -63,6 +63,7 @@ public class Partida implements InterfazPartida {
      * final de toda la aplicacion.
      */
     public static final int ALCANCE_ARCO = 3;
+    public static final int TURNOS_POR_CUEVA = 60;
     public static final String CODIGO_LLAVE_FINAL_DEFECTO = "LLAVE_FINAL";
     public static final String ID_LLAVE_FINAL_DEFECTO = "llave-final";
 
@@ -401,7 +402,7 @@ public class Partida implements InterfazPartida {
 
     @Override
     public boolean equiparObjeto(String idObjeto) {
-        if (!puedeAceptarAccion() || accionRealizada || textoVacio(idObjeto)) {
+        if (!puedeAceptarAccion() || textoVacio(idObjeto)) {
             return false;
         }
 
@@ -414,7 +415,6 @@ public class Partida implements InterfazPartida {
         }
 
         if (equipado) {
-            accionRealizada = true;
             registrarLog("Objeto equipado: " + objeto.getNombre());
         }
         return equipado;
@@ -422,7 +422,7 @@ public class Partida implements InterfazPartida {
 
     @Override
     public boolean avanzarACueva(String idCuevaDestino) {
-        if (!puedeAceptarAccion() || accionRealizada || textoVacio(idCuevaDestino)) {
+        if (!puedeAceptarAccion() || textoVacio(idCuevaDestino)) {
             return false;
         }
         if (!jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
@@ -444,7 +444,7 @@ public class Partida implements InterfazPartida {
         boolean avanzado = mazmorra.avanzarACueva(destino);
         if (avanzado) {
             jugador.cambiarPosicion(celdaEntrada.getFila(), celdaEntrada.getColumna());
-            accionRealizada = true;
+            turnosRestantes = TURNOS_POR_CUEVA;
             registrarLog("Jugador avanza a la cueva " + destino.getId());
         }
         return avanzado;
@@ -1015,7 +1015,7 @@ public class Partida implements InterfazPartida {
     }
 
     public boolean puedeCambiarCueva() {
-        if (!puedeAceptarAccion() || accionRealizada || !jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
+        if (!puedeAceptarAccion() || !jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
             return false;
         }
         Cueva actual = getCuevaActualInterna();
