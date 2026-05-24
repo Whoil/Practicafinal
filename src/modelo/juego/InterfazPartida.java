@@ -42,6 +42,12 @@ public interface InterfazPartida {
     ListaSE<PersonajeEnMapa> getEnemigos();
 
     /**
+     * Devuelve una copia con vistas inmutables de los enemigos vivos que estan
+     * en las 8 celdas alrededor del jugador.
+     */
+    ListaSE<PersonajeEnMapa> getEnemigosAdyacentes();
+
+    /**
      * Devuelve una copia de los objetos disponibles en el suelo de la cueva
      * actual, junto a su posicion.
      */
@@ -99,6 +105,14 @@ public interface InterfazPartida {
      * Devuelve true si habia un enemigo valido y se ha aplicado dano.
      */
     boolean atacar(int fila, int columna);
+
+    /**
+     * Indica si hay un enemigo vivo en una direccion relativa al jugador.
+     *
+     * Por ejemplo, (-1, 0) consulta arriba y (0, 1) consulta derecha. Este
+     * metodo solo consulta estado: no consume accion ni modifica la partida.
+     */
+    boolean hayEnemigoEnDireccion(int df, int dc);
 
     /**
      * Intenta recoger un objeto del suelo por su identificador.

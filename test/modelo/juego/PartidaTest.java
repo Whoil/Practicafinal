@@ -539,6 +539,80 @@ class PartidaTest {
     }
 
     @Test
+    void hayEnemigoEnDireccion_conEnemigo_devuelveTrue() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 0, 1);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+
+        assertTrue(partida.hayEnemigoEnDireccion(-1, 0));
+    }
+
+    @Test
+    void hayEnemigoEnDireccion_sinEnemigo_devuelveFalse() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 0, 1);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+
+        assertFalse(partida.hayEnemigoEnDireccion(0, 1));
+    }
+
+    @Test
+    void getEnemigosAdyacentes_devuelveVarios() {
+        Cueva cueva = new Cueva("c1", 4, 4);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo arriba = new Enemigo("Arriba", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 0, 1);
+        Enemigo derecha = new Enemigo("Derecha", TipoEnemigo.ORCO, 30, 8, 2, 1, 1, 2);
+        Enemigo diagonal = new Enemigo("Diagonal", TipoEnemigo.MAGO, 30, 8, 2, 1, 2, 2);
+        Enemigo lejos = new Enemigo("Lejos", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 3, 3);
+
+        assertTrue(partida.anadirEnemigo(cueva, arriba));
+        assertTrue(partida.anadirEnemigo(cueva, derecha));
+        assertTrue(partida.anadirEnemigo(cueva, diagonal));
+        assertTrue(partida.anadirEnemigo(cueva, lejos));
+
+        assertEquals(3, partida.getEnemigosAdyacentes().getSize());
+    }
+
+    @Test
+    void atacarDireccionConVariosEnemigosSoloDanaElElegido() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo arriba = new Enemigo("Arriba", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 0, 1);
+        Enemigo derecha = new Enemigo("Derecha", TipoEnemigo.ORCO, 30, 8, 2, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, arriba));
+        assertTrue(partida.anadirEnemigo(cueva, derecha));
+
+        assertTrue(partida.atacar(jugador.getFila(), jugador.getColumna() + 1));
+
+        assertEquals(30, arriba.getVidaActual());
+        assertTrue(derecha.getVidaActual() < derecha.getVidaMaxima());
+    }
+
+    @Test
+    void atacarDireccionSinEnemigoDevuelveFalse() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertFalse(partida.hayEnemigoEnDireccion(0, 1));
+        assertFalse(partida.atacar(jugador.getFila(), jugador.getColumna() + 1));
+    }
+
+    @Test
     void pasarTurnoHaceActuarEnemigosYConsumeTurno() {
         Cueva cueva = new Cueva("c1", 3, 3);
         Mazmorra mazmorra = mazmorraCon(cueva);

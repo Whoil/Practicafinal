@@ -946,3 +946,14 @@ Ajuste final antes de PR:
 - `RECOGER OBJETO [R]` queda visible y el atajo `R` respeta el estado de accion usada sin cartel intrusivo.
 - Terminar turno sigue siendo manual, pero deja de mostrar el aviso verde `Turno terminado`.
 
+## 2026-05-24 - Alvaro / Ataque direccional
+
+Alvaro pidio implementar un plan acotado para ataque direccional trabajando en la rama oficial de Parte A (`feature/a-estructuras`). Antes de modificar archivos se cambio desde `feature/a-iconos`, se actualizo la rama con `origin/main` por fast-forward y Alvaro autorizo expresamente tocar logica de Parte B y UI de Parte C para este alcance.
+
+Se implemento la consulta `hayEnemigoEnDireccion(int df, int dc)` y `getEnemigosAdyacentes()` en `Partida`, exponiendolas tambien en `InterfazPartida`. En `PantallaJuego` se anadio ataque por clic sobre enemigo, ataque direccional con `Shift+WASD` o `Shift+Flechas`, resaltado de enemigos adyacentes cuando la accion esta disponible y flash visible de ataque/dano mediante overlays propios.
+
+Se anadieron tests en `PartidaTest` para enemigo en direccion, direccion vacia, varios enemigos adyacentes, dano solo al objetivo elegido y ataque a direccion vacia. La verificacion completa con `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 189/189 tests correctos.
+
+`B-05` queda en `REVISION`. `C-10` sigue pendiente salvo su punto 1, porque ataque especial cargable y revision de turnos quedaron fuera de esta sesion por decision de alcance.
+
+Revision independiente posterior: sin bloqueos P1/P2. Se aceptan como riesgos menores que `hayEnemigoEnDireccion(df, dc)` confia en deltas seguros desde sus callers actuales y que el boton/atajo antiguo de espacio conserva el comportamiento de atacar al primer enemigo adyacente.

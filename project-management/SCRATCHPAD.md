@@ -1946,3 +1946,49 @@ Guillermo pidio ayudar primero a las tareas visuales/audiovisuales pendientes an
 - La accion `RECOGER OBJETO [R]` queda visible en el panel y disponible tambien por teclado.
 - Al pulsar `R` con la accion ya usada no aparece feedback flotante intrusivo.
 - Al terminar turno con `T` o con el boton ya no aparece el aviso verde `Turno terminado`; el turno sigue siendo explicito, pero sin cartel repetitivo.
+## 2026-05-24 - Cierre de sesion con Alvaro / Ataque direccional
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A, con autorizacion expresa para tocar logica de Parte B y UI de Parte C en el alcance de ataque direccional.
+
+### Rama y sincronizacion
+
+Rama usada: `feature/a-estructuras`.
+Inicio real: se cambio desde `feature/a-iconos` a `feature/a-estructuras`.
+Actualizacion remota: `feature/a-estructuras` actualizada con `origin/main` mediante fast-forward antes de modificar archivos.
+
+### Trabajo realizado
+
+- Implementado ataque direccional consultable desde `Partida`: `hayEnemigoEnDireccion(int df, int dc)` y `getEnemigosAdyacentes()`.
+- Actualizado el contrato `InterfazPartida` para exponer las consultas que necesita JavaFX.
+- `PantallaJuego` permite atacar con clic sobre un enemigo y con `Shift+WASD` o `Shift+Flechas`.
+- Anadido resaltado visual de enemigos adyacentes cuando la accion esta disponible y flash visible de ataque/dano mediante overlay propio sobre la celda.
+- Anadidos tests unitarios de direccion, lista de enemigos adyacentes y seleccion de objetivo entre varios enemigos.
+
+### Archivos modificados
+
+- `src/modelo/juego/InterfazPartida.java`
+- `src/modelo/juego/Partida.java`
+- `src/vista/PantallaJuego.java`
+- `test/modelo/juego/PartidaTest.java`
+- `project-management/TASKS.md`
+- `project-management/SCRATCHPAD.md`
+- `project-management/IA_DIARY.md`
+
+### Pruebas
+
+Comando ejecutado: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 189/189 tests correctos.
+
+### Estado de TASKS.md
+
+- `B-05` pasa de `PENDIENTE` a `REVISION`.
+- `C-10` sigue `PENDIENTE`: solo queda documentado como implementado el punto 1 (ataque direccional). Ataque especial cargable y revision de turnos quedan fuera de esta sesion.
+
+### Pendiente para la siguiente sesion
+
+- Revision independiente pasada sin bloqueos P1/P2. Riesgos menores: `hayEnemigoEnDireccion(df, dc)` asume deltas seguros desde la UI y el boton antiguo de espacio sigue atacando el primer adyacente.
+- Marcar `B-05` como `HECHA` cuando el grupo acepte la revision.
+- Decidir en otra sesion el alcance de ataque especial cargable y revision de turnos de `C-10`.
