@@ -45,6 +45,7 @@ import modelo.juego.CuevaEnMapa;
 import modelo.juego.ObjetoEnMapa;
 import modelo.juego.Partida;
 import modelo.juego.PersonajeEnMapa;
+import modelo.juego.ResultadoImpactoBolaFuego;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Arma;
 import modelo.objetos.Escudo;
@@ -136,6 +137,11 @@ public class PantallaJuego {
 
     // Enemigo capturado antes de atacar (para animacion de muerte post-ataque)
     private Enemigo targetAntesAtaque;
+
+    private static final int DANO_BOLA_FUEGO = 10;
+    private static final int RANGO_BOLA_FUEGO = 5;
+    private boolean modoBolaFuegoPendiente = false;
+    private Timeline modoBolaFuegoTimer;
 
     /**
      * Entrada del cache de imagenes usando ListaDE propia.
@@ -301,7 +307,20 @@ public class PantallaJuego {
                 String msg = null;
                 Jugador jug = partida.getJugador();
                 int pf = jug.getFila(), pc = jug.getColumna();
-                if (e.isShiftDown() && esTeclaDireccion(k)) {
+                if (k == KeyCode.F) {
+                    activarModoBolaFuego();
+                    e.consume();
+                    return;
+                }
+                if (esFlechaDireccion(k) && modoBolaFuegoPendiente) {
+                    if (dispararBolaFuego(deltaFila(k), deltaColumna(k))) {
+                        msg = null;
+                    } else {
+                        ok = false;
+                        msg = "No puedes lanzar Bola de Fuego ahora";
+                    }
+                    desactivarModoBolaFuego();
+                } else if (e.isShiftDown() && esTeclaDireccion(k)) {
                     int df = deltaFila(k);
                     int dc = deltaColumna(k);
                     if (partida.isAccionRealizada()) {
@@ -433,6 +452,12 @@ public class PantallaJuego {
             }
         });
 
+        scene.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.F) {
+                desactivarModoBolaFuego();
+            }
+        });
+
         // Que el clic en cualquier parte devuelva el foco al root (teclado)
         root.setFocusTraversable(true);
         root.setOnMouseClicked(e -> root.requestFocus());
@@ -454,6 +479,7 @@ public class PantallaJuego {
             "A / Flecha izq.    - Mover izquierda\n" +
             "D / Flecha der.    - Mover derecha\n" +
             "ESPACIO            - Atacar enemigo adyacente\n" +
+            "F + Flecha         - Bola de Fuego\n" +
             "R                  - Recoger objeto / abrir cofre\n" +
             "T                  - Terminar turno\n" +
             "H                  - Mostrar / ocultar esta ayuda\n\n" +
@@ -1476,6 +1502,7 @@ public class PantallaJuego {
                 case "JUGADOR": txt.setFill(Color.web("#64B5F6")); break;
                 case "ENEMIGO": txt.setFill(Color.web("#EF5350")); break;
                 case "OBJETO":  txt.setFill(Color.web("#FFD700")); break;
+                case "FUEGO":   txt.setFill(Color.web("#FF9800")); break;
                 default:        txt.setFill(Color.web("#CCCCCC")); break;
             }
             linea.getChildren().add(txt);
@@ -1489,6 +1516,9 @@ public class PantallaJuego {
     private String clasificarMensaje(String msg) {
         if (msg == null) return "SISTEMA";
         String m = msg.toLowerCase();
+        if (m.contains("bola de fuego")) {
+            return "FUEGO";
+        }
         if (m.contains("ataca al jugador") || m.contains("se acerca al jugador")) {
             return "ENEMIGO";
         }
@@ -1621,6 +1651,90 @@ public class PantallaJuego {
             return 1;
         }
         return 0;
+    }
+
+    private boolean esFlechaDireccion(KeyCode k) {
+        return k == KeyCode.UP || k == KeyCode.DOWN || k == KeyCode.LEFT || k == KeyCode.RIGHT;
+    }
+
+    private void activarModoBolaFuego() {
+        modoBolaFuegoPendiente = true;
+        if (modoBolaFuegoTimer != null) {
+            modoBolaFuegoTimer.stop();
+        }
+        modoBolaFuegoTimer = new Timeline(new KeyFrame(Duration.millis(450), e -> {
+            modoBolaFuegoPendiente = false;
+        }));
+        modoBolaFuegoTimer.setCycleCount(1);
+        modoBolaFuegoTimer.play();
+    }
+
+    private void desactivarModoBolaFuego() {
+        modoBolaFuegoPendiente = false;
+        if (modoBolaFuegoTimer != null) {
+            modoBolaFuegoTimer.stop();
+            modoBolaFuegoTimer = null;
+        }
+    }
+
+    private boolean dispararBolaFuego(int df, int dc) {
+        if (df == 0 && dc == 0 || animOverlay == null || cumX == null) {
+            return false;
+        }
+        if (!partida.registrarDisparoBolaFuego()) {
+            return false;
+        }
+        Jugador jugador = partida.getJugador();
+        ReproductorSfx.getInstancia().reproducirDisparoBolaFuego();
+        new BolaDeFuego(jugador.getFila(), jugador.getColumna(), df, dc,
+                partida.getCuevaActual().getId()).iniciar();
+        actualizar();
+        return true;
+    }
+
+    private Enemigo buscarEnemigoActual(int fila, int columna) {
+        ListaDE<Enemigo> enems = partida.getEnemigosActuales();
+        MiIterador<Enemigo> it = enems.getIterador();
+        while (it.hasNext()) {
+            Enemigo e = it.next();
+            if (e.getFila() == fila && e.getColumna() == columna) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    private boolean esBloqueanteBolaFuego(CuevaEnMapa cueva, int fila, int columna) {
+        if (cueva == null || fila < 0 || columna < 0
+                || fila >= cueva.getFilas() || columna >= cueva.getColumnas()) {
+            return true;
+        }
+        TipoCelda tipo = cueva.getCelda(fila, columna).getTipo();
+        return tipo == TipoCelda.MURO || tipo == TipoCelda.ROCA || tipo == TipoCelda.ARBUSTO;
+    }
+
+    private Node crearNodoBolaFuego(double tamanio) {
+        File sprite = new File("datos" + File.separator + "iconos" + File.separator + "bola_fuego.png");
+        if (sprite.exists()) {
+            ImageView img = crearSpriteArchivo(sprite.getPath(), tamanio, false);
+            img.setSmooth(false);
+            return img;
+        }
+
+        double radio = Math.max(5, tamanio * 0.22);
+        Circle halo = new Circle(radio * 1.5);
+        halo.setFill(Color.rgb(255, 120, 0, 0.28));
+        halo.setStroke(Color.rgb(255, 210, 70, 0.75));
+        halo.setStrokeWidth(1.5);
+
+        Circle nucleo = new Circle(radio);
+        nucleo.setFill(Color.rgb(255, 95, 15, 0.95));
+        nucleo.setStroke(Color.rgb(255, 238, 120));
+        nucleo.setStrokeWidth(2);
+
+        StackPane bola = new StackPane(halo, nucleo);
+        bola.setPrefSize(radio * 3, radio * 3);
+        return bola;
     }
 
     private boolean atacarCelda(int fila, int columna) {
@@ -1849,6 +1963,112 @@ public class PantallaJuego {
         fade.setOnFinished(e -> animOverlay.getChildren().remove(sprite));
         fade.play();
         scale.play();
+    }
+
+    private class BolaDeFuego {
+        private int fila;
+        private int columna;
+        private final int df;
+        private final int dc;
+        private final String cuevaId;
+        private int distanciaRecorrida;
+        private final Node nodo;
+        private final Timeline timeline;
+
+        BolaDeFuego(int filaInicial, int columnaInicial, int df, int dc, String cuevaId) {
+            this.fila = filaInicial;
+            this.columna = columnaInicial;
+            this.df = df;
+            this.dc = dc;
+            this.cuevaId = cuevaId;
+            this.distanciaRecorrida = 0;
+            double tamanio = Math.min(colWidth[columnaInicial], rowHeight[filaInicial]) * 0.48;
+            this.nodo = crearNodoBolaFuego(tamanio);
+            this.nodo.setMouseTransparent(true);
+            this.timeline = new Timeline(new KeyFrame(Duration.millis(120), e -> avanzar()));
+            this.timeline.setCycleCount(Timeline.INDEFINITE);
+        }
+
+        void iniciar() {
+            posicionarNodo();
+            animOverlay.getChildren().add(nodo);
+            timeline.play();
+        }
+
+        private void avanzar() {
+            CuevaEnMapa cueva = partida.getCuevaActual();
+            if (cueva == null || !cuevaId.equals(cueva.getId())) {
+                destruir(false);
+                return;
+            }
+            if (distanciaRecorrida >= RANGO_BOLA_FUEGO) {
+                destruir(false);
+                return;
+            }
+
+            int siguienteFila = fila + df;
+            int siguienteColumna = columna + dc;
+
+            if (esBloqueanteBolaFuego(cueva, siguienteFila, siguienteColumna)) {
+                destruir(true);
+                return;
+            }
+
+            fila = siguienteFila;
+            columna = siguienteColumna;
+            distanciaRecorrida++;
+            posicionarNodo();
+
+            Enemigo objetivo = buscarEnemigoActual(fila, columna);
+            if (objetivo != null) {
+                String assetMuerte = getEnemyAssetPath(objetivo);
+                ResultadoImpactoBolaFuego resultado =
+                        partida.impactarBolaFuego(fila, columna, DANO_BOLA_FUEGO);
+                destruir(true);
+                actualizar();
+                if (resultado.hayImpacto() && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                    animarAtaque(fila, columna);
+                    if (resultado.isEnemigoMuerto()) {
+                        animarMuerteEnemigo(fila, columna, assetMuerte);
+                    }
+                }
+            }
+        }
+
+        private void posicionarNodo() {
+            if (fila < 0 || columna < 0 || fila >= rowHeight.length || columna >= colWidth.length) {
+                return;
+            }
+            double ancho = nodo.getBoundsInLocal().getWidth();
+            double alto = nodo.getBoundsInLocal().getHeight();
+            if (nodo instanceof ImageView) {
+                ImageView imageView = (ImageView) nodo;
+                ancho = imageView.getFitWidth();
+                alto = imageView.getFitHeight();
+            } else if (nodo instanceof StackPane) {
+                StackPane stack = (StackPane) nodo;
+                ancho = stack.getPrefWidth();
+                alto = stack.getPrefHeight();
+            }
+            if (ancho <= 0) {
+                ancho = colWidth[columna] * 0.48;
+            }
+            if (alto <= 0) {
+                alto = rowHeight[fila] * 0.48;
+            }
+            double x = cumX[columna] + (colWidth[columna] - ancho) / 2.0;
+            double y = cumY[fila] + (rowHeight[fila] - alto) / 2.0;
+            nodo.setLayoutX(x);
+            nodo.setLayoutY(y);
+        }
+
+        private void destruir(boolean conImpacto) {
+            timeline.stop();
+            animOverlay.getChildren().remove(nodo);
+            if (conImpacto) {
+                ReproductorSfx.getInstancia().reproducirImpactoBolaFuego();
+            }
+        }
     }
 
     /**

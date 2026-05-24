@@ -21,6 +21,8 @@ public final class ReproductorSfx {
     private final AudioClip puerta;
     private final AudioClip guardar;
     private final AudioClip pausa;
+    private final AudioClip disparoBolaFuego;
+    private final AudioClip impactoBolaFuego;
 
     private double volumen = 0.9;
 
@@ -31,6 +33,12 @@ public final class ReproductorSfx {
         puerta = crearClip("puerta", new double[] {90, 180, 360}, 420, 0.85);
         guardar = crearClip("guardar", new double[] {523, 659, 784}, 180, 0.55);
         pausa = crearClip("pausa", new double[] {440, 330}, 100, 0.45);
+        disparoBolaFuego = cargarClipArchivo(
+                "datos" + File.separator + "audio" + File.separator + "sonido_disparo.mp3",
+                crearClip("disparo-bola-fuego", new double[] {520, 780, 1040}, 170, 0.7));
+        impactoBolaFuego = cargarClipArchivo(
+                "datos" + File.separator + "audio" + File.separator + "sonido_impacto.mp3",
+                crearClip("impacto-bola-fuego", new double[] {100, 80, 55}, 260, 0.95));
     }
 
     public static synchronized ReproductorSfx getInstancia() {
@@ -46,6 +54,8 @@ public final class ReproductorSfx {
     public void reproducirPuerta() { reproducir(puerta); }
     public void reproducirGuardar() { reproducir(guardar); }
     public void reproducirPausa() { reproducir(pausa); }
+    public void reproducirDisparoBolaFuego() { reproducir(disparoBolaFuego); }
+    public void reproducirImpactoBolaFuego() { reproducir(impactoBolaFuego); }
 
     public void setVolumen(double volumen) {
         this.volumen = Math.max(0.0, Math.min(1.0, volumen));
@@ -68,6 +78,21 @@ public final class ReproductorSfx {
         } catch (IOException | RuntimeException e) {
             System.err.println("[ReproductorSfx] No se pudo crear SFX: " + nombre);
             return null;
+        }
+    }
+
+    private AudioClip cargarClipArchivo(String ruta, AudioClip fallback) {
+        try {
+            File archivo = new File(ruta);
+            if (!archivo.exists()) {
+                return fallback;
+            }
+            AudioClip clip = new AudioClip(archivo.toURI().toString());
+            clip.setVolume(volumen);
+            return clip;
+        } catch (RuntimeException e) {
+            System.err.println("[ReproductorSfx] No se pudo cargar SFX: " + ruta);
+            return fallback;
         }
     }
 

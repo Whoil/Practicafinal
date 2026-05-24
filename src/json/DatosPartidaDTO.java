@@ -1,5 +1,7 @@
 package json;
 
+import modelo.juego.EstadisticasPartida;
+
 /**
  * Raiz del JSON de guardado de partida.
  *
@@ -14,6 +16,7 @@ public class DatosPartidaDTO {
     private String estado;
     private int turnosRestantes;
     private DatosPuertaDTO[] puertas;
+    private EstadisticasPartida estadisticas;
 
     public DatosPartidaDTO() {
     }
@@ -28,12 +31,21 @@ public class DatosPartidaDTO {
                            DatosJugadorDTO jugador, String estado,
                            int turnosRestantes,
                            DatosPuertaDTO[] puertas) {
+        this(version, mazmorra, jugador, estado, turnosRestantes, puertas, null);
+    }
+
+    public DatosPartidaDTO(String version, DatosMazmorraDTO mazmorra,
+                           DatosJugadorDTO jugador, String estado,
+                           int turnosRestantes,
+                           DatosPuertaDTO[] puertas,
+                           EstadisticasPartida estadisticas) {
         this.version = version;
         this.mazmorra = mazmorra;
         this.jugador = jugador;
         this.estado = estado;
         this.turnosRestantes = turnosRestantes;
         this.puertas = puertas;
+        this.estadisticas = estadisticas != null ? new EstadisticasPartida(estadisticas) : null;
     }
 
     public String getVersion() { return version; }
@@ -42,4 +54,7 @@ public class DatosPartidaDTO {
     public String getEstado() { return estado; }
     public int getTurnosRestantes() { return turnosRestantes; }
     public DatosPuertaDTO[] getPuertas() { return puertas; }
+    public EstadisticasPartida getEstadisticas() {
+        return estadisticas != null ? new EstadisticasPartida(estadisticas) : null;
+    }
 }

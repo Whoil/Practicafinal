@@ -35,12 +35,16 @@ public class FabricaPartida {
     public static final int TURNOS_INICIALES = 60;
 
     public Partida crearPartida(ResultadoCarga resultadoCarga) {
+        return crearPartida(resultadoCarga, "Jugador");
+    }
+
+    public Partida crearPartida(ResultadoCarga resultadoCarga, String nombreJugador) {
         validarResultado(resultadoCarga);
 
         Mazmorra mazmorra = resultadoCarga.getMazmorra();
         Cueva cuevaInicial = mazmorra.getCuevaActual();
         Celda inicio = buscarCeldaInicio(cuevaInicial);
-        Jugador jugador = new Jugador("Jugador", VIDA_JUGADOR, ATAQUE_JUGADOR,
+        Jugador jugador = new Jugador(textoOValor(nombreJugador, "Jugador"), VIDA_JUGADOR, ATAQUE_JUGADOR,
                 DEFENSA_JUGADOR, MOVIMIENTO_JUGADOR, inicio.getFila(), inicio.getColumna());
         ListaSE<Puerta> puertas = crearPuertas(mazmorra, resultadoCarga.getConexiones());
 
@@ -199,7 +203,7 @@ public class FabricaPartida {
         if (texto == null || texto.trim().isEmpty()) {
             return valorPorDefecto;
         }
-        return texto;
+        return texto.trim();
     }
 
     private void validarTexto(String texto, String campo) {

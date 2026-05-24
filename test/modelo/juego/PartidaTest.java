@@ -830,6 +830,45 @@ class PartidaTest {
     }
 
     @Test
+    void estadisticasRegistranAtaqueTurnoYDanoRecibido() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 0, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        assertTrue(partida.atacar(1, 2));
+        assertTrue(partida.pasarTurno());
+
+        EstadisticasPartida stats = partida.getEstadisticas();
+        assertEquals(1, stats.getTurnosJugados());
+        assertEquals(15, stats.getDanoEjercido());
+        assertEquals(8, stats.getDanoRecibido());
+    }
+
+    @Test
+    void estadisticasRegistranMuertesComunesYBosses() {
+        Cueva cueva = new Cueva("c1", 4, 4);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 50, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 10, 8, 0, 1, 1, 2);
+        Boss boss = new Boss("Malakor", 10, 20, 0, 1, 2, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        assertTrue(partida.anadirEnemigo(cueva, boss));
+        assertTrue(partida.atacar(1, 2));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.atacar(2, 2));
+
+        EstadisticasPartida stats = partida.getEstadisticas();
+        assertEquals(1, stats.getEnemigosMuertos());
+        assertEquals(1, stats.getBossesMuertos());
+        assertTrue(stats.isMalakorDerrotado());
+    }
+
+    @Test
     void guardarYCargarRoundTripPreservaContenidos(@TempDir Path tempDir) throws Exception {
         Partida original = Partida.crearPartidaNueva();
         original.getJugador().recibirDano(30);
@@ -857,6 +896,112 @@ class PartidaTest {
         Partida cargada = Partida.cargarPartida(ruta);
         assertEquals(enemigosFabrica, cargada.getEnemigos().getSize(),
             "Los enemigos de fabrica deben preservarse al cargar");
+    }
+
+    @Test
+    void guardarYCargarRoundTripPreservaEstadisticas(@TempDir Path tempDir) throws Exception {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 0, 2, 1, 1);
+        Partida original = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 0, 1, 1, 2);
+        assertTrue(original.anadirEnemigo(cueva, enemigo));
+        assertTrue(original.atacar(1, 2));
+        assertTrue(original.pasarTurno());
+
+        String ruta = tempDir.resolve("stats.json").toString();
+        original.guardar(ruta);
+
+        Partida cargada = Partida.cargarPartida(ruta);
+        assertEquals(1, cargada.getEstadisticas().getTurnosJugados());
+        assertEquals(15, cargada.getEstadisticas().getDanoEjercido());
+        assertEquals(8, cargada.getEstadisticas().getDanoRecibido());
+    }
+
+    @Test
+    void registrarDisparoBolaFuegoConsumeAccionPeroNoMovimiento() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.puedeDispararBolaFuego());
+        assertTrue(partida.registrarDisparoBolaFuego());
+        assertTrue(partida.isAccionRealizada());
+        assertFalse(partida.isMovimientoRealizado());
+        assertFalse(partida.registrarDisparoBolaFuego());
+        assertTrue(partida.moverJugador(1, 2));
+    }
+
+    @Test
+    void impactarBolaFuegoAplicaDanoFijoYEstadisticas() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 0, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        ResultadoImpactoBolaFuego resultado = partida.impactarBolaFuego(1, 2, 10);
+
+        assertTrue(resultado.hayImpacto());
+        assertEquals("Esqueleto", resultado.getNombreEnemigo());
+        assertEquals(10, resultado.getDanoReal());
+        assertEquals(20, enemigo.getVidaActual());
+        assertEquals(10, partida.getEstadisticas().getDanoEjercido());
+        assertFalse(resultado.isEnemigoMuerto());
+    }
+
+    @Test
+    void impactarBolaFuegoMataEnemigoComunYLoElimina() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 6, 8, 0, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        ResultadoImpactoBolaFuego resultado = partida.impactarBolaFuego(1, 2, 10);
+
+        assertTrue(resultado.hayImpacto());
+        assertTrue(resultado.isEnemigoMuerto());
+        assertFalse(resultado.isBoss());
+        assertEquals(6, resultado.getDanoReal());
+        assertEquals(0, partida.getEnemigosActuales().getSize());
+        assertEquals(1, partida.getEstadisticas().getEnemigosMuertos());
+    }
+
+    @Test
+    void impactarBolaFuegoMataBossYMarcaMalakor() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Boss boss = new Boss("Malakor", 6, 20, 0, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, boss));
+        ResultadoImpactoBolaFuego resultado = partida.impactarBolaFuego(1, 2, 10);
+
+        assertTrue(resultado.hayImpacto());
+        assertTrue(resultado.isEnemigoMuerto());
+        assertTrue(resultado.isBoss());
+        assertEquals(1, partida.getEstadisticas().getBossesMuertos());
+        assertTrue(partida.getEstadisticas().isMalakorDerrotado());
+        assertTrue(partida.tieneLlaveFinal());
+    }
+
+    @Test
+    void impactarBolaFuegoSinEnemigoNoModificaEstadisticas() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        ResultadoImpactoBolaFuego resultado = partida.impactarBolaFuego(0, 0, 10);
+
+        assertFalse(resultado.hayImpacto());
+        assertEquals(0, partida.getEstadisticas().getDanoEjercido());
+        assertEquals(0, partida.getEstadisticas().getEnemigosMuertos());
     }
 
     private Mazmorra mazmorraCon(Cueva cueva) {
