@@ -12,6 +12,7 @@ class IconosVisualesTest {
 
     private static final String[] ICONOS = {
         "puerta.png",
+        "pocion.png",
         "salida.png",
         "escudo.png",
         "tesoro.png"

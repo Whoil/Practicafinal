@@ -978,3 +978,24 @@ Verificacion:
 - Revisor independiente detecto un riesgo inicial: borrar `accionRealizada` y `movimientoRealizado` al cambiar de cueva regalaba una segunda accion/movimiento. Se corrigio y se anadio test de regresion.
 - Verificacion dirigida de logica sin JavaFX: `PartidaTest` y `FabricaPartidaTest`, 64/64 tests correctos.
 - La ejecucion completa con JavaFX queda para IntelliJ por dependencias locales del entorno.
+
+## 2026-05-24 - Guillermo / Pulido de iconos, TESORO y posiciones de objetos
+
+Nueva sesion iniciada despues del merge de B-02/B-03. Guillermo pidio primero quitar del alcance los bosses distintos porque no estaba claro si debia resolverse ahora, asi que el trabajo se centro en C-09/B-04 visual y de consistencia de mapa.
+
+Se ajusto `PantallaJuego` para que las pociones usen un icono local propio (`datos/iconos/pocion.png`) y los escudos sigan usando `datos/iconos/escudo.png`, ya reemplazado por una version mas reconocible. Tambien se elimino el color morado de `TESORO`, que era lo que se veia debajo del icono en partida.
+
+En `datos/cuevas.json` se corrigio el tesoro de la cueva dificil, moviendolo a una posicion con acceso vecino transitable. Para proteger esa regla, se anadieron tests en `CargadorConfiguracionTest`: los objetos configurados no pueden aparecer sobre muros/rocas/arbustos y los `TESORO` del mapa deben tener al menos una celda vecina transitable. `IconosVisualesTest` ahora valida tambien la existencia y cabecera PNG de `pocion.png`.
+
+Tras probar visualmente, Guillermo propuso dos opciones para resolver los cofres: hacerlos pisables solo en caminos seguros o tratarlos como cofres no pisables pero abribles desde al lado. Se acordo la opcion B minima. `Partida` bloquea ahora el movimiento hacia `TESORO` cerrado, permite `abrirTesoro()` desde una casilla cardinal adyacente o desde la misma casilla para partidas antiguas, cambia la celda a `SUELO` y consume accion. `PantallaJuego` usa esa regla para mostrar `ABRIR COFRE [R]` y evitar el aviso de pared al intentar caminar hacia un cofre cerrado.
+
+Revision independiente posterior: detecto que el BFS de movimiento aun podia atravesar un TESORO cerrado para llegar a una celda posterior. Se corrigio haciendo que las celdas alcanzables de `Partida` excluyan TESORO cerrado, sin cambiar `Celda.esTransitable()` global para no afectar mapa/fog/estructura base. Tambien se actualizo el texto de ayuda para indicar que `R` recoge objetos o abre cofres.
+
+Verificacion ejecutada:
+- `PartidaTest` + `FabricaPartidaTest` + `CargadorConfiguracionTest` + `IconosVisualesTest`: 83/83 tests correctos.
+
+Pendiente:
+- Revision independiente: detecto que `crearSpriteArchivo` recortaba los PNG locales como si fueran spritesheets. Corregido creando una ruta de carga sin recorte para iconos locales.
+- Se reforzo el test de TESORO para exigir camino desde `INICIO`.
+- La compilacion JavaFX desde Codex queda bloqueada por permisos de los JAR OpenJFX locales (`AccessDeniedException`); validar visualmente en IntelliJ.
+- Preparar commit/PR cuando Guillermo confirme y pueda hacer push desde su entorno.

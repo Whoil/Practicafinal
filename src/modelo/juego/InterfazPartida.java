@@ -123,6 +123,19 @@ public interface InterfazPartida {
     boolean recogerObjeto(String idObjeto);
 
     /**
+     * Abre un tesoro cercano al jugador.
+     *
+     * Devuelve true si el jugador estaba sobre una celda TESORO (para partidas
+     * antiguas) o en una celda cardinal adyacente a un TESORO cerrado.
+     */
+    boolean abrirTesoro();
+
+    /**
+     * Indica si el jugador puede abrir un tesoro desde su posicion actual.
+     */
+    boolean hayTesoroCercano();
+
+    /**
      * Intenta usar un objeto del inventario por su identificador.
      *
      * En la primera version el caso obligatorio sera usar pociones.
