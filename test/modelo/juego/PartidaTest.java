@@ -159,6 +159,50 @@ class PartidaTest {
     }
 
     @Test
+    void abrirTesoroConvierteCeldaEnSueloYConsumeAccion() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        cueva.cambiarTipoCelda(1, 1, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.abrirTesoro());
+        assertEquals(TipoCelda.SUELO, partida.getCuevaActual().getCelda(1, 1).getTipo());
+        assertTrue(partida.isAccionRealizada());
+        assertFalse(partida.abrirTesoro());
+    }
+
+    @Test
+    void tesoroCerradoNoSePuedePisarPeroSeAbreDesdeCasillaAdyacente() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        cueva.cambiarTipoCelda(1, 2, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.hayTesoroCercano());
+        assertFalse(partida.moverJugador(1, 2));
+        assertEquals(1, jugador.getColumna());
+
+        assertTrue(partida.abrirTesoro());
+        assertEquals(TipoCelda.SUELO, partida.getCuevaActual().getCelda(1, 2).getTipo());
+        assertTrue(partida.moverJugador(1, 2));
+        assertEquals(2, jugador.getColumna());
+    }
+
+    @Test
+    void tesoroCerradoNoPermiteUsarloComoCaminoIntermedio() {
+        Cueva cueva = new Cueva("c1", 3, 4);
+        cueva.cambiarTipoCelda(1, 2, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 3, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertFalse(partida.moverJugador(1, 3));
+        assertEquals(1, jugador.getColumna());
+    }
+
+    @Test
     void terminarTurnoReduceTurnosRestantes() throws Exception {
         Partida p = Partida.crearPartidaNueva();
         int antes = p.getTurnosRestantes();

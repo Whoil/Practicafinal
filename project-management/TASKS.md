@@ -218,6 +218,9 @@ Sub-tareas:
 - **C-09.14** Encontrar/crear icono para ESCUDO (reemplazar `staff2.png` por un asset tipo escudo) - REVISION
 - **C-09.15** Añadir iconos decorativos para TESORO y SALIDA (actualmente solo color) - REVISION
 - **C-09.16** Buscar assets adicionales en itch.io: pociones, puertas, escudos, cofres y bosses - PENDIENTE
+  - Avance 2026-05-24 / Guillermo: se anade icono local de pocion, se reemplaza el icono local de escudo y se elimina el color morado de TESORO. Los bosses quedan fuera de esta sesion por decision de alcance.
+  - Avance 2026-05-24 / Guillermo: se refuerza `datos/cuevas.json` y los tests para que los objetos configurados no aparezcan en muros/obstaculos y los TESORO tengan acceso desde una celda vecina.
+  - Avance 2026-05-24 / Guillermo: se define TESORO como cofre cerrado no pisable, abrible con `R` desde celda adyacente; al abrirse pasa a `SUELO`.
 
 ### R-01 Revision de restricciones
 

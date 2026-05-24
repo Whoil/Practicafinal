@@ -142,6 +142,43 @@ class CargadorConfiguracionTest {
     }
 
     @Test
+    void objetosConfiguradosNoAparecenEnParedesNiObstaculos() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
+
+        ListaSE<ConfiguracionObjetoDTO> objetos = resultado.getObjetos();
+        for (int indice = 0; indice < objetos.getSize(); indice++) {
+            ConfiguracionObjetoDTO objeto = objetos.get(indice);
+            Cueva cueva = resultado.getMazmorra().getCuevaPorId(objeto.getIdCueva());
+
+            assertNotNull(cueva, "La cueva del objeto debe existir: " + objeto.getId());
+            assertTrue(cueva.esTransitable(objeto.getFila(), objeto.getColumna()),
+                    "El objeto no debe estar en muro, roca o arbusto: " + objeto.getId());
+        }
+    }
+
+    @Test
+    void tesorosDelMapaTienenAccesoDesdeAlgunaCeldaVecina() throws Exception {
+        CargadorConfiguracion cargador = new CargadorConfiguracion();
+        ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
+
+        ListaSE<Cueva> cuevas = resultado.getMazmorra().getCuevas();
+        for (int indiceCueva = 0; indiceCueva < cuevas.getSize(); indiceCueva++) {
+            Cueva cueva = cuevas.get(indiceCueva);
+            for (int fila = 0; fila < cueva.getFilas(); fila++) {
+                for (int columna = 0; columna < cueva.getColumnas(); columna++) {
+                    if (cueva.getCelda(fila, columna).getTipo() == TipoCelda.TESORO) {
+                        assertTrue(tieneVecinoTransitable(cueva, fila, columna),
+                                "El tesoro debe tener acceso desde una celda vecina en " + cueva.getId());
+                        assertTrue(tieneVecinoConCaminoDesdeInicio(cueva, fila, columna),
+                                "El tesoro debe poder abrirse desde una celda vecina alcanzable en " + cueva.getId());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     void conservaConexionesParaCrearPuertasDePartida() throws Exception {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar(RUTA_JSON);
@@ -189,5 +226,33 @@ class CargadorConfiguracionTest {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> new CargadorConfiguracion().cargar(ruta.toString()));
         assertTrue(error.getMessage().contains("Conexion invalida"));
+    }
+
+    private boolean tieneVecinoTransitable(Cueva cueva, int fila, int columna) {
+        return cueva.esTransitable(fila - 1, columna)
+                || cueva.esTransitable(fila + 1, columna)
+                || cueva.esTransitable(fila, columna - 1)
+                || cueva.esTransitable(fila, columna + 1);
+    }
+
+    private boolean tieneVecinoConCaminoDesdeInicio(Cueva cueva, int fila, int columna) {
+        return vecinoTieneCaminoDesdeInicio(cueva, fila - 1, columna)
+                || vecinoTieneCaminoDesdeInicio(cueva, fila + 1, columna)
+                || vecinoTieneCaminoDesdeInicio(cueva, fila, columna - 1)
+                || vecinoTieneCaminoDesdeInicio(cueva, fila, columna + 1);
+    }
+
+    private boolean vecinoTieneCaminoDesdeInicio(Cueva cueva, int filaDestino, int columnaDestino) {
+        if (!cueva.esTransitable(filaDestino, columnaDestino)) {
+            return false;
+        }
+        for (int fila = 0; fila < cueva.getFilas(); fila++) {
+            for (int columna = 0; columna < cueva.getColumnas(); columna++) {
+                if (cueva.getCelda(fila, columna).getTipo() == TipoCelda.INICIO) {
+                    return !cueva.getCaminoMinimo(fila, columna, filaDestino, columnaDestino).isEmpty();
+                }
+            }
+        }
+        return false;
     }
 }

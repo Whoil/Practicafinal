@@ -2024,3 +2024,30 @@ Revisar si `B-02` y `B-03` podian cerrarse tras los ultimos merges y corregir la
 - Verificacion dirigida sin JavaFX: `PartidaTest` + `FabricaPartidaTest`, 64/64 tests correctos.
 - Revisor independiente detecto que no consumir accion no debia borrar accion/movimiento previos; se corrigio conservando los flags.
 - El script completo sigue requiriendo JavaFX local; validar cobertura completa desde IntelliJ.
+
+## 2026-05-24 - Guillermo / Pulido de iconos y tesoros
+
+Guillermo pidio continuar la sesion quitando del alcance los bosses distintos, porque no estaba claro si correspondia ahora. Se mantiene el foco en el pulido visual y de mapa: eliminar el cuadrado morado del tesoro, mejorar iconos de pocion y escudo, y evitar que tesoros/cofres queden encajados en paredes.
+
+Cambios aplicados:
+- `PantallaJuego` usa `datos/iconos/pocion.png` para pociones y `datos/iconos/escudo.png` para escudos, evitando que se representen con cofres genericos.
+- La celda `TESORO` deja de usar el color morado de fondo y pasa a un tono de suelo/tesoro mas integrado.
+- Se reemplaza el PNG local de escudo y se anade un PNG local de pocion.
+- En `datos/cuevas.json`, el tesoro de la cueva dificil se mueve una celda para quedar accesible y no encajado en muro.
+- `CargadorConfiguracionTest` valida que los objetos del JSON real no aparecen en muro, roca o arbusto, y que todos los `TESORO` tienen al menos un vecino transitable.
+- `IconosVisualesTest` incluye tambien `pocion.png`.
+- Regla minima de cofres acordada despues de prueba visual: `TESORO` cerrado no se pisa; se abre con `R` desde una casilla cardinal adyacente o desde la misma casilla en partidas antiguas, pasa a `SUELO` y consume accion.
+- `PantallaJuego` muestra `ABRIR COFRE [R]` cuando hay un tesoro abrible cerca y no muestra mensaje de pared al intentar moverse hacia un cofre cerrado.
+
+Alcance excluido:
+- Bosses con disenos distintos queda fuera de esta sesion por decision explicita de Guillermo.
+
+Verificacion:
+- Verificacion dirigida sin JavaFX: `CargadorConfiguracionTest` + `IconosVisualesTest`, 16/16 tests correctos.
+- Revisor independiente detecto que los PNG locales podian recortarse como spritesheets; corregido con carga de iconos locales sin viewport.
+- Se refuerza el test de TESORO para exigir camino real desde `INICIO`, no solo una celda vecina transitable.
+- Se anaden tests de `Partida` para proteger que el tesoro cerrado no se puede pisar, que se abre desde una casilla adyacente y que al abrirse pasa a `SUELO`.
+- Revisor independiente detecto que el BFS podia usar `TESORO` cerrado como camino intermedio aunque no fuera destino. Corregido: el calculo de celdas alcanzables de `Partida` excluye TESORO cerrado.
+- La ayuda de `PantallaJuego` se actualiza: `R` sirve para recoger objeto o abrir cofre.
+- Verificacion dirigida actualizada: `PartidaTest` + `FabricaPartidaTest` + `CargadorConfiguracionTest` + `IconosVisualesTest`, 83/83 tests correctos.
+- Compilacion JavaFX desde Codex bloqueada por permisos de los JAR OpenJFX locales (`AccessDeniedException`); validar visualmente desde IntelliJ antes de preparar PR.
