@@ -999,3 +999,40 @@ Pendiente:
 - Se reforzo el test de TESORO para exigir camino desde `INICIO`.
 - La compilacion JavaFX desde Codex queda bloqueada por permisos de los JAR OpenJFX locales (`AccessDeniedException`); validar visualmente en IntelliJ.
 - Preparar commit/PR cuando Guillermo confirme y pueda hacer push desde su entorno.
+
+## 2026-05-24 - Alvaro (Animaciones C-09.3)
+
+### Agente o herramienta
+
+opencode (big-pickle)
+
+### Objetivo
+
+Implementar animaciones visuales en PantallaJuego para movimiento suave, ataque (circulo expansivo) y muerte (fade+scale) dentro de la tarea C-09.3 Pulido audiovisual.
+
+### Prompt o resumen del prompt
+
+Alvaro se identifico como Parte A, reviso TASKS.md para priorizar subtareas de C-09, y selecciono C-09.3 Animaciones. Se acordo implementar tres fases: movimiento suave con Timeline, ataque con overlay circular, y muerte con FadeTransition + ScaleTransition, todo integrado con los handlers de teclado/raton/botones existentes.
+
+### Resultado
+
+Implementacion completa de C-09.3 en PantallaJuego.java (~200 lineas):
+
+- Movimiento suave: Timeline 150ms con translateX/Y sobre sprite del jugador, smoothstep easing, 8 frames, offset entre centros de celda origen y destino.
+- Ataque: circulo expansivo en gridOverlay (220ms) con radio creciente y opacidad decreciente.
+- Muerte: FadeTransition + ScaleTransition simultaneos (400ms) en animOverlay (capa separada que no se limpia al redibujar), con getEnemyAssetPath() para sprite segun tipo enemigo.
+- Integracion en handlers de teclado (movimiento, espacio, shift+WASD), clic (movimiento y ataque sobre enemigo) y botones de accion.
+
+### Cambios aceptados
+
+- `animOverlay` como Pane separado para animaciones de muerte, evitando que `actualizar()` las borre al limpiar gridOverlay.
+- `translateX/Y` sobre sprite del jugador (no modifica jerarquia de celdas, compatible con actualizar() existente).
+- Death check post-actualizar() iterando enemigos vivos en la celda atacada.
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Las tres fases se implementaron secuencialmente segun el plan acordado. La decision de usar `animOverlay` separado fue clave para que la animacion de muerte no fuera borrada por el refresco de la grilla en `actualizar()`. Compilacion y 189 tests correctos. Pendiente decidir siguiente prioridad dentro de C-09.

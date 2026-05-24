@@ -194,7 +194,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 Sub-tareas:
 - **C-09.1** Obstaculos (ROCA, ARBUSTO), mapas laberinticos (15x15, 19x19, 23x23), muros macizos (10px) y sistema de niebla (fog-of-war con radio 3 y opacidad progresiva) - HECHA
 - **C-09.2** Musica de fondo con javafx.media y ReproductorMusica singleton - HECHA
-- **C-09.3** Animaciones (movimiento suave, ataque, muerte) - PENDIENTE
+- **C-09.3** Animaciones (movimiento suave, ataque, muerte) - HECHA
 - **C-09.4** Efectos visuales (particulas, brillos) - PENDIENTE
 - **C-09.5** Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) - PENDIENTE
 - **C-09.6** Mejorar diseno de cuevas: mapas laberinticos con paredes de 2 celdas, 3 dificultades, mejor trazado y obstaculos - HECHA

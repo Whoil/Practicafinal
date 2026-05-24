@@ -2051,3 +2051,65 @@ Verificacion:
 - La ayuda de `PantallaJuego` se actualiza: `R` sirve para recoger objeto o abrir cofre.
 - Verificacion dirigida actualizada: `PartidaTest` + `FabricaPartidaTest` + `CargadorConfiguracionTest` + `IconosVisualesTest`, 83/83 tests correctos.
 - Compilacion JavaFX desde Codex bloqueada por permisos de los JAR OpenJFX locales (`AccessDeniedException`); validar visualmente desde IntelliJ antes de preparar PR.
+## 2026-05-24 - Alvaro / Implementacion de animaciones C-09.3
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A, trabajando en animaciones de C-09 (area de Parte C, autorizado)
+Agente: opencode (big-pickle)
+
+### Contexto
+
+Se reviso `TASKS.md` y se priorizo C-09.3 Animaciones (movimiento suave, ataque, muerte) dentro de C-09 Pulido audiovisual. Se decidio comenzar por los subtask de TASKS.md ordenados por prioridad.
+
+### Sincronizacion
+
+Rama: `feature/a-estructuras`
+Cambio remoto revisado: si (`
+task
+` fallback)
+Documentos leidos: `TASKS.md`, `SCRATCHPAD.md`, `PantallaJuego.java`
+
+### Cambios realizados
+
+Archivo modificado:
+- `src/vista/PantallaJuego.java`: ~200 lineas nuevas de animacion
+
+Fase 1 — Movimiento suave:
+- Agregada importacion de `javafx.animation.*` (ScaleTransition).
+- Nuevos campos: `jugadorSprite`, `animMovimientoTimeline`, `emojiSizeCache`, `animOverlay` (capa no limpiada por `actualizar()`).
+- `actualizar()` guarda referencia del sprite del jugador y emojiSizeCache.
+- `animarMovimiento()` usa `translateX/Y` con Timeline 8 frames, easing smoothstep, 150ms, offset entre centro de celda origen y destino.
+
+Fase 2 — Ataque:
+- `animarAtaque()` crea circulo expansivo en gridOverlay (220ms) con opacidad decreciente.
+
+Fase 3 — Muerte:
+- `animarMuerteEnemigo()` usa FadeTransition + ScaleTransition 400ms en animOverlay (no se limpia al redibujar).
+- Helper `getEnemyAssetPath()` resuelve sprite segun tipo enemigo/boss y tematica de cueva.
+
+Integracion en handlers:
+- Keyboard handler (movimiento + espacio + shift+WASD).
+- Click handler (movimiento clic + ataque clic).
+- Botones de accion (arriba/abajo/izq/der/atacar).
+
+### Pruebas
+
+Compilacion: `javac 21.0.10` correcta.
+Tests: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` — 189/189 tests OK.
+
+### Estado de TASKS.md
+
+C-09.3 pasa de PENDIENTE a HECHA.
+
+### Pendiente para la siguiente sesion
+
+- Decidir siguiente subtarea de C-09 (C-09.9 Alertas visuales, C-09.4 Particulas, C-09.5 Sonidos, etc.) o pasar a otra area.
+- Actualizar `IA_DIARY.md` y documentacion.
+
+### Riesgos o avisos
+
+- La animacion de muerte (400ms) coexiste con el timer del flash de ataque (300ms) sin conflicto porque usa `animOverlay` (separado de gridOverlay).
+- Si el jugador cambia de cueva durante una animacion, la escena se descarta y se crea una nueva (sin fugas de memoria).
+- El movimiento animado no bloquea input; el Timeline corre en segundo plano.
