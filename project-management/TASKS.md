@@ -37,14 +37,12 @@ HECHA
 
 ### Resumen de tareas pendientes (Parte B)
 
-- **B-02** Modelo de objetos e inventario - REVISION
 - **B-03** Reglas de turno y combate - REVISION
 - **B-04** Mejoras de logica (IA enemiga, drops, cofres, trampas) - PENDIENTE
-- **B-05** Ataque direccional - PENDIENTE
 
 ### Resumen de tareas pendientes (Parte A)
 
-- **A-01** Revisar estructuras propias - PENDIENTE
+
 
 ## Peticiones urgentes entre partes
 
@@ -68,28 +66,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 
 ## Pendientes urgentes
 
-### A-01 Revisar estructuras propias existentes
-
-- Responsable: Persona A
-- Estado: PENDIENTE
-- Archivos permitidos: `src/Estructuras/`, `src/ParteA/`, `src/ParteB/Grafo/`, `project-management/`
-- Terminado cuando haya tabla de estructuras disponibles, usos y riesgos.
-
-### B-02 Modelo de objetos e inventario
-
-- Responsable: Guille / Parte B
-- Estado: REVISION
-- Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
-- Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`.
-- Nota de alcance: Guillermo autoriza traer `ListaDE`, `ElementoDE` e `IteradorDE` desde las estructuras del grupo y adaptar `ListaDE` para no exigir `Comparable`, porque el inventario necesita guardar objetos sin orden natural.
-
-### C-02 Cargar y guardar partida
-
-- Responsable: Hector / Parte C
-- Estado: HECHA
-- Archivos permitidos: `src/json/`, `test/`, `project-management/`
-- Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
-- Verificacion: 19 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, equipo, estado, errores, conversion DTO<->modelo).
 ### B-03 Reglas de turno y combate
 
 - Responsable: Guille / Parte B
@@ -170,16 +146,6 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 - Archivos permitidos: `src/modelo/juego/Partida.java`, `src/vista/PantallaJuego.java`, `src/vista/EscapeMazmorraApp.java`, `test/`, `project-management/`
 - Terminado cuando exista Partida que cargue JSON, maneje movimiento, combate, objetos, turnos, condiciones de victoria/derrota, guardado/carga, y PantallaJuego que muestre grid coloreado con jugador/enemigos/objetos, panel de stats, inventario, acciones, log, teclado WASD/flechas y atajos SPACE/R/T.
 - Verificacion: 148 tests JUnit pasados el 2026-05-22 (24 tests de Partida + 124 existentes). Demo jugable confirmada por Hector.
-
-### B-05 Ataque direccional cuando haya varios enemigos cerca
-
-- Responsable: Guille / Parte B
-- Estado: REVISION
-- Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `test/modelo/juego/`, `project-management/`
-- Terminado cuando el jugador pueda elegir la direccion u objetivo del ataque si hay varios enemigos adyacentes, y solo reciba dano el enemigo elegido.
-- Propuesta tecnica: exponer un metodo tipo `atacarDireccion(df, dc)` o reutilizar `atacar(fila, columna)` desde JavaFX.
-- Tests minimos: varios enemigos adyacentes, ataque hacia una direccion concreta, direccion sin enemigo devuelve `false`.
-- Verificacion: `scripts/test.ps1` pasado el 2026-05-24 con 189/189 tests correctos. Pendiente revision independiente antes de marcar HECHA.
 
 ### C-10 Ataque direccional, ataque especial cargable y revision de turnos
 
@@ -263,6 +229,31 @@ Sub-tareas:
 - Archivos permitidos: `src/modelo/personajes/`, `test/`, `project-management/`
 - Terminado: existen `Personaje`, `Jugador`, `Enemigo` y `Boss` segun arquitectura acordada.
 - Verificacion: PR #4 mergeada en `main` el 2026-05-21; tests JUnit de `modelo.personajes` pasados y cobertura verificada en IntelliJ.
+
+### B-02 Modelo de objetos e inventario
+
+- Responsable: Guille / Parte B
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
+- Terminado: existen `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`. Equipo con ranuras de arma y escudo, arco a dos manos desequipa escudo, pocion consumible, llaves con tipo y codigo.
+- Verificacion: 16 tests JUnit de objetos/inventario + 189/189 tests globales pasados el 2026-05-24.
+- Nota: `ListaDE` adaptada para no exigir `Comparable`, necesaria para inventario sin orden natural.
+
+### A-01 Revisar estructuras propias existentes
+
+- Responsable: Alvaro / Parte A
+- Estado: HECHA
+- Archivos permitidos: `src/Estructuras/`, `project-management/`
+- Terminado: tabla detallada de las 6 estructuras (ListaSE, ListaDE, Cola, Grafo, NodoGrafo, ArcoGrafo) con almacenamiento interno, complejidad, usos concretos en el proyecto y riesgos. Documentado en `ARCHITECTURE.md` seccion 7.
+
+### B-05 Ataque direccional
+
+- Responsable: Guille / Parte B, Alvaro / Parte A (implementacion UI)
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/`, `src/vista/`, `test/`, `project-management/`
+- Terminado: el jugador puede elegir direccion con Shift+WASD/flechas o hacer clic sobre un enemigo para atacarlo. Resaltado visual dorado en enemigos adyacentes atacables. Reutiliza `atacar(fila, columna)` existente.
+- Tests: `hayEnemigoEnDireccion`, `getEnemigosAdyacentes`, `atacarDireccionConVariosEnemigosSoloDanaElElegido`, direccion sin enemigo.
+- Verificacion: 189/189 tests pasados el 2026-05-24. Commit `b9dc701` en `feature/a-estructuras`.
 
 ### C-01 Disenar JSON inicial
 
