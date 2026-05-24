@@ -37,10 +37,10 @@ HECHA
 
 ### Resumen de tareas pendientes (Parte B)
 
-- **B-02** Modelo de objetos e inventario - REVISION
-- **B-03** Reglas de turno y combate - REVISION
+- **B-02** Modelo de objetos e inventario - HECHA
+- **B-03** Reglas de turno y combate - HECHA
 - **B-04** Mejoras de logica (IA enemiga, drops, cofres, trampas) - PENDIENTE
-- **B-05** Ataque direccional - PENDIENTE
+- **B-05** Ataque direccional - REVISION
 
 ### Resumen de tareas pendientes (Parte A)
 
@@ -78,10 +78,11 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### B-02 Modelo de objetos e inventario
 
 - Responsable: Guille / Parte B
-- Estado: REVISION
+- Estado: HECHA
 - Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
 - Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`.
 - Nota de alcance: Guillermo autoriza traer `ListaDE`, `ElementoDE` e `IteradorDE` desde las estructuras del grupo y adaptar `ListaDE` para no exigir `Comparable`, porque el inventario necesita guardar objetos sin orden natural.
+- Verificacion de cierre: PR #6 implemento modelo y tests; el juego actual carga objetos desde JSON, permite recogerlos y usar/equipar consumibles, armas y escudos desde inventario. El 2026-05-24 se ajusta `equiparObjeto` para no consumir accion, segun regla acordada.
 
 ### C-02 Cargar y guardar partida
 
@@ -93,7 +94,7 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 ### B-03 Reglas de turno y combate
 
 - Responsable: Guille / Parte B
-- Estado: REVISION
+- Estado: HECHA
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
 - Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
 - Avance actual: creada la primera version del contrato publico `InterfazPartida`, el enum `EstadoPartida`, `Partida`, `Puerta`, `ObjetoEnMapa`, `PersonajeEnMapa`, `CuevaEnMapa`, `CeldaEnMapa` y tests JUnit basicos de logica de partida.
@@ -120,11 +121,12 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
   - Pasada el 2026-05-22 sobre las clases nuevas.
   - Corregidos los problemas detectados sobre exposicion mutable principal, ocupacion de celdas, avance a cueva destino ocupada, llave final con id conflictivo, semantica de puerta abierta, `ObjetoEnMapa.equals()` y metodos de preparacion fuera de `InterfazPartida`.
   - Pasada revision independiente adicional sobre el puente JSON-Partida; corregidos conexion JSON invalida ignorada, recolocacion del jugador al cambiar de cueva y estadisticas del boss en `datos/cuevas.json`.
-- Pendiente antes de marcar como HECHA:
-  - Ejecutar tests JUnit completos en IntelliJ.
-  - Confirmar con Parte C si `FabricaPartida` cubre lo necesario para la carga inicial desde JSON y para el arranque de JavaFX.
-  - Revisar si `ALCANCE_ARCO = 3` es el alcance definitivo para la primera version.
-  - Revisar si avanzar de cueva debe consumir accion pero no finalizar automaticamente el turno, como queda implementado.
+- Cierre 2026-05-24:
+  - PR #15 deja documentados 189/189 tests JUnit pasados.
+  - Guillermo confirma que `FabricaPartida` cubre lo necesario para el arranque desde JSON y JavaFX.
+  - Guillermo confirma `ALCANCE_ARCO = 3` como alcance definitivo para la primera version.
+  - Se corrige avance de cueva: no genera consumo nuevo de accion, no termina turno, no hace actuar enemigos y reinicia turnos a 60 al entrar en la siguiente cueva; si el jugador ya habia usado accion o movimiento, ese estado se conserva hasta pasar turno.
+  - Verificacion dirigida: `PartidaTest` y `FabricaPartidaTest` pasan con 64/64 tests correctos en compilacion logica sin JavaFX.
 
 ### B-04 Mejoras de logica para iteraciones posteriores
 

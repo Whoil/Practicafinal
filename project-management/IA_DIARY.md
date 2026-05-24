@@ -957,3 +957,24 @@ Se anadieron tests en `PartidaTest` para enemigo en direccion, direccion vacia, 
 `B-05` queda en `REVISION`. `C-10` sigue pendiente salvo su punto 1, porque ataque especial cargable y revision de turnos quedaron fuera de esta sesion por decision de alcance.
 
 Revision independiente posterior: sin bloqueos P1/P2. Se aceptan como riesgos menores que `hayEnemigoEnDireccion(df, dc)` confia en deltas seguros desde sus callers actuales y que el boton/atajo antiguo de espacio conserva el comportamiento de atacar al primer enemigo adyacente.
+
+## 2026-05-24 - Guillermo / Cierre de B-02 y B-03
+
+Guillermo pidio revisar el estado real de `B-02` y `B-03` tras los ultimos merges. Se comprobo que el PR #15 ya estaba integrado en `main`, que `B-05` debia figurar como `REVISION`, y que quedaba una regla pendiente: el cambio de cueva no debia gastar accion ni turno, y los turnos debian reiniciarse al entrar en otra cueva.
+
+Decisiones cerradas:
+- `FabricaPartida` sirve para la integracion JSON/JavaFX de la primera version.
+- `ALCANCE_ARCO = 3` queda aceptado.
+- Equipar o cambiar objeto no consume accion.
+- Cambiar de cueva no consume accion, no termina turno y reinicia los turnos a 60; si la accion o el movimiento ya estaban usados, se conservan hasta pasar turno.
+
+Cambios aplicados:
+- `Partida.equiparObjeto(...)` no marca `accionRealizada`.
+- `Partida.avanzarACueva(...)` permite avanzar aunque la accion del turno ya este usada y restaura `turnosRestantes` a `TURNOS_POR_CUEVA`, conservando los flags de accion/movimiento previos.
+- `PartidaTest` incorpora tests para proteger estas reglas.
+- `TASKS.md` marca `B-02` y `B-03` como `HECHA` y corrige `B-05` a `REVISION` en el resumen.
+
+Verificacion:
+- Revisor independiente detecto un riesgo inicial: borrar `accionRealizada` y `movimientoRealizado` al cambiar de cueva regalaba una segunda accion/movimiento. Se corrigio y se anadio test de regresion.
+- Verificacion dirigida de logica sin JavaFX: `PartidaTest` y `FabricaPartidaTest`, 64/64 tests correctos.
+- La ejecucion completa con JavaFX queda para IntelliJ por dependencias locales del entorno.
