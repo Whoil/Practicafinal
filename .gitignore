@@ -36,4 +36,5 @@ crash.log
 crash_detail.log
 direct_debug.log
 datos/partida_guardada.json
+ranking.json
 datos/audio/sfx/

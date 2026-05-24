@@ -391,3 +391,49 @@ Motivo:
 - Alvaro tenia la sesion abierta y las tareas de Parte C requerian cambios en Partida.java.
 - Obtener aprobacion del responsable de Parte B (Guille) no era viable en ese momento.
 - Se acordo como excepcion documentada, no como precedente para futuras modificaciones sin permiso.
+
+## D-26 Estadisticas, puntuacion y ranking local
+
+Decision:
+
+```text
+Las estadisticas de partida viven en una clase dedicada EstadisticasPartida
+compuesta dentro de Partida. El ranking final se persiste como array JSON simple
+en ranking.json usando Gson.
+```
+
+Reglas acordadas:
+
+- El nombre del jugador se pide al iniciar partida nueva con un modal JavaFX propio integrado en la estetica del juego.
+- Si el usuario cancela o deja el nombre vacio, se usa "Mago Errante".
+- Las partidas cargadas conservan el nombre y las estadisticas guardadas si existen.
+- `ranking.json` vive en la raiz del proyecto y queda ignorado en Git por ser dato local.
+- La UI de Ranking muestra Top 10 ordenado por puntuacion descendente usando estructuras propias, no colecciones prohibidas.
+
+Motivo:
+
+- Partida puede registrar dano, turnos y bajas independientemente de si la accion llega desde teclado, raton o boton.
+- El formato array JSON simple coincide con el requisito funcional y es facil de revisar.
+
+## D-27 Bola de Fuego en tiempo real
+
+Decision:
+
+```text
+La Bola de Fuego se dispara con F + flecha, consume solo la accion del turno,
+no consume movimiento, inflige dano fijo 10 y viaja como instancia autonoma con
+su propio Timeline en la capa de animacion.
+```
+
+Reglas acordadas:
+
+- El proyectil tiene rango maximo de 5 casillas y avanza cada 120 ms.
+- Cada disparo crea una instancia independiente para no compartir posicion ni temporizador.
+- La logica de impacto vive en Partida; JavaFX solo anima trayectoria y pide aplicar impacto.
+- Si no existe `datos/iconos/bola_fuego.png`, se usa un sprite generado por codigo.
+- Los SFX intentan cargar `datos/audio/sonido_disparo.mp3` y `datos/audio/sonido_impacto.mp3`; si faltan, se usan clips generados.
+
+Motivo:
+
+- Mantiene el juego fluido y evita que un proyectil activo dependa de variables globales del controlador.
+- Consumir accion conserva el equilibrio del turno sin impedir el movimiento posterior.

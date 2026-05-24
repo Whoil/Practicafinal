@@ -32,6 +32,7 @@ HECHA
 
 - **C-09** Pulido audiovisual (sonidos/musica/animaciones/menu pausa) - PENDIENTE
 - **C-10** Ataque direccional, ataque especial cargable y revision de turnos - PENDIENTE
+- **C-11** Estadisticas, puntuacion y ranking con Gson - HECHA
 - **R-01** Revision de restricciones (colecciones prohibidas, arrays) - PENDIENTE
 - **R-02** Revision de codigo y tests para cada PR - PENDIENTE
 
@@ -329,6 +330,33 @@ Sub-tareas:
 - Estado: HECHA
 - Archivos permitidos: `src/vista/`, `project-management/`
 - Terminado: boton "AYUDA [H]" en panel de acciones, overlay superpuesto con todos los controles, atajo tecla H.
+
+### C-11 Estadisticas, puntuacion y ranking con Gson
+
+- Responsable: Alvaro / Parte A, con excepcion autorizada para tocar logica de Parte B y UI/JSON de Parte C.
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/`, `src/json/`, `src/vista/`, `test/`, `project-management/`
+- Terminado: `Partida` registra estadisticas mediante `EstadisticasPartida`; la pantalla final calcula puntuacion y titulo; `ranking.json` se guarda con Gson; el menu incluye boton `Ranking` con Top 10.
+- Ajuste posterior: el menu de opciones sube la botonera para no tapar el cofre y el nombre del mago se pide con un modal propio integrado en la estetica del juego.
+- Verificacion: 208/208 tests JUnit pasados el 2026-05-24 con `scripts/test.ps1`.
+
+### B-07 Bola de Fuego en tiempo real
+
+- Responsable: Alvaro / Parte A, con excepcion autorizada para tocar combate de Parte B y UI de Parte C.
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/juego/`, `src/vista/`, `test/`, `project-management/`
+- Terminado: `F + Flecha` lanza una Bola de Fuego con Timeline propio, rango 5, dano fijo 10, impacto contra muros/enemigos, SFX de disparo/impacto y log naranja.
+- Verificacion: 213/213 tests JUnit pasados el 2026-05-24 con `scripts/test.ps1`.
+
+### C-12 Redisenio premium pantalla de inicio
+
+- Responsable: Alvaro / Parte A, con excepcion autorizada para pulido visual de UI.
+- Estado: HECHA
+- Archivos permitidos: `src/vista/EscapeMazmorraApp.java`, `project-management/`
+- Terminado: la pantalla de inicio usa logo premium, marco central, arco de mazmorra, luz ambiental, chispas y boton pergamino; el menu de opciones reutiliza el nuevo helper de boton.
+- Ajuste posterior: se reemplazo la version de marco/arco por una composicion mas simple de estilo pixel art con assets del Dungeon Asset Pack.
+- Ajuste posterior: a peticion de Alvaro, la primera pantalla de inicio se dejo de nuevo como estaba antes de los redisenios de esta sesion.
+- Verificacion: 213/213 tests JUnit pasados el 2026-05-24 con `scripts/test.ps1`.
 
 ### PM-01 Crear documentos de coordinacion
 

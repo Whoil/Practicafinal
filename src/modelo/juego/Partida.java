@@ -75,6 +75,7 @@ public class Partida implements InterfazPartida {
     private final ListaSE<Puerta> puertas;
     private final ListaSE<String> log;
     private final String codigoLlaveFinal;
+    private final EstadisticasPartida estadisticas;
 
     /*
      * Estos flags controlan la regla acordada de "un movimiento" y "una
@@ -99,6 +100,11 @@ public class Partida implements InterfazPartida {
     }
 
     public Partida(Mazmorra mazmorra, Jugador jugador, int turnosRestantes, String codigoLlaveFinal, ListaSE<Puerta> puertasIniciales) {
+        this(mazmorra, jugador, turnosRestantes, codigoLlaveFinal, puertasIniciales, null);
+    }
+
+    public Partida(Mazmorra mazmorra, Jugador jugador, int turnosRestantes, String codigoLlaveFinal,
+                   ListaSE<Puerta> puertasIniciales, EstadisticasPartida estadisticasIniciales) {
         if (mazmorra == null) {
             throw new IllegalArgumentException("La mazmorra es obligatoria");
         }
@@ -123,6 +129,7 @@ public class Partida implements InterfazPartida {
         this.contenidosPorCueva = new ListaSE<>();
         this.puertas = new ListaSE<>();
         this.log = new ListaSE<>();
+        this.estadisticas = new EstadisticasPartida(estadisticasIniciales);
 
         cargarPuertasIniciales(puertasIniciales);
         registrarLog("Partida iniciada");
@@ -350,21 +357,73 @@ public class Partida implements InterfazPartida {
             return false;
         }
 
+        int vidaAntes = enemigo.getVidaActual();
         int dano = calcularDano(jugador.getAtaqueTotal(), enemigo.getDefensaBase());
         enemigo.recibirDano(dano);
+        int danoReal = vidaAntes - enemigo.getVidaActual();
+        estadisticas.registrarDanoEjercido(danoReal);
         accionRealizada = true;
-        registrarLog("Jugador ataca a " + enemigo.getNombre() + " e inflige " + dano + " de dano");
+        registrarLog("Jugador ataca a " + enemigo.getNombre() + " e inflige " + dano + " de daño");
 
         if (!enemigo.estaVivo()) {
             obtenerOCrearContenidoActual().getEnemigos().del(enemigo);
             registrarLog(enemigo.getNombre() + " derrotado");
             if (enemigo instanceof Boss) {
+                estadisticas.registrarBossMuerto();
                 entregarLlaveFinal();
+            } else {
+                estadisticas.registrarEnemigoComunMuerto();
             }
         }
 
         comprobarVictoriaODerrota();
         return true;
+    }
+
+    public boolean puedeDispararBolaFuego() {
+        return puedeAceptarAccion() && !accionRealizada;
+    }
+
+    public boolean registrarDisparoBolaFuego() {
+        if (!puedeDispararBolaFuego()) {
+            return false;
+        }
+        accionRealizada = true;
+        registrarLog("Bola de Fuego lanzada");
+        return true;
+    }
+
+    public ResultadoImpactoBolaFuego impactarBolaFuego(int fila, int columna, int dano) {
+        if (estado != EstadoPartida.EN_CURSO || dano <= 0) {
+            return ResultadoImpactoBolaFuego.sinImpacto();
+        }
+
+        Enemigo enemigo = buscarEnemigoEn(fila, columna);
+        if (enemigo == null || !enemigo.estaVivo()) {
+            return ResultadoImpactoBolaFuego.sinImpacto();
+        }
+
+        int vidaAntes = enemigo.getVidaActual();
+        enemigo.recibirDano(dano);
+        int danoReal = vidaAntes - enemigo.getVidaActual();
+        estadisticas.registrarDanoEjercido(danoReal);
+        boolean eraBoss = enemigo instanceof Boss;
+        boolean murio = !enemigo.estaVivo();
+
+        registrarLog("Tu Bola de Fuego impacta al enemigo haciendo " + danoReal + " de daño");
+        if (murio) {
+            obtenerOCrearContenidoActual().getEnemigos().del(enemigo);
+            registrarLog(enemigo.getNombre() + " derrotado");
+            if (eraBoss) {
+                estadisticas.registrarBossMuerto();
+                entregarLlaveFinal();
+            } else {
+                estadisticas.registrarEnemigoComunMuerto();
+            }
+        }
+
+        comprobarVictoriaODerrota();
+        return ResultadoImpactoBolaFuego.impacto(enemigo.getNombre(), danoReal, murio, eraBoss);
     }
 
     @Override
@@ -474,6 +533,7 @@ public class Partida implements InterfazPartida {
         }
 
         actuarEnemigos();
+        estadisticas.registrarTurnoJugado();
         turnosRestantes--;
         movimientoRealizado = false;
         accionRealizada = false;
@@ -515,8 +575,10 @@ public class Partida implements InterfazPartida {
     private void actuarEnemigo(Enemigo enemigo) {
         if (estaEnCeldaCercana(enemigo.getFila(), enemigo.getColumna(), jugador.getFila(), jugador.getColumna())) {
             int dano = calcularDano(enemigo.getAtaqueBase(), jugador.getDefensaTotal());
+            int vidaAntes = jugador.getVidaActual();
             jugador.recibirDano(dano);
-            registrarLog(enemigo.getNombre() + " ataca al jugador e inflige " + dano + " de dano");
+            estadisticas.registrarDanoRecibido(vidaAntes - jugador.getVidaActual());
+            registrarLog(enemigo.getNombre() + " ataca al jugador e inflige " + dano + " de daño");
             return;
         }
 
@@ -899,10 +961,14 @@ public class Partida implements InterfazPartida {
     }
 
     public static Partida crearPartidaNueva() throws IOException {
+        return crearPartidaNueva("Jugador");
+    }
+
+    public static Partida crearPartidaNueva(String nombreJugador) throws IOException {
         CargadorConfiguracion cargador = new CargadorConfiguracion();
         ResultadoCarga resultado = cargador.cargar("datos/cuevas.json");
         FabricaPartida fabrica = new FabricaPartida();
-        return fabrica.crearPartida(resultado);
+        return fabrica.crearPartida(resultado, nombreJugador);
     }
 
     public static Partida cargarPartida(String ruta) throws IOException {
@@ -924,7 +990,8 @@ public class Partida implements InterfazPartida {
                 }
             }
         }
-        Partida partida = new Partida(mazmorra, jugador, turnosRestantes, puertas);
+        Partida partida = new Partida(mazmorra, jugador, turnosRestantes,
+                CODIGO_LLAVE_FINAL_DEFECTO, puertas, dto.getEstadisticas());
         partida.estado = EstadoPartida.valueOf(dto.getEstado());
 
         if (dto.getMazmorra().getCuevas() != null) {
@@ -1188,8 +1255,12 @@ public class Partida implements InterfazPartida {
         DatosPartidaDTO dto = new DatosPartidaDTO(
             SerializadorPartida.getVersionActual(),
             mazmorraDTO, jugadorDTO, estado.name(), turnosRestantes,
-            puertasDTO);
+            puertasDTO, estadisticas);
         SerializadorPartida.guardar(dto, ruta);
+    }
+
+    public EstadisticasPartida getEstadisticas() {
+        return new EstadisticasPartida(estadisticas);
     }
 
     // ---------------------------------------------------------------

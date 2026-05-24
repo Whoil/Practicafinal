@@ -2113,3 +2113,152 @@ C-09.3 pasa de PENDIENTE a HECHA.
 - La animacion de muerte (400ms) coexiste con el timer del flash de ataque (300ms) sin conflicto porque usa `animOverlay` (separado de gridOverlay).
 - Si el jugador cambia de cueva durante una animacion, la escena se descarta y se crea una nueva (sin fugas de memoria).
 - El movimiento animado no bloquea input; el Timeline corre en segundo plano.
+
+## 2026-05-24 - Alvaro / Estadisticas, puntuacion y ranking
+
+### Identificacion de sesion
+
+Humano: Alvaro
+Rol: Parte A, con excepcion autorizada para implementar estadisticas/ranking tocando logica de Parte B, UI de Parte C y JSON.
+
+### Rama y sincronizacion
+
+Rama usada: `feature/a-estructuras`.
+Estado previo: rama actualizada con `origin/main` por fast-forward; queda por delante de `origin/feature/a-estructuras` por la sincronizacion y los cambios locales.
+
+### Trabajo realizado
+
+- Se creo `EstadisticasPartida` para registrar turnos, dano recibido, dano ejercido, enemigos comunes muertos, bosses muertos y Malakor derrotado.
+- `Partida` registra estadisticas al atacar, recibir dano enemigo, matar enemigos/bosses y pasar turno.
+- El guardado/carga de partida conserva estadisticas cuando existen y mantiene compatibilidad con guardados antiguos.
+- El inicio de partida nueva pide nombre; cancelado/vacio usa "Mago Errante".
+- La pantalla final muestra nombre, estadisticas, puntuacion y titulo.
+- Se creo `SerializadorRanking` y `ResultadoPartidaDTO`; `ranking.json` se guarda en raiz con Gson pretty printing y se ignora en Git.
+- El menu incluye boton `Ranking` y vista Top 10 ordenada por puntuacion usando estructuras propias.
+- Se documento D-26 y se marco C-11 como HECHA.
+
+### Archivos modificados
+
+- `.gitignore`
+- `src/modelo/juego/EstadisticasPartida.java`
+- `src/modelo/juego/Partida.java`
+- `src/modelo/juego/FabricaPartida.java`
+- `src/json/DatosPartidaDTO.java`
+- `src/json/ResultadoPartidaDTO.java`
+- `src/json/SerializadorRanking.java`
+- `src/vista/EscapeMazmorraApp.java`
+- `src/vista/PantallaFinal.java`
+- `test/modelo/juego/EstadisticasPartidaTest.java`
+- `test/modelo/juego/PartidaTest.java`
+- `test/json/SerializadorRankingTest.java`
+- `project-management/DECISIONS.md`
+- `project-management/TASKS.md`
+- `project-management/IA_DIARY.md`
+- `project-management/SCRATCHPAD.md`
+
+### Pruebas
+
+Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 208/208 tests correctos.
+Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
+
+### Pendiente para la siguiente sesion
+
+- Validar visualmente en IntelliJ el dialogo de nombre, la pantalla final y el ranking.
+- Pedir revision independiente antes de merge porque hay codigo de logica y UI.
+- Autorizar commit/push si el grupo acepta el alcance.
+
+## 2026-05-24 - Alvaro / Ajuste visual del menu y dialogo de nombre
+
+### Trabajo realizado
+
+- Se subio la botonera de opciones (`layoutY` 190) para dejar libre el cofre decorativo inferior.
+- Se elimino el uso de `TextInputDialog` para la nueva partida.
+- Se anadio un modal propio en `EscapeMazmorraApp` con panel de pergamino/madera, campo de nombre estilizado y botones `Comenzar`/`Cancelar`.
+- Confirmar con Enter usa el nombre escrito; Cancelar, Escape, vacio o espacios usa "Mago Errante".
+
+### Pruebas
+
+Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 208/208 tests correctos.
+Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
+
+### Pendiente
+
+- Validacion visual manual en JavaFX/IntelliJ del nuevo modal y del cofre visible.
+- Revision independiente antes de merge.
+
+## 2026-05-24 - Alvaro / Bola de Fuego en tiempo real
+
+### Trabajo realizado
+
+- Se implemento `F + Flecha` en `PantallaJuego` con modo de disparo breve.
+- Cada proyectil vive en una instancia interna `BolaDeFuego` con posicion, direccion, distancia y `Timeline` propios.
+- La bola viaja por `animOverlay`, no por `gridOverlay`, para sobrevivir a refrescos de UI.
+- `Partida` registra el disparo como accion y aplica impactos con dano fijo 10 mediante `ResultadoImpactoBolaFuego`.
+- Impactos actualizan estadisticas, eliminan enemigos muertos, entregan llave final si cae boss y escriben log.
+- `ReproductorSfx` intenta cargar MP3 externos y cae a WAV generado si no existen.
+
+### Pruebas
+
+Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 213/213 tests correctos.
+Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
+
+### Pendiente
+
+- Validacion visual manual en JavaFX/IntelliJ de `F + Flecha`, trayectoria, SFX y limpieza del proyectil.
+- Revision independiente antes de merge porque toca combate, UI y SFX.
+
+## 2026-05-24 - Alvaro / Redisenio premium pantalla de inicio
+
+### Trabajo realizado
+
+- Se anadio ambiente propio para inicio: haz de luz, vineta y chispas generadas por codigo.
+- Se creo una silueta decorativa de arco de mazmorra y un marco central para el logo.
+- El titulo queda como logo `ESCAPE` + `DE LA MAZMORRA` con degradado dorado, brillo y sombra.
+- `Inicio` usa el nuevo boton premium, sin globo.
+- `crearBotonOpcion` delega en el nuevo helper premium para unificar el menu de opciones.
+
+### Pruebas
+
+Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 213/213 tests correctos.
+Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
+
+### Pendiente
+
+- Validacion visual manual en JavaFX/IntelliJ de inicio y menu de opciones.
+
+## 2026-05-24 - Alvaro / Sustitucion inicio por estilo pixel art
+
+### Trabajo realizado
+
+- La pantalla de inicio deja de usar el marco/arco/chispas de la version premium.
+- Se anadio una vigneta simple y sprites del Dungeon Asset Pack: mago, demonio, baston, cofre y llave.
+- El helper de assets de menu recorta spritesheets al primer frame y usa `setSmooth(false)`.
+- El boton principal y el menu de opciones mantienen un estilo pergamino limpio.
+
+### Pruebas
+
+Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 213/213 tests correctos.
+Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.
+
+### Pendiente
+
+- Validacion visual manual en JavaFX/IntelliJ para confirmar que la composicion pixel art convence.
+
+## 2026-05-24 - Alvaro / Revertir primera pantalla de inicio
+
+### Trabajo realizado
+
+- `mostrarPantallaInicio()` vuelve al titulo original en tres lineas.
+- `crearBotonInicio()` vuelve al boton dorado con globo.
+- No se tocaron mecanicas ni flujos de menu.
+
+### Pruebas
+
+Comando: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1`
+Resultado: 213/213 tests correctos.
+Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se reejecuto con permisos y paso.

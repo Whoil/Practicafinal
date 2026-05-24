@@ -13,6 +13,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import json.ResultadoPartidaDTO;
 
 /**
  * Pantalla de desenlace — Victoria o Derrota.
@@ -28,6 +29,7 @@ public class PantallaFinal {
     private static final String FONT = "Georgia, serif";
 
     private final boolean victoria;
+    private final ResultadoPartidaDTO resultado;
     private final Runnable volverAlMenu;
     private Scene scene;
 
@@ -35,8 +37,9 @@ public class PantallaFinal {
      * @param victoria     true para pantalla de victoria, false para derrota
      * @param volverAlMenu callback al pulsar "Volver al Menu Principal"
      */
-    public PantallaFinal(boolean victoria, Runnable volverAlMenu) {
+    public PantallaFinal(boolean victoria, ResultadoPartidaDTO resultado, Runnable volverAlMenu) {
         this.victoria = victoria;
+        this.resultado = resultado;
         this.volverAlMenu = volverAlMenu;
     }
 
@@ -78,7 +81,7 @@ public class PantallaFinal {
         titulo.setEffect(sombraTitulo);
 
         // Texto narrativo
-        Text cuerpo = new Text(obtenerTexto());
+        Text cuerpo = new Text(obtenerTexto() + "\n\n" + obtenerTextoEstadisticas());
         cuerpo.setFont(Font.font(FONT, FontWeight.NORMAL, 18));
         cuerpo.setFill(Color.web("#f5f5f5"));
         cuerpo.setTextAlignment(TextAlignment.CENTER);
@@ -132,6 +135,21 @@ public class PantallaFinal {
         }
     }
 
+    private String obtenerTextoEstadisticas() {
+        if (resultado == null) {
+            return "";
+        }
+        return "Mago: " + resultado.getNombreJugador()
+             + "\nTurnos jugados: " + resultado.getTurnosJugados()
+             + "   Daño ejercido: " + resultado.getDanoEjercido()
+             + "   Daño recibido: " + resultado.getDanoRecibido()
+             + "\nEnemigos derrotados: " + resultado.getEnemigosMuertos()
+             + "   Bosses derrotados: " + resultado.getBossesMuertos()
+             + "   Malakor derrotado: " + (resultado.isMalakorDerrotado() ? "si" : "no")
+             + "\nPuntuación final: " + resultado.getPuntuacion()
+             + "\nTítulo: " + resultado.getTitulo();
+    }
+
     /**
      * Boton "Volver al Menu Principal" con estilo pergamino.
      */
@@ -153,7 +171,7 @@ public class PantallaFinal {
         sombra.setOffsetY(2);
         rect.setEffect(sombra);
 
-        Text texto = new Text("Volver al Menu Principal");
+        Text texto = new Text("Volver al Menú Principal");
         texto.setFont(Font.font(FONT, FontWeight.BOLD, 18));
         texto.setFill(Color.web("#2A1A0E"));
 
