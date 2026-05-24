@@ -416,6 +416,7 @@ public class PantallaJuego {
 
                 // Animacion visual de impacto y muerte tras ataque
                 if (ataqueFila >= 0 && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                    animarProyectil(pf, pc, ataqueFila, ataqueCol);
                     animarAtaque(ataqueFila, ataqueCol);
                     if (targetAntesAtaque != null && !targetAntesAtaque.estaVivo()) {
                         animarMuerteEnemigo(ataqueFila, ataqueCol, getEnemyAssetPath(targetAntesAtaque));
@@ -636,6 +637,7 @@ public class PantallaJuego {
                         }
                         // Animacion visual de impacto y muerte tras ataque por clic
                         if (ataqueFila >= 0 && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                            animarProyectil(clickOldF, clickOldC, ataqueFila, ataqueCol);
                             animarAtaque(ataqueFila, ataqueCol);
                             if (targetAntesAtaque != null && !targetAntesAtaque.estaVivo()) {
                                 animarMuerteEnemigo(ataqueFila, ataqueCol, getEnemyAssetPath(targetAntesAtaque));
@@ -781,14 +783,11 @@ public class PantallaJuego {
             for (int c = 0; c < cols; c++) {
                 if (celdas[f][c] == null) continue;
                 TipoCelda tc = cueva.getCelda(f, c).getTipo();
-                String obsAsset = null;
                 if (tc == TipoCelda.ROCA) {
-                    obsAsset = "objects" + File.separator + "chest2.png";
+                    ImageView obsIcon = crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "rocks.png", spriteSize * 0.7, false);
+                    celdas[f][c].getChildren().add(obsIcon);
                 } else if (tc == TipoCelda.ARBUSTO) {
-                    obsAsset = "objects" + File.separator + "chest3.png";
-                }
-                if (obsAsset != null) {
-                    ImageView obsIcon = crearSpriteAssets(obsAsset, spriteSize * 0.7);
+                    ImageView obsIcon = crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "bush.png", spriteSize * 0.7, false);
                     celdas[f][c].getChildren().add(obsIcon);
                 }
             }
@@ -895,6 +894,9 @@ public class PantallaJuego {
             boolean okAtq = partida.atacar();
             actualizar();
             if (okAtq && ataqueFila >= 0 && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                int pfj = partida.getJugador().getFila();
+                int pcj = partida.getJugador().getColumna();
+                animarProyectil(pfj, pcj, ataqueFila, ataqueCol);
                 animarAtaque(ataqueFila, ataqueCol);
                 if (targetAntesAtaque != null && !targetAntesAtaque.estaVivo()) {
                     animarMuerteEnemigo(ataqueFila, ataqueCol, getEnemyAssetPath(targetAntesAtaque));
@@ -1503,7 +1505,7 @@ public class PantallaJuego {
      */
     private Node crearIconoObjeto(Objeto obj, double tamanio) {
         if (obj instanceof modelo.objetos.Pocion) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "pocion.png", tamanio, false);
+            return crearSpriteAssets("TinyBits Inventory Pack - Potions.png", tamanio);
         }
         if (obj instanceof modelo.objetos.Escudo) {
             return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "escudo.png", tamanio, false);
@@ -1515,7 +1517,7 @@ public class PantallaJuego {
 
     private Node crearIconoCeldaEspecial(TipoCelda tipo, double tamanio) {
         if (tipo == TipoCelda.PUERTA) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "puerta.png", tamanio * 1.05, false);
+            return crearSpriteArchivo("Dungeon Asset Pack" + File.separator + "door_closed.png", tamanio * 1.05, false);
         }
         if (tipo == TipoCelda.SALIDA) {
             return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "salida.png", tamanio * 1.2, false);
@@ -1750,6 +1752,39 @@ public class PantallaJuego {
      * Animacion visual de impacto al atacar: circulo expansivo que
      * aparece en la celda del enemigo, crece y se desvanece.
      */
+    private void animarProyectil(int playerF, int playerC, int enemyF, int enemyC) {
+        if (cumX == null || gridOverlay == null) return;
+        double startX = cumX[playerC] + colWidth[playerC] / 2.0;
+        double startY = cumY[playerF] + rowHeight[playerF] / 2.0;
+        double endX = cumX[enemyC] + colWidth[enemyC] / 2.0;
+        double endY = cumY[enemyF] + rowHeight[enemyF] / 2.0;
+
+        Circle bolt = new Circle(startX, startY, 5);
+        bolt.setFill(Color.rgb(255, 220, 80));
+        bolt.setStroke(Color.rgb(255, 255, 200));
+        bolt.setStrokeWidth(1.5);
+        bolt.setMouseTransparent(true);
+        gridOverlay.getChildren().add(bolt);
+
+        Timeline tl = new Timeline(
+            new KeyFrame(Duration.millis(0), e -> {
+                bolt.setCenterX(startX);
+                bolt.setCenterY(startY);
+                bolt.setOpacity(1.0);
+            }),
+            new KeyFrame(Duration.millis(140), e -> {
+                bolt.setCenterX(endX);
+                bolt.setCenterY(endY);
+                bolt.setOpacity(0.3);
+            }),
+            new KeyFrame(Duration.millis(170), e -> {
+                gridOverlay.getChildren().remove(bolt);
+            })
+        );
+        tl.setCycleCount(1);
+        tl.play();
+    }
+
     private void animarAtaque(int enemyF, int enemyC) {
         if (cumX == null || gridOverlay == null) return;
         double cx = cumX[enemyC] + colWidth[enemyC] / 2.0;

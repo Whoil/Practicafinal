@@ -442,7 +442,8 @@ public class Partida implements InterfazPartida {
         Cueva origen = getCuevaActualInterna();
         Cueva destino = mazmorra.getCuevaPorId(idCuevaDestino);
         Puerta puerta = buscarPuerta(origen, destino);
-        if (puerta == null || !tieneLlaveParaPuerta(puerta)) {
+        Llave llave = puerta != null ? buscarLlavePorCodigo(puerta.getCodigoLlave()) : null;
+        if (puerta == null || llave == null) {
             return false;
         }
         Celda celdaEntrada = buscarCeldaEntradaLibre(destino);
@@ -451,6 +452,7 @@ public class Partida implements InterfazPartida {
         }
 
         puerta.abrir();
+        jugador.quitarObjeto(llave);
         boolean avanzado = mazmorra.avanzarACueva(destino);
         if (avanzado) {
             jugador.cambiarPosicion(celdaEntrada.getFila(), celdaEntrada.getColumna());

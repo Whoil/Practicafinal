@@ -52,8 +52,8 @@ public enum DatosTemaCueva {
           + "Demonios menores custodian los tesoros finales y protegen "
           + "el santuario de su senor. "
           + "Tu mana es escaso, tus turnos estan contados. "
-          + "Derrota al Rey Demonio Malakor para arrebatarle la llave "
-          + "final y escapar con vida de la mazmorra.",
+          + "Derrota al Rey Demonio Malakor para liberar al reino "
+          + "de su oscuridad y devolver la paz a estas tierras.",
             "radial-gradient(center 50% 50%, radius 60%, #3a0d0d 0%, #0a0202 100%)",
             Color.rgb(170, 45, 45),
             "characters/Spritesheets/demon_idle.png",
