@@ -37,8 +37,10 @@ HECHA
 
 ### Resumen de tareas pendientes (Parte B)
 
-- **B-03** Reglas de turno y combate - REVISION
+- **B-02** Modelo de objetos e inventario - HECHA
+- **B-03** Reglas de turno y combate - HECHA
 - **B-04** Mejoras de logica (IA enemiga, drops, cofres, trampas) - PENDIENTE
+- **B-05** Ataque direccional - REVISION
 
 ### Resumen de tareas pendientes (Parte A)
 
@@ -66,10 +68,34 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
 
 ## Pendientes urgentes
 
+### A-01 Revisar estructuras propias existentes
+
+- Responsable: Persona A
+- Estado: PENDIENTE
+- Archivos permitidos: `src/Estructuras/`, `src/ParteA/`, `src/ParteB/Grafo/`, `project-management/`
+- Terminado cuando haya tabla de estructuras disponibles, usos y riesgos.
+
+### B-02 Modelo de objetos e inventario
+
+- Responsable: Guille / Parte B
+- Estado: HECHA
+- Archivos permitidos: `src/modelo/objetos/`, `src/modelo/personajes/`, `src/Estructuras/ListaDE.java`, `src/Estructuras/ElementoDE.java`, `src/Estructuras/IteradorDE.java`, `test/`, `project-management/`
+- Terminado cuando existan `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` e inventario con `ListaDE<Objeto>`.
+- Nota de alcance: Guillermo autoriza traer `ListaDE`, `ElementoDE` e `IteradorDE` desde las estructuras del grupo y adaptar `ListaDE` para no exigir `Comparable`, porque el inventario necesita guardar objetos sin orden natural.
+- Verificacion de cierre: PR #6 implemento modelo y tests; el juego actual carga objetos desde JSON, permite recogerlos y usar/equipar consumibles, armas y escudos desde inventario. El 2026-05-24 se ajusta `equiparObjeto` para no consumir accion, segun regla acordada.
+
+### C-02 Cargar y guardar partida
+
+- Responsable: Hector / Parte C
+- Estado: HECHA
+- Archivos permitidos: `src/json/`, `test/`, `project-management/`
+- Terminado cuando se pueda cargar configuracion inicial y guardar/cargar estado.
+- Verificacion: 19 tests JUnit pasados el 2026-05-22 (guardado/carga round-trip, matriz, enemigos, objetos, inventario, equipo, estado, errores, conversion DTO<->modelo).
+
 ### B-03 Reglas de turno y combate
 
 - Responsable: Guille / Parte B
-- Estado: REVISION
+- Estado: HECHA
 - Archivos permitidos: `src/modelo/juego/`, `src/modelo/personajes/`, `src/modelo/objetos/`, `test/`, `project-management/`
 - Terminado cuando el jugador pueda actuar, enemigos respondan, se aplique dano y haya victoria/derrota basica.
 - Avance actual: creada la primera version del contrato publico `InterfazPartida`, el enum `EstadoPartida`, `Partida`, `Puerta`, `ObjetoEnMapa`, `PersonajeEnMapa`, `CuevaEnMapa`, `CeldaEnMapa` y tests JUnit basicos de logica de partida.
@@ -96,11 +122,12 @@ Usar esta seccion cuando una parte necesite algo de otra. Los agentes deben revi
   - Pasada el 2026-05-22 sobre las clases nuevas.
   - Corregidos los problemas detectados sobre exposicion mutable principal, ocupacion de celdas, avance a cueva destino ocupada, llave final con id conflictivo, semantica de puerta abierta, `ObjetoEnMapa.equals()` y metodos de preparacion fuera de `InterfazPartida`.
   - Pasada revision independiente adicional sobre el puente JSON-Partida; corregidos conexion JSON invalida ignorada, recolocacion del jugador al cambiar de cueva y estadisticas del boss en `datos/cuevas.json`.
-- Pendiente antes de marcar como HECHA:
-  - Ejecutar tests JUnit completos en IntelliJ.
-  - Confirmar con Parte C si `FabricaPartida` cubre lo necesario para la carga inicial desde JSON y para el arranque de JavaFX.
-  - Revisar si `ALCANCE_ARCO = 3` es el alcance definitivo para la primera version.
-  - Revisar si avanzar de cueva debe consumir accion pero no finalizar automaticamente el turno, como queda implementado.
+- Cierre 2026-05-24:
+  - PR #15 deja documentados 189/189 tests JUnit pasados.
+  - Guillermo confirma que `FabricaPartida` cubre lo necesario para el arranque desde JSON y JavaFX.
+  - Guillermo confirma `ALCANCE_ARCO = 3` como alcance definitivo para la primera version.
+  - Se corrige avance de cueva: no genera consumo nuevo de accion, no termina turno, no hace actuar enemigos y reinicia turnos a 60 al entrar en la siguiente cueva; si el jugador ya habia usado accion o movimiento, ese estado se conserva hasta pasar turno.
+  - Verificacion dirigida: `PartidaTest` y `FabricaPartidaTest` pasan con 64/64 tests correctos en compilacion logica sin JavaFX.
 
 ### B-04 Mejoras de logica para iteraciones posteriores
 
@@ -182,6 +209,9 @@ Sub-tareas:
 - **C-09.14** Encontrar/crear icono para ESCUDO (reemplazar `staff2.png` por un asset tipo escudo) - REVISION
 - **C-09.15** Añadir iconos decorativos para TESORO y SALIDA (actualmente solo color) - REVISION
 - **C-09.16** Buscar assets adicionales en itch.io: pociones, puertas, escudos, cofres y bosses - PENDIENTE
+  - Avance 2026-05-24 / Guillermo: se anade icono local de pocion, se reemplaza el icono local de escudo y se elimina el color morado de TESORO. Los bosses quedan fuera de esta sesion por decision de alcance.
+  - Avance 2026-05-24 / Guillermo: se refuerza `datos/cuevas.json` y los tests para que los objetos configurados no aparezcan en muros/obstaculos y los TESORO tengan acceso desde una celda vecina.
+  - Avance 2026-05-24 / Guillermo: se define TESORO como cofre cerrado no pisable, abrible con `R` desde celda adyacente; al abrirse pasa a `SUELO`.
 
 ### R-01 Revision de restricciones
 

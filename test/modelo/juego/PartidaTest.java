@@ -159,6 +159,50 @@ class PartidaTest {
     }
 
     @Test
+    void abrirTesoroConvierteCeldaEnSueloYConsumeAccion() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        cueva.cambiarTipoCelda(1, 1, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.abrirTesoro());
+        assertEquals(TipoCelda.SUELO, partida.getCuevaActual().getCelda(1, 1).getTipo());
+        assertTrue(partida.isAccionRealizada());
+        assertFalse(partida.abrirTesoro());
+    }
+
+    @Test
+    void tesoroCerradoNoSePuedePisarPeroSeAbreDesdeCasillaAdyacente() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        cueva.cambiarTipoCelda(1, 2, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.hayTesoroCercano());
+        assertFalse(partida.moverJugador(1, 2));
+        assertEquals(1, jugador.getColumna());
+
+        assertTrue(partida.abrirTesoro());
+        assertEquals(TipoCelda.SUELO, partida.getCuevaActual().getCelda(1, 2).getTipo());
+        assertTrue(partida.moverJugador(1, 2));
+        assertEquals(2, jugador.getColumna());
+    }
+
+    @Test
+    void tesoroCerradoNoPermiteUsarloComoCaminoIntermedio() {
+        Cueva cueva = new Cueva("c1", 3, 4);
+        cueva.cambiarTipoCelda(1, 2, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 3, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertFalse(partida.moverJugador(1, 3));
+        assertEquals(1, jugador.getColumna());
+    }
+
+    @Test
     void terminarTurnoReduceTurnosRestantes() throws Exception {
         Partida p = Partida.crearPartidaNueva();
         int antes = p.getTurnosRestantes();
@@ -696,6 +740,93 @@ class PartidaTest {
         assertTrue(partida.puedeCambiarCueva());
         assertTrue(partida.cambiarCueva());
         assertEquals("destino", partida.getCuevaActual().getId());
+    }
+
+    @Test
+    void cambiarCuevaNoConsumeTurnoYReiniciaTurnosSinHacerActuarEnemigos() {
+        Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(1, 1, TipoCelda.PUERTA);
+        Cueva destino = new Cueva("destino", 3, 3);
+        Mazmorra mazmorra = new Mazmorra();
+        mazmorra.conectarCuevas(origen, destino, "p1");
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        jugador.agregarObjeto(new Llave("llave-p1", TipoLlave.PUERTA, "llave-p1"));
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        puertas.addLast(new Puerta("p1", origen, destino, "llave-p1"));
+        Partida partida = new Partida(mazmorra, jugador, 4, puertas);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(origen, enemigo));
+        assertTrue(partida.cambiarCueva());
+
+        assertEquals("destino", partida.getCuevaActual().getId());
+        assertEquals(Partida.TURNOS_POR_CUEVA, partida.getTurnosRestantes());
+        assertEquals(100, jugador.getVidaActual());
+    }
+
+    @Test
+    void cambiarCuevaPermiteAvanzarAunqueLaAccionYaEsteUsada() {
+        Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(1, 1, TipoCelda.PUERTA);
+        Cueva destino = new Cueva("destino", 3, 3);
+        Mazmorra mazmorra = new Mazmorra();
+        mazmorra.conectarCuevas(origen, destino, "p1");
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        jugador.agregarObjeto(new Llave("llave-p1", TipoLlave.PUERTA, "llave-p1"));
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        puertas.addLast(new Puerta("p1", origen, destino, "llave-p1"));
+        Partida partida = new Partida(mazmorra, jugador, 10, puertas);
+        Enemigo enemigo = new Enemigo("Orco", TipoEnemigo.ORCO, 50, 12, 4, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(origen, enemigo));
+        assertTrue(partida.atacar(1, 2));
+        assertTrue(partida.isAccionRealizada());
+
+        assertTrue(partida.puedeCambiarCueva());
+        assertTrue(partida.cambiarCueva());
+        assertEquals("destino", partida.getCuevaActual().getId());
+        assertTrue(partida.isAccionRealizada());
+        assertFalse(partida.atacar(1, 2));
+    }
+
+    @Test
+    void cambiarCuevaNoDevuelveMovimientoYaUsado() {
+        Cueva origen = new Cueva("origen", 3, 3);
+        origen.cambiarTipoCelda(1, 2, TipoCelda.PUERTA);
+        Cueva destino = new Cueva("destino", 3, 3);
+        Mazmorra mazmorra = new Mazmorra();
+        mazmorra.conectarCuevas(origen, destino, "p1");
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        jugador.agregarObjeto(new Llave("llave-p1", TipoLlave.PUERTA, "llave-p1"));
+        ListaSE<Puerta> puertas = new ListaSE<>();
+        puertas.addLast(new Puerta("p1", origen, destino, "llave-p1"));
+        Partida partida = new Partida(mazmorra, jugador, 10, puertas);
+
+        assertTrue(partida.moverJugadorDerecha());
+        assertTrue(partida.isMovimientoRealizado());
+        assertTrue(partida.cambiarCueva());
+
+        assertTrue(partida.isMovimientoRealizado());
+        assertFalse(partida.moverJugadorDerecha());
+    }
+
+    @Test
+    void equiparObjetoNoConsumeAccionYPermiteAtacarDespues() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Espada espada = new Espada("espada-1");
+        jugador.agregarObjeto(espada);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 2, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        assertTrue(partida.equiparObjeto("espada-1"));
+        assertFalse(partida.isAccionRealizada());
+
+        assertTrue(partida.atacar(1, 2));
+        assertTrue(partida.isAccionRealizada());
+        assertTrue(enemigo.getVidaActual() < enemigo.getVidaMaxima());
     }
 
     @Test

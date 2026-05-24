@@ -2,6 +2,7 @@ package modelo.juego;
 
 import java.io.IOException;
 
+import Estructuras.Cola;
 import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import Estructuras.MiIterador;
@@ -18,6 +19,7 @@ import json.ResultadoCarga;
 import json.SerializadorPartida;
 import modelo.mapa.Celda;
 import modelo.mapa.Cueva;
+import modelo.mapa.Posicion;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Arco;
 import modelo.objetos.Arma;
@@ -63,6 +65,7 @@ public class Partida implements InterfazPartida {
      * final de toda la aplicacion.
      */
     public static final int ALCANCE_ARCO = 3;
+    public static final int TURNOS_POR_CUEVA = 60;
     public static final String CODIGO_LLAVE_FINAL_DEFECTO = "LLAVE_FINAL";
     public static final String ID_LLAVE_FINAL_DEFECTO = "llave-final";
 
@@ -217,7 +220,8 @@ public class Partida implements InterfazPartida {
         if (cuevaActual == null) {
             return new ListaSE<>();
         }
-        return crearVistasCeldas(cuevaActual.getCeldasAlcanzables(
+        return crearVistasCeldas(getCeldasAlcanzablesJugadorSinTesoros(
+                cuevaActual,
                 jugador.getFila(),
                 jugador.getColumna(),
                 jugador.getMovimiento()));
@@ -303,12 +307,19 @@ public class Partida implements InterfazPartida {
         if (cuevaActual == null || !cuevaActual.esTransitable(fila, columna)) {
             return false;
         }
+        if (cuevaActual.getCelda(fila, columna).getTipo() == TipoCelda.TESORO) {
+            return false;
+        }
         if (hayEnemigoEn(cuevaActual, fila, columna)) {
             return false;
         }
 
-        CeldaEnMapa destino = crearVistaCelda(cuevaActual.getCelda(fila, columna));
-        if (!getCeldasAlcanzablesJugador().existeDato(destino)) {
+        Celda destino = cuevaActual.getCelda(fila, columna);
+        if (!getCeldasAlcanzablesJugadorSinTesoros(
+                cuevaActual,
+                jugador.getFila(),
+                jugador.getColumna(),
+                jugador.getMovimiento()).existeDato(destino)) {
             return false;
         }
 
@@ -401,7 +412,7 @@ public class Partida implements InterfazPartida {
 
     @Override
     public boolean equiparObjeto(String idObjeto) {
-        if (!puedeAceptarAccion() || accionRealizada || textoVacio(idObjeto)) {
+        if (!puedeAceptarAccion() || textoVacio(idObjeto)) {
             return false;
         }
 
@@ -414,7 +425,6 @@ public class Partida implements InterfazPartida {
         }
 
         if (equipado) {
-            accionRealizada = true;
             registrarLog("Objeto equipado: " + objeto.getNombre());
         }
         return equipado;
@@ -422,7 +432,7 @@ public class Partida implements InterfazPartida {
 
     @Override
     public boolean avanzarACueva(String idCuevaDestino) {
-        if (!puedeAceptarAccion() || accionRealizada || textoVacio(idCuevaDestino)) {
+        if (!puedeAceptarAccion() || textoVacio(idCuevaDestino)) {
             return false;
         }
         if (!jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
@@ -444,7 +454,7 @@ public class Partida implements InterfazPartida {
         boolean avanzado = mazmorra.avanzarACueva(destino);
         if (avanzado) {
             jugador.cambiarPosicion(celdaEntrada.getFila(), celdaEntrada.getColumna());
-            accionRealizada = true;
+            turnosRestantes = TURNOS_POR_CUEVA;
             registrarLog("Jugador avanza a la cueva " + destino.getId());
         }
         return avanzado;
@@ -580,6 +590,61 @@ public class Partida implements InterfazPartida {
             vistas.addLast(crearVistaCelda(celdas.get(indice)));
         }
         return vistas;
+    }
+
+    private ListaSE<Celda> getCeldasAlcanzablesJugadorSinTesoros(
+            Cueva cueva,
+            int filaInicio,
+            int columnaInicio,
+            int pasosMaximos) {
+
+        ListaSE<Celda> alcanzables = new ListaSE<>();
+        if (cueva == null || pasosMaximos < 0 || !cueva.esTransitable(filaInicio, columnaInicio)) {
+            return alcanzables;
+        }
+
+        Cola<PasoMovimiento> pendientes = new Cola<>();
+        ListaSE<Posicion> visitadas = new ListaSE<>();
+        Posicion inicio = new Posicion(filaInicio, columnaInicio);
+        pendientes.offer(new PasoMovimiento(inicio, 0));
+        visitadas.addLast(inicio);
+
+        while (!pendientes.isEmpty()) {
+            PasoMovimiento paso = pendientes.poll();
+            Posicion actual = paso.getPosicion();
+            alcanzables.addLast(cueva.getCelda(actual.getFila(), actual.getColumna()));
+
+            if (paso.getDistancia() < pasosMaximos) {
+                anadirVecinoMovimientoSiValido(cueva, actual.getFila() - 1, actual.getColumna(), paso.getDistancia() + 1, pendientes, visitadas);
+                anadirVecinoMovimientoSiValido(cueva, actual.getFila() + 1, actual.getColumna(), paso.getDistancia() + 1, pendientes, visitadas);
+                anadirVecinoMovimientoSiValido(cueva, actual.getFila(), actual.getColumna() - 1, paso.getDistancia() + 1, pendientes, visitadas);
+                anadirVecinoMovimientoSiValido(cueva, actual.getFila(), actual.getColumna() + 1, paso.getDistancia() + 1, pendientes, visitadas);
+            }
+        }
+
+        return alcanzables;
+    }
+
+    private void anadirVecinoMovimientoSiValido(
+            Cueva cueva,
+            int fila,
+            int columna,
+            int distancia,
+            Cola<PasoMovimiento> pendientes,
+            ListaSE<Posicion> visitadas) {
+
+        Posicion posicion = new Posicion(fila, columna);
+        if (esCeldaValidaParaMovimiento(cueva, fila, columna) && !visitadas.existeDato(posicion)) {
+            visitadas.addLast(posicion);
+            pendientes.offer(new PasoMovimiento(posicion, distancia));
+        }
+    }
+
+    private boolean esCeldaValidaParaMovimiento(Cueva cueva, int fila, int columna) {
+        if (!cueva.esTransitable(fila, columna)) {
+            return false;
+        }
+        return cueva.getCelda(fila, columna).getTipo() != TipoCelda.TESORO;
     }
 
     private CeldaEnMapa crearVistaCelda(Celda celda) {
@@ -963,6 +1028,29 @@ public class Partida implements InterfazPartida {
         return recogerObjeto(objeto.getObjeto().getId());
     }
 
+    @Override
+    public boolean abrirTesoro() {
+        if (!puedeAceptarAccion() || accionRealizada) {
+            return false;
+        }
+
+        Cueva cueva = getCuevaActualInterna();
+        Celda tesoro = buscarTesoroAbrible(cueva);
+        if (tesoro == null) {
+            return false;
+        }
+
+        cueva.cambiarTipoCelda(tesoro.getFila(), tesoro.getColumna(), TipoCelda.SUELO);
+        accionRealizada = true;
+        registrarLog("Cofre abierto");
+        return true;
+    }
+
+    @Override
+    public boolean hayTesoroCercano() {
+        return buscarTesoroAbrible(getCuevaActualInterna()) != null;
+    }
+
     public boolean terminarTurno() {
         return pasarTurno();
     }
@@ -1015,7 +1103,7 @@ public class Partida implements InterfazPartida {
     }
 
     public boolean puedeCambiarCueva() {
-        if (!puedeAceptarAccion() || accionRealizada || !jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
+        if (!puedeAceptarAccion() || !jugadorEstaSobreTipo(TipoCelda.PUERTA)) {
             return false;
         }
         Cueva actual = getCuevaActualInterna();
@@ -1118,6 +1206,35 @@ public class Partida implements InterfazPartida {
         return cueva.getCelda(jugador.getFila(), jugador.getColumna()).getTipo() == tipo;
     }
 
+    private Celda buscarTesoroAbrible(Cueva cueva) {
+        if (cueva == null) {
+            return null;
+        }
+        int fila = jugador.getFila();
+        int columna = jugador.getColumna();
+        if (esTesoroEn(cueva, fila, columna)) {
+            return cueva.getCelda(fila, columna);
+        }
+        if (esTesoroEn(cueva, fila - 1, columna)) {
+            return cueva.getCelda(fila - 1, columna);
+        }
+        if (esTesoroEn(cueva, fila + 1, columna)) {
+            return cueva.getCelda(fila + 1, columna);
+        }
+        if (esTesoroEn(cueva, fila, columna - 1)) {
+            return cueva.getCelda(fila, columna - 1);
+        }
+        if (esTesoroEn(cueva, fila, columna + 1)) {
+            return cueva.getCelda(fila, columna + 1);
+        }
+        return null;
+    }
+
+    private boolean esTesoroEn(Cueva cueva, int fila, int columna) {
+        return cueva.estaDentro(fila, columna)
+                && cueva.getCelda(fila, columna).getTipo() == TipoCelda.TESORO;
+    }
+
     private Cueva getSiguienteCuevaInterna() {
         Cueva actual = getCuevaActualInterna();
         if (actual == null) {
@@ -1191,6 +1308,24 @@ public class Partida implements InterfazPartida {
 
         private void agregarObjeto(ObjetoEnMapa objeto) {
             objetosEnSuelo.addLast(objeto);
+        }
+    }
+
+    private static class PasoMovimiento {
+        private final Posicion posicion;
+        private final int distancia;
+
+        private PasoMovimiento(Posicion posicion, int distancia) {
+            this.posicion = posicion;
+            this.distancia = distancia;
+        }
+
+        private Posicion getPosicion() {
+            return posicion;
+        }
+
+        private int getDistancia() {
+            return distancia;
         }
     }
 }

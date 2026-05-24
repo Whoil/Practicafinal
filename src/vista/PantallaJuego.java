@@ -302,18 +302,22 @@ public class PantallaJuego {
                     }
                 } else if (k == KeyCode.W || k == KeyCode.UP) {
                     if (partida.hayEnemigoEn(pf - 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esTesoro(partida.getCuevaActual().getCelda(pf - 1, pc))) { ok = false; msg = null; }
                     else if (esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorArriba(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.S || k == KeyCode.DOWN) {
                     if (partida.hayEnemigoEn(pf + 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esTesoro(partida.getCuevaActual().getCelda(pf + 1, pc))) { ok = false; msg = null; }
                     else if (esObstaculo(partida.getCuevaActual().getCelda(pf + 1, pc))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorAbajo(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.A || k == KeyCode.LEFT) {
                     if (partida.hayEnemigoEn(pf, pc - 1)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esTesoro(partida.getCuevaActual().getCelda(pf, pc - 1))) { ok = false; msg = null; }
                     else if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc - 1))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorIzquierda(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.D || k == KeyCode.RIGHT) {
                     if (partida.hayEnemigoEn(pf, pc + 1)) { ok = false; msg = "Hay un enemigo ahi"; }
+                    else if (esTesoro(partida.getCuevaActual().getCelda(pf, pc + 1))) { ok = false; msg = null; }
                     else if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ok = false; msg = "Hay una pared"; }
                     else { ok = partida.moverJugadorDerecha(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
                 } else if (k == KeyCode.SPACE) {
@@ -345,6 +349,9 @@ public class PantallaJuego {
                         msg = null;
                     } else {
                         ok = partida.recogerObjeto();
+                        if (!ok && partida.hayTesoroCercano()) {
+                            ok = partida.abrirTesoro();
+                        }
                         if (ok) ReproductorSfx.getInstancia().reproducirRecoger();
                         if (!ok) msg = "No hay objeto que recoger aqui";
                     }
@@ -415,7 +422,7 @@ public class PantallaJuego {
             "A / Flecha izq.    - Mover izquierda\n" +
             "D / Flecha der.    - Mover derecha\n" +
             "ESPACIO            - Atacar enemigo adyacente\n" +
-            "R                  - Recoger objeto\n" +
+            "R                  - Recoger objeto / abrir cofre\n" +
             "T                  - Terminar turno\n" +
             "H                  - Mostrar / ocultar esta ayuda\n\n" +
             "Click en celda     - Moverse a esa celda\n" +
@@ -566,6 +573,8 @@ public class PantallaJuego {
                                     clickMsg = "No puedes atacar ahora";
                                 }
                             }
+                        } else if (esTesoro(cueva.getCelda(ff, cc))) {
+                            ok = false;
                         } else if (esObstaculo(cueva.getCelda(ff, cc))) {
                             ok = false;
                             clickMsg = "Hay una pared";
@@ -774,6 +783,7 @@ public class PantallaJuego {
         btnArriba = crearBotonTexto("ARRIBA [W]");
         btnArriba.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esTesoro(partida.getCuevaActual().getCelda(pf - 1, pc))) { ejecutarAccion(false, null); return; }
             if (esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ejecutarAccion(false, "Hay una pared"); return; }
             ejecutarAccion(partida.moverJugadorArriba(), "No puedes moverte mas este turno");
         });
@@ -783,12 +793,14 @@ public class PantallaJuego {
         btnIzq = crearBotonTexto("< IZQ [A]");
         btnIzq.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esTesoro(partida.getCuevaActual().getCelda(pf, pc - 1))) { ejecutarAccion(false, null); return; }
             if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc - 1))) { ejecutarAccion(false, "Hay una pared"); return; }
             ejecutarAccion(partida.moverJugadorIzquierda(), "No puedes moverte mas este turno");
         });
         btnDer = crearBotonTexto("DER [D] >");
         btnDer.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esTesoro(partida.getCuevaActual().getCelda(pf, pc + 1))) { ejecutarAccion(false, null); return; }
             if (esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ejecutarAccion(false, "Hay una pared"); return; }
             ejecutarAccion(partida.moverJugadorDerecha(), "No puedes moverte mas este turno");
         });
@@ -797,6 +809,7 @@ public class PantallaJuego {
         btnAbajo = crearBotonTexto("ABAJO [S]");
         btnAbajo.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
+            if (esTesoro(partida.getCuevaActual().getCelda(pf + 1, pc))) { ejecutarAccion(false, null); return; }
             if (esObstaculo(partida.getCuevaActual().getCelda(pf + 1, pc))) { ejecutarAccion(false, "Hay una pared"); return; }
             ejecutarAccion(partida.moverJugadorAbajo(), "No puedes moverte mas este turno");
         });
@@ -817,12 +830,15 @@ public class PantallaJuego {
 
         Text btnRecoger = crearBotonTexto(partida.isAccionRealizada()
                 ? "RECOGER OBJETO [ACCION USADA]"
-                : "RECOGER OBJETO [R]");
+                : partida.hayTesoroCercano() ? "ABRIR COFRE [R]" : "RECOGER OBJETO [R]");
         btnRecoger.setOnMouseClicked(e -> {
             if (partida.isAccionRealizada()) {
                 return;
             }
             boolean ok = partida.recogerObjeto();
+            if (!ok && partida.hayTesoroCercano()) {
+                ok = partida.abrirTesoro();
+            }
             if (ok) ReproductorSfx.getInstancia().reproducirRecoger();
             ejecutarAccion(ok, "No hay objeto que recoger aqui");
         });
@@ -1095,8 +1111,12 @@ public class PantallaJuego {
         return t == TipoCelda.MURO || t == TipoCelda.ROCA || t == TipoCelda.ARBUSTO;
     }
 
+    private boolean esTesoro(CeldaEnMapa celda) {
+        return celda != null && celda.getTipo() == TipoCelda.TESORO;
+    }
+
     private void ejecutarAccion(boolean ok, String mensajeError) {
-        if (!ok) {
+        if (!ok && mensajeError != null) {
             mostrarFeedback(mensajeError, Color.rgb(255, 120, 100));
         }
         actualizar();
@@ -1405,8 +1425,11 @@ public class PantallaJuego {
      * Devuelve la ruta del asset (relativa a ASSETS_BASE) para un tipo de objeto.
      */
     private Node crearIconoObjeto(Objeto obj, double tamanio) {
+        if (obj instanceof modelo.objetos.Pocion) {
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "pocion.png", tamanio, false);
+        }
         if (obj instanceof modelo.objetos.Escudo) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "escudo.png", tamanio);
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "escudo.png", tamanio, false);
         }
         ImageView icono = crearSpriteAssets(assetParaObjeto(obj), tamanio);
         icono.setSmooth(false);
@@ -1415,21 +1438,19 @@ public class PantallaJuego {
 
     private Node crearIconoCeldaEspecial(TipoCelda tipo, double tamanio) {
         if (tipo == TipoCelda.PUERTA) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "puerta.png", tamanio * 1.05);
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "puerta.png", tamanio * 1.05, false);
         }
         if (tipo == TipoCelda.SALIDA) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "salida.png", tamanio * 1.2);
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "salida.png", tamanio * 1.2, false);
         }
         if (tipo == TipoCelda.TESORO) {
-            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "tesoro.png", tamanio);
+            return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "tesoro.png", tamanio, false);
         }
         return null;
     }
 
     private String assetParaObjeto(Objeto obj) {
-        if (obj instanceof modelo.objetos.Pocion) return "objects" + File.separator + "chest1.png";
         if (obj instanceof modelo.objetos.Llave) return "objects" + File.separator + "key.png";
-        if (obj instanceof modelo.objetos.Escudo) return "objects" + File.separator + "chest2.png";
         if (obj instanceof modelo.objetos.Arco) return "weapons" + File.separator + "bow1.png";
         if (obj instanceof modelo.objetos.Arma) return "weapons" + File.separator + "sword1.png";
         return "objects" + File.separator + "chest4.png";
@@ -1457,6 +1478,10 @@ public class PantallaJuego {
     }
 
     private ImageView crearSpriteArchivo(String fullPath, double tamanio) {
+        return crearSpriteArchivo(fullPath, tamanio, true);
+    }
+
+    private ImageView crearSpriteArchivo(String fullPath, double tamanio, boolean recortarSpritesheet) {
         Image img = buscarEnCache(fullPath);
         if (img == null) {
             try {
@@ -1472,8 +1497,8 @@ public class PantallaJuego {
         double imgW = img.getWidth();
         double imgH = img.getHeight();
 
-        // Spritesheets de personajes tienen altura > 18px; objetos individuales son mas pequenos
-        if (imgH > 18) {
+        // Los assets del pack pueden ser spritesheets; los PNG locales ya son iconos finales.
+        if (recortarSpritesheet && imgH > 18) {
             int numFrames = (imgW > imgH * 2.5) ? 4 : 2;
             double frameW = imgW / numFrames;
             iv.setViewport(new Rectangle2D(0, 0, frameW, imgH));
@@ -1637,7 +1662,7 @@ public class PantallaJuego {
             case SUELO:  return Color.rgb(160, 130, 90);
             case INICIO: return Color.rgb(60, 160, 60);
             case PUERTA: return Color.rgb(200, 170, 40);
-            case TESORO: return Color.rgb(140, 60, 180);
+            case TESORO: return Color.rgb(150, 118, 78);
             case SALIDA: return Color.rgb(200, 50, 50);
             case TRAMPA: return Color.rgb(220, 120, 40);
             case ROCA:   return Color.rgb(100, 100, 110);
