@@ -374,3 +374,20 @@ narrativo, fondo CSS, color de muro y emojis de enemigos/boss.
 Motivo:
 - Evita duplicar configuracion visual entre PantallaJuego, PantallaTransicion y PantallaFinal.
 - Facilita anadir nuevas cuevas o cambiar la tematica sin modificar varias clases.
+
+## D-25 Modificacion de Partida.java desde rama de Parte A
+
+Decision:
+
+```text
+El 2026-05-24, el humano autorizo explicitamente a Alvaro (Parte A) para modificar
+Partida.java (archivo compartido) desde la rama feature/a-estructuras, como parte
+de las tareas de Parte C (animaciones, sonidos, iconos y flujo de juego).
+El cambio concreto fue anadir jugador.quitarObjeto(llave) en avanzarACueva()
+para consumir la llave al abrir la puerta (commit 2633a5f).
+```
+
+Motivo:
+- Alvaro tenia la sesion abierta y las tareas de Parte C requerian cambios en Partida.java.
+- Obtener aprobacion del responsable de Parte B (Guille) no era viable en ese momento.
+- Se acordo como excepcion documentada, no como precedente para futuras modificaciones sin permiso.

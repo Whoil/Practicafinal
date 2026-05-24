@@ -673,7 +673,9 @@ public class PantallaJuego {
             java.io.FileWriter fw = new java.io.FileWriter("crash_detail.log", true);
             fw.write(java.time.LocalDateTime.now() + " " + msg + "\n");
             fw.close();
-        } catch (Exception ignored) {}
+        } catch (Exception e2) {
+            System.err.println("[logError] No se pudo escribir en crash_detail.log: " + e2.getMessage());
+        }
     }
 
     private void actualizar() {
