@@ -170,7 +170,8 @@ public class SerializadorPartida {
                 enemigo.getMovimiento(),
                 enemigo.getFila(),
                 enemigo.getColumna(),
-                enemigo.estaVivo());
+                enemigo.estaVivo(),
+                enemigo.getTurnosCongelado());
     }
 
     public static DatosObjetoDTO objetoADTO(Objeto objeto, int fila, int columna) {
@@ -344,6 +345,7 @@ public class SerializadorPartida {
         } else if (diferenciaVida > 0) {
             enemigo.curar(diferenciaVida);
         }
+        enemigo.congelar(dto.getTurnosCongelado());
 
         return enemigo;
     }

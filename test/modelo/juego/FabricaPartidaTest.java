@@ -24,7 +24,7 @@ class FabricaPartidaTest {
         assertEquals("cueva_facil", partida.getCuevaActual().getId());
         assertEquals(2, partida.getJugadorEnMapa().getFila());
         assertEquals(2, partida.getJugadorEnMapa().getColumna());
-        assertEquals(2, partida.getEnemigos().getSize());
+        assertEquals(3, partida.getEnemigos().getSize());
         assertEquals(3, partida.getObjetosEnSuelo().getSize());
     }
 

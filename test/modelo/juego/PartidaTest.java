@@ -12,6 +12,7 @@ import Estructuras.MiIterador;
 import modelo.mapa.Cueva;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Arco;
+import modelo.objetos.Escudo;
 import modelo.objetos.Espada;
 import modelo.objetos.Llave;
 import modelo.objetos.Objeto;
@@ -1002,6 +1003,162 @@ class PartidaTest {
         assertFalse(resultado.hayImpacto());
         assertEquals(0, partida.getEstadisticas().getDanoEjercido());
         assertEquals(0, partida.getEstadisticas().getEnemigosMuertos());
+    }
+
+    @Test
+    void abrirTesoroFacilAnadePocionAlInventario() {
+        Cueva cueva = new Cueva("cueva_facil", 3, 3);
+        cueva.cambiarTipoCelda(1, 1, TipoCelda.TESORO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.abrirTesoro());
+
+        assertEquals(TipoCelda.SUELO, partida.getCuevaActual().getCelda(1, 1).getTipo());
+        assertEquals(1, jugador.getCantidadObjetosInventario());
+        assertInstanceOf(Pocion.class, jugador.getInventario().get(0));
+        assertFalse(partida.abrirTesoro());
+    }
+
+    @Test
+    void abrirTesoroMedioAnadeEscudoYTesoroDificilAnadeEspada() {
+        Cueva cuevaMedia = new Cueva("cueva_media", 3, 3);
+        cuevaMedia.cambiarTipoCelda(1, 1, TipoCelda.TESORO);
+        Jugador jugadorMedia = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partidaMedia = new Partida(mazmorraCon(cuevaMedia), jugadorMedia, 10);
+
+        assertTrue(partidaMedia.abrirTesoro());
+        assertInstanceOf(Escudo.class, jugadorMedia.getInventario().get(0));
+
+        Cueva cuevaDificil = new Cueva("cueva_dificil", 3, 3);
+        cuevaDificil.cambiarTipoCelda(1, 1, TipoCelda.TESORO);
+        Jugador jugadorDificil = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partidaDificil = new Partida(mazmorraCon(cuevaDificil), jugadorDificil, 10);
+
+        assertTrue(partidaDificil.abrirTesoro());
+        assertInstanceOf(Espada.class, jugadorDificil.getInventario().get(0));
+    }
+
+    @Test
+    void registrarDisparoBolaHieloConsumeAccionPeroNoMovimiento() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+
+        assertTrue(partida.puedeDispararBolaHielo());
+        assertTrue(partida.registrarDisparoBolaHielo());
+        assertTrue(partida.isAccionRealizada());
+        assertFalse(partida.isMovimientoRealizado());
+        assertFalse(partida.registrarDisparoBolaHielo());
+        assertTrue(partida.moverJugador(1, 2));
+    }
+
+    @Test
+    void impactarBolaHieloCongelaTresTurnosSinDano() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 0, 1, 1, 2);
+
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        ResultadoImpactoBolaHielo resultado = partida.impactarBolaHielo(1, 2);
+
+        assertTrue(resultado.hayImpacto());
+        assertEquals(3, resultado.getTurnosCongelado());
+        assertEquals(30, enemigo.getVidaActual());
+        assertEquals(0, partida.getEstadisticas().getDanoEjercido());
+    }
+
+    @Test
+    void enemigoCongeladoPierdeTresTurnosYLuegoActua() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 0, 1, 1, 2);
+        assertTrue(partida.anadirEnemigo(cueva, enemigo));
+        assertTrue(partida.impactarBolaHielo(1, 2).hayImpacto());
+
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.pasarTurno());
+        assertEquals(100, jugador.getVidaActual());
+        assertEquals(0, enemigo.getTurnosCongelado());
+
+        assertTrue(partida.pasarTurno());
+        assertEquals(92, jugador.getVidaActual());
+    }
+
+    @Test
+    void guardarYCargarPreservaCongelacion(@TempDir Path tempDir) throws Exception {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 1, 1);
+        Partida original = new Partida(mazmorra, jugador, 10);
+        Enemigo enemigo = new Enemigo("Esqueleto", TipoEnemigo.ESQUELETO, 30, 8, 0, 1, 1, 2);
+        assertTrue(original.anadirEnemigo(cueva, enemigo));
+        assertTrue(original.impactarBolaHielo(1, 2).hayImpacto());
+
+        String ruta = tempDir.resolve("hielo.json").toString();
+        original.guardar(ruta);
+
+        Partida cargada = Partida.cargarPartida(ruta);
+        assertEquals(3, cargada.getEnemigosActuales().get(0).getTurnosCongelado());
+    }
+
+    @Test
+    void arqueroDisparaEnLineaRectaConProyectilPendiente() {
+        Cueva cueva = new Cueva("c1", 3, 7);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo arquero = new Enemigo("Arquero", TipoEnemigo.ARQUERO, 18, 6, 1, 1, 1, 5);
+        assertTrue(partida.anadirEnemigo(cueva, arquero));
+
+        assertTrue(partida.pasarTurno());
+
+        assertEquals(94, jugador.getVidaActual());
+        ListaSE<DisparoEnemigo> disparos = partida.consumirDisparosEnemigosPendientes();
+        assertEquals(1, disparos.getSize());
+        assertEquals(1, disparos.get(0).getFilaOrigen());
+        assertEquals(5, disparos.get(0).getColumnaOrigen());
+    }
+
+    @Test
+    void arqueroNoDisparaSiUnMuroBloqueaLaLinea() {
+        Cueva cueva = new Cueva("c1", 3, 7);
+        cueva.cambiarTipoCelda(1, 3, TipoCelda.MURO);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo arquero = new Enemigo("Arquero", TipoEnemigo.ARQUERO, 18, 6, 1, 1, 1, 5);
+        assertTrue(partida.anadirEnemigo(cueva, arquero));
+
+        assertTrue(partida.pasarTurno());
+
+        assertEquals(100, jugador.getVidaActual());
+        assertEquals(0, partida.consumirDisparosEnemigosPendientes().getSize());
+    }
+
+    @Test
+    void arqueroCongeladoNoDisparaNiSeMueve() {
+        Cueva cueva = new Cueva("c1", 3, 7);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo arquero = new Enemigo("Arquero", TipoEnemigo.ARQUERO, 18, 6, 1, 1, 1, 5);
+        assertTrue(partida.anadirEnemigo(cueva, arquero));
+        assertTrue(partida.impactarBolaHielo(1, 5).hayImpacto());
+
+        assertTrue(partida.pasarTurno());
+
+        assertEquals(100, jugador.getVidaActual());
+        assertEquals(1, arquero.getFila());
+        assertEquals(5, arquero.getColumna());
+        assertEquals(0, partida.consumirDisparosEnemigosPendientes().getSize());
     }
 
     private Mazmorra mazmorraCon(Cueva cueva) {

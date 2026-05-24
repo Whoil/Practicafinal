@@ -42,10 +42,12 @@ import Estructuras.ListaSE;
 import Estructuras.MiIterador;
 import modelo.juego.CeldaEnMapa;
 import modelo.juego.CuevaEnMapa;
+import modelo.juego.DisparoEnemigo;
 import modelo.juego.ObjetoEnMapa;
 import modelo.juego.Partida;
 import modelo.juego.PersonajeEnMapa;
 import modelo.juego.ResultadoImpactoBolaFuego;
+import modelo.juego.ResultadoImpactoBolaHielo;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Arma;
 import modelo.objetos.Escudo;
@@ -53,6 +55,7 @@ import modelo.objetos.Objeto;
 import modelo.objetos.Pocion;
 import modelo.personajes.Enemigo;
 import modelo.personajes.Jugador;
+import modelo.personajes.TipoEnemigo;
 
 /**
  * PantallaJuego — Interfaz grafica de la partida.
@@ -140,8 +143,14 @@ public class PantallaJuego {
 
     private static final int DANO_BOLA_FUEGO = 10;
     private static final int RANGO_BOLA_FUEGO = 5;
-    private boolean modoBolaFuegoPendiente = false;
-    private Timeline modoBolaFuegoTimer;
+    private HechizoPendiente hechizoPendiente = HechizoPendiente.NINGUNO;
+    private Timeline hechizoPendienteTimer;
+
+    private enum HechizoPendiente {
+        NINGUNO,
+        FUEGO,
+        HIELO
+    }
 
     /**
      * Entrada del cache de imagenes usando ListaDE propia.
@@ -305,21 +314,28 @@ public class PantallaJuego {
                 boolean ok = true;
                 boolean movio = false;
                 String msg = null;
+                ListaSE<DisparoEnemigo> disparosEnemigosTurno = null;
                 Jugador jug = partida.getJugador();
                 int pf = jug.getFila(), pc = jug.getColumna();
                 if (k == KeyCode.F) {
-                    activarModoBolaFuego();
+                    activarModoHechizo(HechizoPendiente.FUEGO);
                     e.consume();
                     return;
                 }
-                if (esFlechaDireccion(k) && modoBolaFuegoPendiente) {
-                    if (dispararBolaFuego(deltaFila(k), deltaColumna(k))) {
+                if (k == KeyCode.C) {
+                    activarModoHechizo(HechizoPendiente.HIELO);
+                    e.consume();
+                    return;
+                }
+                if (esFlechaDireccion(k) && hechizoPendiente != HechizoPendiente.NINGUNO) {
+                    HechizoPendiente hechizo = hechizoPendiente;
+                    if (dispararHechizo(hechizo, deltaFila(k), deltaColumna(k))) {
                         msg = null;
                     } else {
                         ok = false;
-                        msg = "No puedes lanzar Bola de Fuego ahora";
+                        msg = "No puedes lanzar el hechizo ahora";
                     }
-                    desactivarModoBolaFuego();
+                    desactivarModoHechizo();
                 } else if (e.isShiftDown() && esTeclaDireccion(k)) {
                     int df = deltaFila(k);
                     int dc = deltaColumna(k);
@@ -397,6 +413,7 @@ public class PantallaJuego {
                     int hpAntes = partida.getJugador().getVidaActual();
                     ok = partida.terminarTurno();
                     if (ok) {
+                        disparosEnemigosTurno = partida.consumirDisparosEnemigosPendientes();
                         if (partida.getJugador().getVidaActual() < hpAntes) {
                             Jugador j2 = partida.getJugador();
                             ReproductorSfx.getInstancia().reproducirDano();
@@ -408,6 +425,9 @@ public class PantallaJuego {
                     }
                 }
                 actualizar();
+                if (disparosEnemigosTurno != null) {
+                    animarDisparosEnemigos(disparosEnemigosTurno);
+                }
 
                 // Auto-avance en PUERTA con llave: si el movimiento
                 // acabo de poner al jugador sobre una puerta con la
@@ -453,8 +473,8 @@ public class PantallaJuego {
         });
 
         scene.setOnKeyReleased(e -> {
-            if (e.getCode() == KeyCode.F) {
-                desactivarModoBolaFuego();
+            if (e.getCode() == KeyCode.F || e.getCode() == KeyCode.C) {
+                desactivarModoHechizo();
             }
         });
 
@@ -480,6 +500,7 @@ public class PantallaJuego {
             "D / Flecha der.    - Mover derecha\n" +
             "ESPACIO            - Atacar enemigo adyacente\n" +
             "F + Flecha         - Bola de Fuego\n" +
+            "C + Flecha         - Bola de Hielo\n" +
             "R                  - Recoger objeto / abrir cofre\n" +
             "T                  - Terminar turno\n" +
             "H                  - Mostrar / ocultar esta ayuda\n\n" +
@@ -779,13 +800,18 @@ public class PantallaJuego {
         while (itE.hasNext()) {
             Enemigo e = itE.next();
             boolean esBoss = e instanceof modelo.personajes.Boss;
-            String asset = esBoss ? tema.getAssetBoss() : tema.getAssetEnemigo();
+            String asset = getEnemyAssetPath(e);
             ImageView enemyIcon = crearSpriteAssets(asset, spriteSize);
             if (esBoss) {
                 DropShadow sombraBoss = new DropShadow();
                 sombraBoss.setRadius(10);
                 sombraBoss.setColor(Color.rgb(200, 50, 50, 0.5));
                 enemyIcon.setEffect(sombraBoss);
+            } else if (e.getTipoEnemigo() == TipoEnemigo.ARQUERO) {
+                DropShadow sombraArquero = new DropShadow();
+                sombraArquero.setRadius(8);
+                sombraArquero.setColor(Color.rgb(80, 220, 140, 0.65));
+                enemyIcon.setEffect(sombraArquero);
             }
             if (e.getFila() >= 0 && e.getFila() < filas && e.getColumna() >= 0 && e.getColumna() < cols) {
                 celdas[e.getFila()][e.getColumna()].getChildren().add(enemyIcon);
@@ -1503,6 +1529,7 @@ public class PantallaJuego {
                 case "ENEMIGO": txt.setFill(Color.web("#EF5350")); break;
                 case "OBJETO":  txt.setFill(Color.web("#FFD700")); break;
                 case "FUEGO":   txt.setFill(Color.web("#FF9800")); break;
+                case "HIELO":   txt.setFill(Color.web("#66D9EF")); break;
                 default:        txt.setFill(Color.web("#CCCCCC")); break;
             }
             linea.getChildren().add(txt);
@@ -1519,7 +1546,11 @@ public class PantallaJuego {
         if (m.contains("bola de fuego")) {
             return "FUEGO";
         }
-        if (m.contains("ataca al jugador") || m.contains("se acerca al jugador")) {
+        if (m.contains("bola de hielo") || m.contains("congelado") || m.contains("congela")) {
+            return "HIELO";
+        }
+        if (m.contains("ataca al jugador") || m.contains("se acerca al jugador")
+                || m.contains("dispara al jugador")) {
             return "ENEMIGO";
         }
         if (m.contains("ataca a ") || m.contains("inflige") || m.contains("derrotado")) {
@@ -1657,24 +1688,34 @@ public class PantallaJuego {
         return k == KeyCode.UP || k == KeyCode.DOWN || k == KeyCode.LEFT || k == KeyCode.RIGHT;
     }
 
-    private void activarModoBolaFuego() {
-        modoBolaFuegoPendiente = true;
-        if (modoBolaFuegoTimer != null) {
-            modoBolaFuegoTimer.stop();
+    private void activarModoHechizo(HechizoPendiente hechizo) {
+        hechizoPendiente = hechizo;
+        if (hechizoPendienteTimer != null) {
+            hechizoPendienteTimer.stop();
         }
-        modoBolaFuegoTimer = new Timeline(new KeyFrame(Duration.millis(450), e -> {
-            modoBolaFuegoPendiente = false;
+        hechizoPendienteTimer = new Timeline(new KeyFrame(Duration.millis(450), e -> {
+            hechizoPendiente = HechizoPendiente.NINGUNO;
         }));
-        modoBolaFuegoTimer.setCycleCount(1);
-        modoBolaFuegoTimer.play();
+        hechizoPendienteTimer.setCycleCount(1);
+        hechizoPendienteTimer.play();
     }
 
-    private void desactivarModoBolaFuego() {
-        modoBolaFuegoPendiente = false;
-        if (modoBolaFuegoTimer != null) {
-            modoBolaFuegoTimer.stop();
-            modoBolaFuegoTimer = null;
+    private void desactivarModoHechizo() {
+        hechizoPendiente = HechizoPendiente.NINGUNO;
+        if (hechizoPendienteTimer != null) {
+            hechizoPendienteTimer.stop();
+            hechizoPendienteTimer = null;
         }
+    }
+
+    private boolean dispararHechizo(HechizoPendiente hechizo, int df, int dc) {
+        if (hechizo == HechizoPendiente.FUEGO) {
+            return dispararBolaFuego(df, dc);
+        }
+        if (hechizo == HechizoPendiente.HIELO) {
+            return dispararBolaHielo(df, dc);
+        }
+        return false;
     }
 
     private boolean dispararBolaFuego(int df, int dc) {
@@ -1687,6 +1728,21 @@ public class PantallaJuego {
         Jugador jugador = partida.getJugador();
         ReproductorSfx.getInstancia().reproducirDisparoBolaFuego();
         new BolaDeFuego(jugador.getFila(), jugador.getColumna(), df, dc,
+                partida.getCuevaActual().getId()).iniciar();
+        actualizar();
+        return true;
+    }
+
+    private boolean dispararBolaHielo(int df, int dc) {
+        if (df == 0 && dc == 0 || animOverlay == null || cumX == null) {
+            return false;
+        }
+        if (!partida.registrarDisparoBolaHielo()) {
+            return false;
+        }
+        Jugador jugador = partida.getJugador();
+        ReproductorSfx.getInstancia().reproducirDisparoBolaFuego();
+        new BolaDeHielo(jugador.getFila(), jugador.getColumna(), df, dc,
                 partida.getCuevaActual().getId()).iniciar();
         actualizar();
         return true;
@@ -1730,6 +1786,23 @@ public class PantallaJuego {
         Circle nucleo = new Circle(radio);
         nucleo.setFill(Color.rgb(255, 95, 15, 0.95));
         nucleo.setStroke(Color.rgb(255, 238, 120));
+        nucleo.setStrokeWidth(2);
+
+        StackPane bola = new StackPane(halo, nucleo);
+        bola.setPrefSize(radio * 3, radio * 3);
+        return bola;
+    }
+
+    private Node crearNodoBolaHielo(double tamanio) {
+        double radio = Math.max(5, tamanio * 0.22);
+        Circle halo = new Circle(radio * 1.55);
+        halo.setFill(Color.rgb(110, 210, 255, 0.26));
+        halo.setStroke(Color.rgb(190, 245, 255, 0.85));
+        halo.setStrokeWidth(1.5);
+
+        Circle nucleo = new Circle(radio);
+        nucleo.setFill(Color.rgb(120, 220, 255, 0.94));
+        nucleo.setStroke(Color.WHITE);
         nucleo.setStrokeWidth(2);
 
         StackPane bola = new StackPane(halo, nucleo);
@@ -1965,6 +2038,61 @@ public class PantallaJuego {
         scale.play();
     }
 
+    private void animarDisparosEnemigos(ListaSE<DisparoEnemigo> disparos) {
+        if (disparos == null) {
+            return;
+        }
+        for (int i = 0; i < disparos.getSize(); i++) {
+            animarDisparoEnemigo(disparos.get(i));
+        }
+    }
+
+    private void animarDisparoEnemigo(DisparoEnemigo disparo) {
+        if (disparo == null || animOverlay == null || cumX == null) {
+            return;
+        }
+        int fo = disparo.getFilaOrigen();
+        int co = disparo.getColumnaOrigen();
+        int fd = disparo.getFilaDestino();
+        int cd = disparo.getColumnaDestino();
+        if (fo < 0 || co < 0 || fd < 0 || cd < 0
+                || fo >= rowHeight.length || fd >= rowHeight.length
+                || co >= colWidth.length || cd >= colWidth.length) {
+            return;
+        }
+
+        double startX = cumX[co] + colWidth[co] / 2.0;
+        double startY = cumY[fo] + rowHeight[fo] / 2.0;
+        double endX = cumX[cd] + colWidth[cd] / 2.0;
+        double endY = cumY[fd] + rowHeight[fd] / 2.0;
+
+        Circle proyectil = new Circle(startX, startY, Math.max(4, spriteSizeCache * 0.12));
+        proyectil.setFill(Color.rgb(170, 255, 135, 0.95));
+        proyectil.setStroke(Color.rgb(235, 255, 190));
+        proyectil.setStrokeWidth(1.5);
+        proyectil.setMouseTransparent(true);
+        animOverlay.getChildren().add(proyectil);
+
+        Timeline tl = new Timeline(
+                new KeyFrame(Duration.millis(0), e -> {
+                    proyectil.setCenterX(startX);
+                    proyectil.setCenterY(startY);
+                    proyectil.setOpacity(1.0);
+                }),
+                new KeyFrame(Duration.millis(180), e -> {
+                    proyectil.setCenterX(endX);
+                    proyectil.setCenterY(endY);
+                    proyectil.setOpacity(0.75);
+                }),
+                new KeyFrame(Duration.millis(260), e -> {
+                    proyectil.setOpacity(0.0);
+                    animOverlay.getChildren().remove(proyectil);
+                })
+        );
+        tl.setCycleCount(1);
+        tl.play();
+    }
+
     private class BolaDeFuego {
         private int fila;
         private int columna;
@@ -2071,6 +2199,104 @@ public class PantallaJuego {
         }
     }
 
+    private class BolaDeHielo {
+        private int fila;
+        private int columna;
+        private final int df;
+        private final int dc;
+        private final String cuevaId;
+        private int distanciaRecorrida;
+        private final Node nodo;
+        private final Timeline timeline;
+
+        BolaDeHielo(int filaInicial, int columnaInicial, int df, int dc, String cuevaId) {
+            this.fila = filaInicial;
+            this.columna = columnaInicial;
+            this.df = df;
+            this.dc = dc;
+            this.cuevaId = cuevaId;
+            this.distanciaRecorrida = 0;
+            double tamanio = Math.min(colWidth[columnaInicial], rowHeight[filaInicial]) * 0.48;
+            this.nodo = crearNodoBolaHielo(tamanio);
+            this.nodo.setMouseTransparent(true);
+            this.timeline = new Timeline(new KeyFrame(Duration.millis(120), e -> avanzar()));
+            this.timeline.setCycleCount(Timeline.INDEFINITE);
+        }
+
+        void iniciar() {
+            posicionarNodo();
+            animOverlay.getChildren().add(nodo);
+            timeline.play();
+        }
+
+        private void avanzar() {
+            CuevaEnMapa cueva = partida.getCuevaActual();
+            if (cueva == null || !cuevaId.equals(cueva.getId())) {
+                destruir(false);
+                return;
+            }
+            if (distanciaRecorrida >= RANGO_BOLA_FUEGO) {
+                destruir(false);
+                return;
+            }
+
+            int siguienteFila = fila + df;
+            int siguienteColumna = columna + dc;
+
+            if (esBloqueanteBolaFuego(cueva, siguienteFila, siguienteColumna)) {
+                destruir(true);
+                return;
+            }
+
+            fila = siguienteFila;
+            columna = siguienteColumna;
+            distanciaRecorrida++;
+            posicionarNodo();
+
+            Enemigo objetivo = buscarEnemigoActual(fila, columna);
+            if (objetivo != null) {
+                ResultadoImpactoBolaHielo resultado = partida.impactarBolaHielo(fila, columna);
+                destruir(true);
+                actualizar();
+                if (resultado.hayImpacto() && partida.getEstado() == modelo.juego.EstadoPartida.EN_CURSO) {
+                    agregarFlashCelda(fila, columna, celdas.length, celdas[0].length, spriteSizeCache,
+                            Color.rgb(80, 220, 255, 0.28), Color.rgb(185, 245, 255, 0.95));
+                }
+            }
+        }
+
+        private void posicionarNodo() {
+            if (fila < 0 || columna < 0 || fila >= rowHeight.length || columna >= colWidth.length) {
+                return;
+            }
+            double ancho = nodo.getBoundsInLocal().getWidth();
+            double alto = nodo.getBoundsInLocal().getHeight();
+            if (nodo instanceof StackPane) {
+                StackPane stack = (StackPane) nodo;
+                ancho = stack.getPrefWidth();
+                alto = stack.getPrefHeight();
+            }
+            if (ancho <= 0) {
+                ancho = colWidth[columna] * 0.48;
+            }
+            if (alto <= 0) {
+                alto = rowHeight[fila] * 0.48;
+            }
+            double x = cumX[columna] + (colWidth[columna] - ancho) / 2.0;
+            double y = cumY[fila] + (rowHeight[fila] - alto) / 2.0;
+            nodo.setLayoutX(x);
+            nodo.setLayoutY(y);
+        }
+
+        private void destruir(boolean conImpacto) {
+            timeline.stop();
+            animOverlay.getChildren().remove(nodo);
+            if (conImpacto) {
+                ReproductorSfx.getInstancia().reproducirImpactoBolaFuego();
+            }
+        }
+    }
+
     /**
      * Devuelve la ruta del asset sprite para un enemigo, segun
      * si es boss o no y la tematica de la cueva actual.
@@ -2078,7 +2304,13 @@ public class PantallaJuego {
     private String getEnemyAssetPath(Enemigo e) {
         boolean esBoss = e instanceof modelo.personajes.Boss;
         DatosTemaCueva tema = DatosTemaCueva.paraCuevaId(partida.getCuevaActual().getId());
-        return esBoss ? tema.getAssetBoss() : tema.getAssetEnemigo();
+        if (esBoss) {
+            return tema.getAssetBoss();
+        }
+        if (e != null && e.getTipoEnemigo() == TipoEnemigo.ARQUERO) {
+            return "characters" + File.separator + "Spritesheets" + File.separator + "shaman2_idle.png";
+        }
+        return tema.getAssetEnemigo();
     }
 
     private void agregarBarraVida(StackPane cell, int vidaActual, int vidaMaxima, double cellSize) {

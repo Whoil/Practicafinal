@@ -9,6 +9,7 @@ package modelo.personajes;
  */
 public class Enemigo extends Personaje {
     private final TipoEnemigo tipoEnemigo;
+    private int turnosCongelado;
 
     public Enemigo(String nombre, TipoEnemigo tipoEnemigo, int vidaMaxima, int ataqueBase,
                    int defensaBase, int movimiento, int fila, int columna) {
@@ -17,9 +18,31 @@ public class Enemigo extends Personaje {
             throw new IllegalArgumentException("El tipo de enemigo es obligatorio");
         }
         this.tipoEnemigo = tipoEnemigo;
+        this.turnosCongelado = 0;
     }
 
     public TipoEnemigo getTipoEnemigo() {
         return tipoEnemigo;
+    }
+
+    public int getTurnosCongelado() {
+        return turnosCongelado;
+    }
+
+    public boolean estaCongelado() {
+        return turnosCongelado > 0;
+    }
+
+    public void congelar(int turnos) {
+        if (turnos < 0) {
+            throw new IllegalArgumentException("Los turnos de congelacion no pueden ser negativos");
+        }
+        turnosCongelado = turnos;
+    }
+
+    public void consumirTurnoCongelado() {
+        if (turnosCongelado > 0) {
+            turnosCongelado--;
+        }
     }
 }

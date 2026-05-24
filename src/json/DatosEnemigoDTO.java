@@ -18,6 +18,7 @@ public class DatosEnemigoDTO {
     private int fila;
     private int columna;
     private boolean vivo;
+    private int turnosCongelado;
 
     public DatosEnemigoDTO() {
     }
@@ -27,6 +28,15 @@ public class DatosEnemigoDTO {
                            int ataqueBase, int defensaBase,
                            int movimiento, int fila, int columna,
                            boolean vivo) {
+        this(tipo, nombre, vidaActual, vidaMaxima, ataqueBase, defensaBase,
+                movimiento, fila, columna, vivo, 0);
+    }
+
+    public DatosEnemigoDTO(String tipo, String nombre,
+                           int vidaActual, int vidaMaxima,
+                           int ataqueBase, int defensaBase,
+                           int movimiento, int fila, int columna,
+                           boolean vivo, int turnosCongelado) {
         this.tipo = tipo;
         this.nombre = nombre;
         this.vidaActual = vidaActual;
@@ -37,6 +47,7 @@ public class DatosEnemigoDTO {
         this.fila = fila;
         this.columna = columna;
         this.vivo = vivo;
+        this.turnosCongelado = turnosCongelado;
     }
 
     public String getTipo() {
@@ -77,5 +88,9 @@ public class DatosEnemigoDTO {
 
     public boolean isVivo() {
         return vivo;
+    }
+
+    public int getTurnosCongelado() {
+        return turnosCongelado;
     }
 }

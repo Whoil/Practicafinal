@@ -42,6 +42,15 @@
           "ataque": 8,
           "defensa": 3,
           "movimiento": 2
+        },
+        {
+          "tipo": "ARQUERO",
+          "fila": 2,
+          "columna": 12,
+          "vida": 18,
+          "ataque": 6,
+          "defensa": 1,
+          "movimiento": 1
         }
       ],
       "objetos": [
@@ -129,6 +138,24 @@
           "ataque": 12,
           "defensa": 5,
           "movimiento": 2
+        },
+        {
+          "tipo": "ARQUERO",
+          "fila": 10,
+          "columna": 12,
+          "vida": 22,
+          "ataque": 8,
+          "defensa": 1,
+          "movimiento": 1
+        },
+        {
+          "tipo": "ARQUERO",
+          "fila": 16,
+          "columna": 16,
+          "vida": 22,
+          "ataque": 8,
+          "defensa": 1,
+          "movimiento": 1
         }
       ],
       "objetos": [
@@ -220,6 +247,33 @@
           "ataque": 15,
           "defensa": 7,
           "movimiento": 3
+        },
+        {
+          "tipo": "ARQUERO",
+          "fila": 10,
+          "columna": 15,
+          "vida": 26,
+          "ataque": 10,
+          "defensa": 1,
+          "movimiento": 1
+        },
+        {
+          "tipo": "ARQUERO",
+          "fila": 18,
+          "columna": 20,
+          "vida": 26,
+          "ataque": 10,
+          "defensa": 1,
+          "movimiento": 1
+        },
+        {
+          "tipo": "ARQUERO",
+          "fila": 20,
+          "columna": 18,
+          "vida": 26,
+          "ataque": 10,
+          "defensa": 1,
+          "movimiento": 1
         },
         {
           "tipo": "BOSS",

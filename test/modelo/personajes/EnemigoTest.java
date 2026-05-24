@@ -29,6 +29,19 @@ class EnemigoTest {
                 new Enemigo("Orco", TipoEnemigo.ORCO, 50, 12, 4, 1, 2, 3).getTipoEnemigo());
         assertEquals(TipoEnemigo.MAGO,
                 new Enemigo("Mago", TipoEnemigo.MAGO, 25, 14, 1, 2, 3, 4).getTipoEnemigo());
+        assertEquals(TipoEnemigo.ARQUERO,
+                new Enemigo("Arquero", TipoEnemigo.ARQUERO, 18, 6, 1, 1, 3, 4).getTipoEnemigo());
+    }
+
+    @Test
+    void enemigoGestionaCongelacion() {
+        Enemigo enemigo = new Enemigo("Arquero", TipoEnemigo.ARQUERO, 18, 6, 1, 1, 1, 1);
+
+        enemigo.congelar(3);
+        assertEquals(3, enemigo.getTurnosCongelado());
+        enemigo.consumirTurnoCongelado();
+
+        assertEquals(2, enemigo.getTurnosCongelado());
     }
 
     @Test
@@ -62,10 +75,11 @@ class EnemigoTest {
     void enumTipoEnemigoContieneTodosLosTiposAcordados() {
         TipoEnemigo[] tipos = TipoEnemigo.values();
 
-        assertEquals(4, tipos.length);
+        assertEquals(5, tipos.length);
         assertEquals(TipoEnemigo.ESQUELETO, TipoEnemigo.valueOf("ESQUELETO"));
         assertEquals(TipoEnemigo.ORCO, TipoEnemigo.valueOf("ORCO"));
         assertEquals(TipoEnemigo.MAGO, TipoEnemigo.valueOf("MAGO"));
+        assertEquals(TipoEnemigo.ARQUERO, TipoEnemigo.valueOf("ARQUERO"));
         assertEquals(TipoEnemigo.BOSS, TipoEnemigo.valueOf("BOSS"));
     }
 }

@@ -65,6 +65,8 @@ public class Partida implements InterfazPartida {
      * final de toda la aplicacion.
      */
     public static final int ALCANCE_ARCO = 3;
+    public static final int ALCANCE_ARQUERO = 6;
+    public static final int TURNOS_CONGELACION = 3;
     public static final int TURNOS_POR_CUEVA = 60;
     public static final String CODIGO_LLAVE_FINAL_DEFECTO = "LLAVE_FINAL";
     public static final String ID_LLAVE_FINAL_DEFECTO = "llave-final";
@@ -74,6 +76,7 @@ public class Partida implements InterfazPartida {
     private final ListaSE<ContenidoCueva> contenidosPorCueva;
     private final ListaSE<Puerta> puertas;
     private final ListaSE<String> log;
+    private final ListaSE<DisparoEnemigo> disparosEnemigosPendientes;
     private final String codigoLlaveFinal;
     private final EstadisticasPartida estadisticas;
 
@@ -129,6 +132,7 @@ public class Partida implements InterfazPartida {
         this.contenidosPorCueva = new ListaSE<>();
         this.puertas = new ListaSE<>();
         this.log = new ListaSE<>();
+        this.disparosEnemigosPendientes = new ListaSE<>();
         this.estadisticas = new EstadisticasPartida(estadisticasIniciales);
 
         cargarPuertasIniciales(puertasIniciales);
@@ -393,6 +397,19 @@ public class Partida implements InterfazPartida {
         return true;
     }
 
+    public boolean puedeDispararBolaHielo() {
+        return puedeAceptarAccion() && !accionRealizada;
+    }
+
+    public boolean registrarDisparoBolaHielo() {
+        if (!puedeDispararBolaHielo()) {
+            return false;
+        }
+        accionRealizada = true;
+        registrarLog("Bola de Hielo lanzada");
+        return true;
+    }
+
     public ResultadoImpactoBolaFuego impactarBolaFuego(int fila, int columna, int dano) {
         if (estado != EstadoPartida.EN_CURSO || dano <= 0) {
             return ResultadoImpactoBolaFuego.sinImpacto();
@@ -424,6 +441,22 @@ public class Partida implements InterfazPartida {
 
         comprobarVictoriaODerrota();
         return ResultadoImpactoBolaFuego.impacto(enemigo.getNombre(), danoReal, murio, eraBoss);
+    }
+
+    public ResultadoImpactoBolaHielo impactarBolaHielo(int fila, int columna) {
+        if (estado != EstadoPartida.EN_CURSO) {
+            return ResultadoImpactoBolaHielo.sinImpacto();
+        }
+
+        Enemigo enemigo = buscarEnemigoEn(fila, columna);
+        if (enemigo == null || !enemigo.estaVivo()) {
+            return ResultadoImpactoBolaHielo.sinImpacto();
+        }
+
+        enemigo.congelar(TURNOS_CONGELACION);
+        registrarLog("Tu Bola de Hielo congela a " + enemigo.getNombre()
+                + " durante " + TURNOS_CONGELACION + " turnos");
+        return ResultadoImpactoBolaHielo.impacto(enemigo.getNombre(), TURNOS_CONGELACION);
     }
 
     @Override
@@ -573,12 +606,31 @@ public class Partida implements InterfazPartida {
     }
 
     private void actuarEnemigo(Enemigo enemigo) {
+        if (enemigo.estaCongelado()) {
+            enemigo.consumirTurnoCongelado();
+            registrarLog(enemigo.getNombre() + " está congelado y no puede actuar");
+            return;
+        }
+
         if (estaEnCeldaCercana(enemigo.getFila(), enemigo.getColumna(), jugador.getFila(), jugador.getColumna())) {
             int dano = calcularDano(enemigo.getAtaqueBase(), jugador.getDefensaTotal());
             int vidaAntes = jugador.getVidaActual();
             jugador.recibirDano(dano);
             estadisticas.registrarDanoRecibido(vidaAntes - jugador.getVidaActual());
             registrarLog(enemigo.getNombre() + " ataca al jugador e inflige " + dano + " de daño");
+            return;
+        }
+
+        if (enemigo.getTipoEnemigo() == TipoEnemigo.ARQUERO && arqueroPuedeDisparar(enemigo)) {
+            int dano = calcularDano(enemigo.getAtaqueBase(), jugador.getDefensaTotal());
+            int vidaAntes = jugador.getVidaActual();
+            jugador.recibirDano(dano);
+            int danoReal = vidaAntes - jugador.getVidaActual();
+            estadisticas.registrarDanoRecibido(danoReal);
+            disparosEnemigosPendientes.addLast(new DisparoEnemigo(
+                    enemigo.getFila(), enemigo.getColumna(), jugador.getFila(), jugador.getColumna(),
+                    danoReal, enemigo.getNombre()));
+            registrarLog(enemigo.getNombre() + " dispara al jugador e inflige " + dano + " de daño");
             return;
         }
 
@@ -598,6 +650,45 @@ public class Partida implements InterfazPartida {
             enemigo.cambiarPosicion(siguiente.getFila(), siguiente.getColumna());
             registrarLog(enemigo.getNombre() + " se acerca al jugador");
         }
+    }
+
+    private boolean arqueroPuedeDisparar(Enemigo enemigo) {
+        int filaEnemigo = enemigo.getFila();
+        int columnaEnemigo = enemigo.getColumna();
+        int filaJugador = jugador.getFila();
+        int columnaJugador = jugador.getColumna();
+        boolean mismaFila = filaEnemigo == filaJugador;
+        boolean mismaColumna = columnaEnemigo == columnaJugador;
+        if (!mismaFila && !mismaColumna) {
+            return false;
+        }
+        int distancia = Math.abs(filaEnemigo - filaJugador) + Math.abs(columnaEnemigo - columnaJugador);
+        if (distancia <= 1 || distancia > ALCANCE_ARQUERO) {
+            return false;
+        }
+
+        int df = Integer.compare(filaJugador, filaEnemigo);
+        int dc = Integer.compare(columnaJugador, columnaEnemigo);
+        Cueva cueva = getCuevaActualInterna();
+        int fila = filaEnemigo + df;
+        int columna = columnaEnemigo + dc;
+        while (fila != filaJugador || columna != columnaJugador) {
+            if (esBloqueanteLineaDisparo(cueva, fila, columna)) {
+                return false;
+            }
+            fila += df;
+            columna += dc;
+        }
+        return true;
+    }
+
+    private boolean esBloqueanteLineaDisparo(Cueva cueva, int fila, int columna) {
+        if (cueva == null || !cueva.estaDentro(fila, columna)) {
+            return true;
+        }
+        TipoCelda tipo = cueva.getCelda(fila, columna).getTipo();
+        return tipo == TipoCelda.MURO || tipo == TipoCelda.ROCA
+                || tipo == TipoCelda.ARBUSTO || tipo == TipoCelda.TESORO;
     }
 
     private boolean jugadorPuedeAtacar(Enemigo enemigo) {
@@ -1022,6 +1113,7 @@ public class Partida implements InterfazPartida {
                         if (!eDTO.isVivo() && enemigo.estaVivo()) {
                             enemigo.recibirDano(enemigo.getVidaMaxima());
                         }
+                        enemigo.congelar(eDTO.getTurnosCongelado());
                         contenido.agregarEnemigo(enemigo);
                     }
                 }
@@ -1110,14 +1202,27 @@ public class Partida implements InterfazPartida {
         }
 
         cueva.cambiarTipoCelda(tesoro.getFila(), tesoro.getColumna(), TipoCelda.SUELO);
+        Objeto recompensa = crearRecompensaTesoro(cueva.getId(), tesoro.getFila(), tesoro.getColumna());
+        jugador.agregarObjeto(recompensa);
         accionRealizada = true;
-        registrarLog("Cofre abierto");
+        registrarLog("Cofre abierto: obtienes " + recompensa.getNombre());
         return true;
     }
 
     @Override
     public boolean hayTesoroCercano() {
         return buscarTesoroAbrible(getCuevaActualInterna()) != null;
+    }
+
+    private Objeto crearRecompensaTesoro(String idCueva, int fila, int columna) {
+        String sufijo = idCueva + "-" + fila + "-" + columna;
+        if ("cueva_media".equals(idCueva)) {
+            return new Escudo("cofre-escudo-" + sufijo);
+        }
+        if ("cueva_dificil".equals(idCueva)) {
+            return new Espada("cofre-espada-" + sufijo);
+        }
+        return new Pocion("cofre-pocion-" + sufijo);
     }
 
     public boolean terminarTurno() {
@@ -1139,6 +1244,12 @@ public class Partida implements InterfazPartida {
             }
         }
         return vivos;
+    }
+
+    public ListaSE<DisparoEnemigo> consumirDisparosEnemigosPendientes() {
+        ListaSE<DisparoEnemigo> copia = disparosEnemigosPendientes.copy();
+        disparosEnemigosPendientes.clear();
+        return copia;
     }
 
     public ListaDE<ObjetoEnMapa> getObjetosActuales() {
@@ -1214,7 +1325,7 @@ public class Partida implements InterfazPartida {
                     e.getVidaActual(), e.getVidaMaxima(),
                     e.getAtaqueBase(), e.getDefensaBase(),
                     e.getMovimiento(), e.getFila(), e.getColumna(),
-                    e.estaVivo());
+                    e.estaVivo(), e.getTurnosCongelado());
             }
             cuevasDTO[i].setEnemigos(enemigosDTO);
 
