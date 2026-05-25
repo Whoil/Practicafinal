@@ -1092,3 +1092,9 @@ Guillermo reporto dos problemas visuales al comenzar una nueva sesion: en ventan
 Se mantuvo el alcance en la capa JavaFX. En `PantallaJuego` el area de mapa paso a estar dentro de un `ScrollPane` y se agrego centrado automatico sobre el jugador al cambiar de cueva. Tambien se redujo la rigidez del log inferior y se envolvio el panel derecho en un scroll vertical para evitar que las acciones queden cortadas en ventanas bajas.
 
 No se modificaron reglas de juego ni persistencia. La compilacion desde Codex quedo bloqueada por permisos de lectura sobre los JAR locales de JavaFX en `.m2`; queda pendiente validar visualmente desde IntelliJ. La revision independiente detecto riesgos de foco de teclado, centrado prematuro y corte horizontal; se corrigieron antes de preparar PR.
+
+## 2026-05-25 - Guillermo / Correccion visual de pocion
+
+Guillermo aviso de que el PNG de la pocion se veia cortado por la mitad. Se reviso la carga del icono en `PantallaJuego` y se detecto que se estaba tratando como spritesheet cuando realmente es una imagen vertical unica.
+
+Se cambio la carga para usar el PNG completo sin recorte. El cambio no afecta reglas de partida, inventario, JSON ni turnos. Se solicito revision independiente para el PR #24; el revisor no encontro bloqueos y recomendo validacion visual manual en mapa e inventario.

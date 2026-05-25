@@ -308,6 +308,7 @@ Sub-tareas:
   - Avance 2026-05-24 / Guillermo: se anade icono local de pocion, se reemplaza el icono local de escudo y se elimina el color morado de TESORO. Los bosses quedan fuera de esta sesion por decision de alcance.
   - Avance 2026-05-24 / Guillermo: se refuerza `datos/cuevas.json` y los tests para que los objetos configurados no aparezcan en muros/obstaculos y los TESORO tengan acceso desde una celda vecina.
   - Avance 2026-05-24 / Guillermo: se define TESORO como cofre cerrado no pisable, abrible con `R` desde celda adyacente; al abrirse pasa a `SUELO`.
+  - Avance 2026-05-25 / Guillermo: se corrige la carga visual de la pocion para mostrar el PNG completo en lugar de recortarlo como spritesheet.
 - **C-09.17** Ajuste responsive de pantalla de partida para ventana no maximizada - REVISION
   - Avance 2026-05-25 / Guillermo: el mapa se envuelve en un `ScrollPane`, se centra la vista en el jugador al cambiar de cueva y el log/panel derecho dejan de cortar contenido en ventanas bajas. Pendiente validacion visual en IntelliJ.
 
