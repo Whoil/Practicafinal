@@ -1541,7 +1541,7 @@ public class PantallaJuego {
      */
     private Node crearIconoObjeto(Objeto obj, double tamanio) {
         if (obj instanceof modelo.objetos.Pocion) {
-            return crearSpriteAssets("TinyBits Inventory Pack - Potions.png", tamanio);
+            return crearSpriteArchivo(ASSETS_BASE + "TinyBits Inventory Pack - Potions.png", tamanio, false);
         }
         if (obj instanceof modelo.objetos.Escudo) {
             return crearSpriteArchivo("datos" + File.separator + "iconos" + File.separator + "escudo.png", tamanio, false);

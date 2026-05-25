@@ -2312,3 +2312,21 @@ Guillermo inicio una nueva sesion porque, al ejecutar el juego sin maximizar la 
 
 - Revisor independiente solicitado antes de preparar PR.
 - Resultado: detecto riesgos de foco de teclado en `ScrollPane`, centrado antes del layout y posible corte horizontal. Se corrigieron usando filtros de teclado a nivel de `Scene`, reintento/espera de medidas validas para el centrado y wrapping controlado en textos/botones del panel derecho.
+
+## 2026-05-25 - Guillermo / Icono de pocion completo
+
+### Contexto
+
+Guillermo detecto que el icono PNG de la pocion se veia cortado por la mitad en el juego.
+
+### Trabajo realizado
+
+- Se reviso `src/vista/PantallaJuego.java`.
+- La pocion deja de cargarse con el helper de spritesheet y pasa a cargarse como imagen completa.
+- No se tocaron reglas de juego, inventario, JSON, turnos ni datos de mapa.
+
+### Pruebas y revision
+
+- Cambio visual de una linea; no se anadieron tests JUnit.
+- Pendiente validacion visual desde IntelliJ.
+- Revisor independiente solicitado para el PR #24.
