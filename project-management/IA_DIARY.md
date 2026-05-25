@@ -1084,3 +1084,11 @@ Alvaro pidio corregir dos problemas de la implementacion anterior: la botonera d
 Se ajusto la posicion vertical de la botonera del menu y se sustituyo el `TextInputDialog` por un modal JavaFX propio dentro de `EscapeMazmorraApp`, con velo oscuro, panel estilo pergamino, campo `TextField` estilizado, botones `Comenzar` y `Cancelar`, soporte de Enter/Escape y el mismo fallback a "Mago Errante".
 
 Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 208/208 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-25 - Guillermo / Responsive en pantalla de partida
+
+Guillermo reporto dos problemas visuales al comenzar una nueva sesion: en ventana no maximizada el jugador podia quedar fuera de la zona visible al inicio de una mazmorra, y la parte inferior de la pantalla cortaba texto.
+
+Se mantuvo el alcance en la capa JavaFX. En `PantallaJuego` el area de mapa paso a estar dentro de un `ScrollPane` y se agrego centrado automatico sobre el jugador al cambiar de cueva. Tambien se redujo la rigidez del log inferior y se envolvio el panel derecho en un scroll vertical para evitar que las acciones queden cortadas en ventanas bajas.
+
+No se modificaron reglas de juego ni persistencia. La compilacion desde Codex quedo bloqueada por permisos de lectura sobre los JAR locales de JavaFX en `.m2`; queda pendiente validar visualmente desde IntelliJ. La revision independiente detecto riesgos de foco de teclado, centrado prematuro y corte horizontal; se corrigieron antes de preparar PR.

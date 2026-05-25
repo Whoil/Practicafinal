@@ -2287,3 +2287,28 @@ Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se
 - NC-10 a NC-13: Revision de diagramas.
 - NC-06: Planificar memoria.
 - NC-08: Planificar guion video.
+
+## 2026-05-25 - Guillermo / Ajuste responsive pantalla de partida
+
+### Contexto
+
+Guillermo inicio una nueva sesion porque, al ejecutar el juego sin maximizar la ventana, el jugador no siempre quedaba visible al principio de cada mazmorra y el texto inferior de la pantalla de partida aparecia cortado.
+
+### Trabajo realizado
+
+- `src/vista/PantallaJuego.java`: el mapa de la cueva queda dentro de un `ScrollPane` pannable, en lugar de depender de que toda la grilla quepa siempre en la ventana.
+- Se anadio centrado automatico de la vista sobre el jugador cuando se construye o cambia la cueva.
+- El log inferior deja de usar una altura fija tan rigida y conserva una altura minima menor.
+- El panel derecho queda dentro de un `ScrollPane` vertical para que las acciones no se corten en ventanas bajas.
+- No se tocaron reglas de partida, movimiento, combate, inventario, JSON ni datos de mapa.
+
+### Pruebas ejecutadas
+
+- Intento de compilacion: `powershell.exe -ExecutionPolicy Bypass -File scripts\run.ps1 -CompileOnly`.
+- Resultado en Codex: bloqueado por permisos al leer los JAR locales de JavaFX en `C:\Users\landm\.m2\repository\org\openjfx\...`.
+- Pendiente: validar visualmente desde IntelliJ con ventana no maximizada, cambio de cueva y panel inferior/derecho.
+
+### Revision independiente
+
+- Revisor independiente solicitado antes de preparar PR.
+- Resultado: detecto riesgos de foco de teclado en `ScrollPane`, centrado antes del layout y posible corte horizontal. Se corrigieron usando filtros de teclado a nivel de `Scene`, reintento/espera de medidas validas para el centrado y wrapping controlado en textos/botones del panel derecho.
