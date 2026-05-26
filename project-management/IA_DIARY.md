@@ -1098,3 +1098,11 @@ No se modificaron reglas de juego ni persistencia. La compilacion desde Codex qu
 Guillermo aviso de que el PNG de la pocion se veia cortado por la mitad. Se reviso la carga del icono en `PantallaJuego` y se detecto que se estaba tratando como spritesheet cuando realmente es una imagen vertical unica.
 
 Se cambio la carga para usar el PNG completo sin recorte. El cambio no afecta reglas de partida, inventario, JSON ni turnos. Se solicito revision independiente para el PR #24; el revisor no encontro bloqueos y recomendo validacion visual manual en mapa e inventario.
+
+## 2026-05-26 - Guillermo / Portabilidad de ejecucion y ventana fija
+
+Guillermo pidio abordar dos puntos finales de entrega: comprobar como abrir el juego en otros ordenadores y resolver el problema de pantalla completa/maximizado, que seguia deformando la interfaz en algunas pruebas.
+
+Se revisaron `README.md`, `scripts/run.ps1`, `scripts/test.ps1`, `ControladorFlujo` y `EscapeMazmorraApp`. Los scripts dejaron de depender de una ruta fija de JDK y ahora usan `JAVA_HOME` o el `PATH`. Tambien se documento que JavaFX 21.0.5 puede estar en `.m2` o copiarse a `lib\javafx` para una entrega mas portable.
+
+Para el problema visual se eligio la solucion conservadora: quitar el redimensionado de la ventana de juego y restaurar siempre a una ventana ajustada a la escena 1280x720, sin maximizado ni pantalla completa al cambiar de escena. Es menos flexible, pero reduce riesgo para la entrega. La revision independiente recomendo usar `sizeToScene()` para no confundir tamano exterior de ventana con area util de escena, y se aplico. Tambien marco como riesgo menor que una carpeta `lib\javafx` incompleta bloqueara el fallback a `.m2`; se corrigio para intentar Maven local si no estan los cuatro JAR locales. La compilacion en Codex queda bloqueada por permisos al leer JavaFX en `.m2`; se solicita validacion local en IntelliJ/PowerShell.

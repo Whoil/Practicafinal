@@ -2330,3 +2330,27 @@ Guillermo detecto que el icono PNG de la pocion se veia cortado por la mitad en 
 - Cambio visual de una linea; no se anadieron tests JUnit.
 - Pendiente validacion visual desde IntelliJ.
 - Revisor independiente solicitado para el PR #24.
+
+## 2026-05-26 - Guillermo / Ejecucion en otros equipos y pantalla completa
+
+### Contexto
+
+Guillermo pidio revisar que el proyecto pueda abrirse en otros ordenadores y corregir o eliminar el problema de pantalla completa/maximizado, porque en algunas pruebas la interfaz seguia deformandose.
+
+### Trabajo realizado
+
+- `scripts/run.ps1` y `scripts/test.ps1`: eliminada la dependencia de la ruta fija `C:\Users\UAH\.jdks\ms-21.0.10`.
+- Los scripts ahora usan `JAVA_HOME` si apunta a un JDK con `javac`; si no, buscan `java.exe` y `javac.exe` en el `PATH`.
+- Los scripts aceptan JavaFX 21.0.5 desde `lib\javafx\` dentro del proyecto o desde el repositorio Maven local del usuario.
+- `README.md`: documentados requisitos, forma de ejecutar, dependencias necesarias y notas de entrega.
+- `ControladorFlujo` y `EscapeMazmorraApp`: las escenas restauran la ventana a un tamano fijo equivalente a la escena 1280x720, no redimensionable, sin maximizado ni pantalla completa.
+
+### Pruebas ejecutadas
+
+- `git diff --check`: correcto.
+- `scripts\run.ps1 -CompileOnly`: el script arranca y llega a `javac`, pero en el entorno Codex falla por no poder leer los JAR locales de JavaFX en `.m2`.
+
+### Pendiente
+
+- Validar desde IntelliJ/PowerShell local que el juego abre en ventana fija y ya no se deforma al intentar maximizar.
+- Si se quiere portabilidad completa por ZIP, copiar los JAR de JavaFX 21.0.5 para Windows a `lib\javafx\`. Si esa carpeta esta incompleta, los scripts prueban igualmente el fallback del repositorio Maven local.

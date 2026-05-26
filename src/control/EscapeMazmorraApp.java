@@ -122,7 +122,7 @@ public class EscapeMazmorraApp extends Application {
         Scene escena = new Scene(raiz, ANCHO, ALTO);
         stage.setTitle("ESCAPE DE LA MAZMORRA");
         stage.setScene(escena);
-        stage.setResizable(false);
+        fijarVentanaMenu(stage);
         stage.show();
 
         animacionIzquierda.play();
@@ -1187,10 +1187,22 @@ public class EscapeMazmorraApp extends Application {
         raiz.getChildren().add(contenidoActual);
 
         Scene menuScene = new Scene(raiz, ANCHO, ALTO);
-        stage.setResizable(false);
         stage.setScene(menuScene);
+        fijarVentanaMenu(stage);
         animacionIzquierda.play();
         animacionDerecha.play();
+    }
+
+    /**
+     * Mantiene las pantallas de menu en un tamano fijo. Si el usuario viene de
+     * una ventana maximizada o pantalla completa, se restaura antes de pintar.
+     */
+    private void fijarVentanaMenu(Stage stage) {
+        stage.setFullScreen(false);
+        stage.setMaximized(false);
+        stage.setResizable(false);
+        stage.sizeToScene();
+        stage.centerOnScreen();
     }
 
     public static void main(String[] args) {
