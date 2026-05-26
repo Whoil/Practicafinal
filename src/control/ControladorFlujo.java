@@ -41,8 +41,8 @@ public class ControladorFlujo {
         });
         Scene scene = intro.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
-        stage.setResizable(false);
         stage.setScene(scene);
+        fijarVentanaEstable(false);
     }
 
     /**
@@ -55,8 +55,8 @@ public class ControladorFlujo {
         });
         Scene scene = transicion.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
-        stage.setResizable(false);
         stage.setScene(scene);
+        fijarVentanaEstable(false);
     }
 
     /**
@@ -88,10 +88,10 @@ public class ControladorFlujo {
             });
             Scene gameScene = pj.crearScene();
             logDirecto("crearScene() completado");
-            stage.setResizable(true);
-            stage.setMinWidth(960);
-            stage.setMinHeight(540);
             stage.setScene(gameScene);
+            // La vista de juego usa una escena fija 1280x720. Ajustamos el
+            // tamano de la ventana a la escena, no al borde exterior.
+            fijarVentanaEstable(true);
             logDirecto("stage.setScene() completado");
         } catch (Throwable t) {
             logDirecto("EXCEPCION EN mostrarJuego: " + t.getClass().getName() + " - " + t.getMessage());
@@ -117,7 +117,22 @@ public class ControladorFlujo {
         PantallaFinal pantallaFinal = new PantallaFinal(victoria, resultado, volverAlMenu);
         Scene scene = pantallaFinal.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
-        stage.setResizable(false);
         stage.setScene(scene);
+        fijarVentanaEstable(false);
+    }
+
+    /**
+     * Devuelve la ventana a un modo fijo y conocido tras cambiar de escena.
+     * Evita que un estado previo maximizado o de pantalla completa deforme
+     * pantallas disenadas para 1280x720.
+     */
+    private void fijarVentanaEstable(boolean centrar) {
+        stage.setFullScreen(false);
+        stage.setMaximized(false);
+        stage.setResizable(false);
+        stage.sizeToScene();
+        if (centrar) {
+            stage.centerOnScreen();
+        }
     }
 }

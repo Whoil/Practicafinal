@@ -311,6 +311,7 @@ Sub-tareas:
   - Avance 2026-05-25 / Guillermo: se corrige la carga visual de la pocion para mostrar el PNG completo en lugar de recortarlo como spritesheet.
 - **C-09.17** Ajuste responsive de pantalla de partida para ventana no maximizada - REVISION
   - Avance 2026-05-25 / Guillermo: el mapa se envuelve en un `ScrollPane`, se centra la vista en el jugador al cambiar de cueva y el log/panel derecho dejan de cortar contenido en ventanas bajas. Pendiente validacion visual en IntelliJ.
+  - Avance 2026-05-26 / Guillermo: se bloquea el redimensionado/maximizado de la ventana de juego y se restaura a 1280x720 al cambiar de escena para evitar fallos visuales de pantalla completa.
 
 ### R-01 Revision de restricciones
 
