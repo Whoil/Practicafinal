@@ -404,7 +404,7 @@ Sub-tareas:
 - Archivos permitidos: `src/modelo/juego/`, `test/modelo/juego/`, `datos/cuevas.json`, `project-management/DECISIONS.md`
 - Terminado: victoria requiere derrotar al boss para obtener llave final Y pisar celda SALIDA. Implementado en `Partida.comprobarVictoriaODerrota()` y documentado en DECISIONS.md D-18.
 
-### C-06 Menu principal completo para demo presentable
+### C-06 Menu principal completo para demo
 
 - Responsable: Hector / Parte C
 - Estado: HECHA

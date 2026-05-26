@@ -48,7 +48,7 @@ El proyecto combina varias tecnologías y recursos:
 - **JavaFX** para la interfaz gráfica, escenas, controles, animaciones y reproducción multimedia.
 - **Gson 2.10.1** para serialización y deserialización JSON.
 - **JUnit 5** para pruebas unitarias.
-- **PlantUML** para diagramas de clases, actividad, estados, secuencia y casos de uso.
+- **PlantUML** para diagramas de clases, componentes, actividad, estados, secuencia y casos de uso.
 - **JSON** como formato de configuración, guardado de partida y ranking.
 - **Dungeon Asset Pack / assets locales** para sprites de personajes, objetos, cofres, armas, obstáculos, puerta y salida.
 - **Suno AI** como herramienta de apoyo para generar música ambiental.
@@ -60,7 +60,7 @@ La elección de estas tecnologías responde a una combinación de requisitos aca
 
 PlantUML se eligió porque permite mantener diagramas como texto versionable. Esto encaja bien con el flujo de GitHub: los diagramas se pueden revisar en Pull Requests igual que el código, y no dependen de archivos binarios difíciles de comparar. En un proyecto con varios integrantes y agentes, esta trazabilidad es especialmente útil.
 
-Los assets visuales y de audio se trataron como recursos de apoyo, no como núcleo técnico. El juego debía poder justificarse aunque el aspecto gráfico fuera simple. Sin embargo, la incorporación de sprites, iconos, música y efectos ayudó a que la entrega fuera más clara para el usuario y más presentable en una demostración.
+Los assets visuales y de audio se trataron como recursos de apoyo, no como núcleo técnico. El juego debía poder justificarse aunque el aspecto gráfico fuera simple. Sin embargo, la incorporación de sprites, iconos, música y efectos ayudó a que la entrega fuera más clara para el usuario durante una demostración.
 
 ## 2. Metodología de trabajo
 
@@ -278,9 +278,9 @@ También se corrigieron problemas detectados durante pruebas visuales, como el u
 
 El pulido final también tuvo una dimensión de limpieza. Se eliminaron assets no referenciados y se reorganizó el Dungeon Asset Pack bajo `datos/dungeon-asset-pack/`. Esta limpieza no cambia las reglas del juego, pero sí facilita entender qué recursos son realmente necesarios. Para una entrega académica, reducir ruido en el repositorio ayuda a revisar y defender el proyecto.
 
-La última fase de documentación incluyó la creación y reorganización de diagramas UML: clases, casos de uso, secuencia, estados y actividad. Estos diagramas funcionan como puente entre el código y la memoria. No sustituyen a la explicación escrita, pero ayudan a visualizar relaciones que en texto serían más pesadas.
+La última fase de documentación incluyó la creación y reorganización de diagramas UML: clases, componentes, casos de uso, secuencia, estados y actividad. Estos diagramas funcionan como puente entre el código y la memoria. No sustituyen a la explicación escrita, pero ayudan a visualizar relaciones que en texto serían más pesadas.
 
-En conjunto, la evolución del desarrollo muestra una transición clara: de estructura académica a aplicación jugable, y de aplicación jugable a entrega documentada y presentable.
+En conjunto, la evolución del desarrollo muestra una transición clara: de estructura académica a aplicación jugable, y de aplicación jugable a entrega documentada.
 
 ### 2.6 Gestión de cambios y trazabilidad
 

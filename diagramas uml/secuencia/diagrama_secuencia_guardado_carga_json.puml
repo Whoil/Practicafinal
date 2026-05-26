@@ -1,0 +1,48 @@
+@startuml
+title Secuencia - Guardado y carga JSON
+skinparam shadowing false
+
+actor Jugador
+participant "Vista JavaFX" as Vista
+participant "Partida" as Partida
+participant "SerializadorPartida" as Serializador
+database "Archivo JSON" as Archivo
+
+== Guardar partida ==
+Jugador -> Vista : pulsa Guardar
+Vista -> Vista : guardarPartida()
+Vista -> Partida : guardar("datos/partida_guardada.json")
+Partida -> Serializador : guardar(dto, ruta)
+Serializador -> Serializador : crear DatosPartidaDTO
+Serializador -> Archivo : escribir JSON
+Archivo --> Serializador : escritura correcta
+Serializador --> Partida : ok
+Partida --> Vista : resultado guardado
+Vista --> Jugador : muestra confirmacion
+
+== Cargar partida ==
+Jugador -> Vista : pulsa Cargar
+Vista -> Partida : cargarPartida("datos/partida_guardada.json")
+note right of Partida
+  La carga se invoca como metodo estatico
+  desde el flujo de control de JavaFX.
+end note
+Partida -> Serializador : cargar(ruta)
+Serializador -> Archivo : leer JSON
+Archivo --> Serializador : DatosPartidaDTO
+Serializador -> Serializador : reconstruir objetos y estado
+Serializador --> Partida : partida reconstruida
+Partida --> Vista : estado cargado
+Vista --> Jugador : refresca pantalla
+
+note right of Vista
+  La vista no serializa directamente
+  el modelo: delega en Partida.
+end note
+
+note right of Serializador
+  Gson trabaja con DTOs para evitar
+  depender de referencias internas.
+end note
+
+@enduml
