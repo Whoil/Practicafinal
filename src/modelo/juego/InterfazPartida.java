@@ -85,12 +85,6 @@ public interface InterfazPartida {
     boolean isAccionRealizada();
 
     /**
-     * Calcula las celdas a las que puede moverse el jugador desde su posicion
-     * actual usando el movimiento disponible.
-     */
-    ListaSE<CeldaEnMapa> getCeldasAlcanzablesJugador();
-
-    /**
      * Intenta mover al jugador a la posicion indicada.
      *
      * Devuelve true si la posicion esta dentro de la cueva, es transitable, esta

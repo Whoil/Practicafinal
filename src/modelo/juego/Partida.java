@@ -2,7 +2,6 @@ package modelo.juego;
 
 import java.io.IOException;
 
-import Estructuras.Cola;
 import Estructuras.ListaDE;
 import Estructuras.ListaSE;
 import Estructuras.MiIterador;
@@ -19,7 +18,6 @@ import json.ResultadoCarga;
 import json.SerializadorPartida;
 import modelo.mapa.Celda;
 import modelo.mapa.Cueva;
-import modelo.mapa.Posicion;
 import modelo.mapa.TipoCelda;
 import modelo.objetos.Arco;
 import modelo.objetos.Arma;
@@ -240,19 +238,6 @@ public class Partida implements InterfazPartida {
         return accionRealizada;
     }
 
-    @Override
-    public ListaSE<CeldaEnMapa> getCeldasAlcanzablesJugador() {
-        Cueva cuevaActual = getCuevaActualInterna();
-        if (cuevaActual == null) {
-            return new ListaSE<>();
-        }
-        return crearVistasCeldas(getCeldasAlcanzablesJugadorSinTesoros(
-                cuevaActual,
-                jugador.getFila(),
-                jugador.getColumna(),
-                jugador.getMovimiento()));
-    }
-
     boolean anadirEnemigo(Cueva cueva, Enemigo enemigo) {
         /*
          * Metodo de preparacion de partida.
@@ -340,6 +325,7 @@ public class Partida implements InterfazPartida {
             return false;
         }
 
+        // Restringido a distancia Manhattan == 1: solo ortogonal, prohibido diagonal y saltos
         if (Math.abs(fila - jugador.getFila()) + Math.abs(columna - jugador.getColumna()) != 1) {
             return false;
         }
@@ -758,61 +744,6 @@ public class Partida implements InterfazPartida {
             vistas.addLast(crearVistaCelda(celdas.get(indice)));
         }
         return vistas;
-    }
-
-    private ListaSE<Celda> getCeldasAlcanzablesJugadorSinTesoros(
-            Cueva cueva,
-            int filaInicio,
-            int columnaInicio,
-            int pasosMaximos) {
-
-        ListaSE<Celda> alcanzables = new ListaSE<>();
-        if (cueva == null || pasosMaximos < 0 || !cueva.esTransitable(filaInicio, columnaInicio)) {
-            return alcanzables;
-        }
-
-        Cola<PasoMovimiento> pendientes = new Cola<>();
-        ListaSE<Posicion> visitadas = new ListaSE<>();
-        Posicion inicio = new Posicion(filaInicio, columnaInicio);
-        pendientes.offer(new PasoMovimiento(inicio, 0));
-        visitadas.addLast(inicio);
-
-        while (!pendientes.isEmpty()) {
-            PasoMovimiento paso = pendientes.poll();
-            Posicion actual = paso.getPosicion();
-            alcanzables.addLast(cueva.getCelda(actual.getFila(), actual.getColumna()));
-
-            if (paso.getDistancia() < pasosMaximos) {
-                anadirVecinoMovimientoSiValido(cueva, actual.getFila() - 1, actual.getColumna(), paso.getDistancia() + 1, pendientes, visitadas);
-                anadirVecinoMovimientoSiValido(cueva, actual.getFila() + 1, actual.getColumna(), paso.getDistancia() + 1, pendientes, visitadas);
-                anadirVecinoMovimientoSiValido(cueva, actual.getFila(), actual.getColumna() - 1, paso.getDistancia() + 1, pendientes, visitadas);
-                anadirVecinoMovimientoSiValido(cueva, actual.getFila(), actual.getColumna() + 1, paso.getDistancia() + 1, pendientes, visitadas);
-            }
-        }
-
-        return alcanzables;
-    }
-
-    private void anadirVecinoMovimientoSiValido(
-            Cueva cueva,
-            int fila,
-            int columna,
-            int distancia,
-            Cola<PasoMovimiento> pendientes,
-            ListaSE<Posicion> visitadas) {
-
-        Posicion posicion = new Posicion(fila, columna);
-        if (esCeldaValidaParaMovimiento(cueva, fila, columna) && !visitadas.existeDato(posicion)) {
-            visitadas.addLast(posicion);
-            pendientes.offer(new PasoMovimiento(posicion, distancia));
-        }
-    }
-
-    private boolean esCeldaValidaParaMovimiento(Cueva cueva, int fila, int columna) {
-        if (!cueva.esTransitable(fila, columna)) {
-            return false;
-        }
-        return cueva.getCelda(fila, columna).getTipo() != TipoCelda.TESORO;
     }
 
     private CeldaEnMapa crearVistaCelda(Celda celda) {
@@ -1665,21 +1596,4 @@ public class Partida implements InterfazPartida {
         }
     }
 
-    private static class PasoMovimiento {
-        private final Posicion posicion;
-        private final int distancia;
-
-        private PasoMovimiento(Posicion posicion, int distancia) {
-            this.posicion = posicion;
-            this.distancia = distancia;
-        }
-
-        private Posicion getPosicion() {
-            return posicion;
-        }
-
-        private int getDistancia() {
-            return distancia;
-        }
-    }
 }

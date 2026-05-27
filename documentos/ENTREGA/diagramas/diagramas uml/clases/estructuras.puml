@@ -1,0 +1,123 @@
+@startuml
+title Estructuras
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Estructuras" #FFFFFF {
+
+  interface "Lista(T)" as Lista {
+    + void add(T dato)
+    + void addLast(T dato)
+    + T get(T dato)
+    + T get(int posicion)
+    + T del(T dato)
+    + T delFirst()
+    + T delLast()
+    + boolean isEmpty()
+    + int getSize()
+    + Lista(T) copy()
+  }
+
+  class "ListaSE(T)" as ListaSE {
+    - int size
+    ..
+    + void add(T dato)
+    + void addLast(T dato)
+    + T get(T dato)
+    + T get(int pos)
+    + T del(T dato)
+    + T delFirst()
+    + T delLast()
+    + boolean existeDato(T dato)
+    + ListaSE(T) copy()
+  }
+
+  class "ListaDE(T)" as ListaDE {
+    - int size
+    ..
+    + void add(T dato)
+    + void addLast(T dato)
+    + T get(T dato)
+    + T get(int pos)
+    + T del(T dato)
+    + T delFirst()
+    + T delLast()
+    + boolean existeDato(T dato)
+    + T getPrimero()
+    + T getUltimo()
+    + ListaDE(T) copy()
+  }
+
+  interface "InterfazCola(T)" as ICola {
+    + void offer(T dato)
+    + T poll()
+    + T peek()
+    + boolean isEmpty()
+    + int getSize()
+  }
+
+  class "Cola(T)" as Cola {
+    - int size
+    ..
+    + void offer(T dato)
+    + T poll()
+    + T peek()
+    + boolean isEmpty()
+    + int getSize()
+  }
+
+  interface "InterfazGrafo(T)" as IGrafo {
+    + boolean addNodo(T dato)
+    + boolean addArco(T o, T d, String e)
+    + boolean existeNodo(T dato)
+    + boolean existeConexion(T o, T d)
+    + ListaSE(T) getAdyacentes(T dato)
+    + ListaSE(T) recorridoBFS(T inicio)
+    + boolean existeCamino(T inicio, T destino)
+    + ListaSE(T) caminoMinimo(T inicio, T destino)
+    + int getDistanciaMinima(T inicio, T destino)
+  }
+
+  class "Grafo(T)" as Grafo {
+    - ListaSE(NodoGrafo(T)) nodos
+    - ListaSE(ArcoGrafo(T)) arcos
+    ..
+    + boolean addNodo(T dato)
+    + boolean addArco(T o, T d, String e)
+    + boolean existeNodo(T dato)
+    + boolean existeConexion(T o, T d)
+    + ListaSE(T) getAdyacentes(T dato)
+    + ListaSE(T) recorridoBFS(T inicio)
+    + boolean existeCamino(T inicio, T destino)
+    + ListaSE(T) caminoMinimo(T inicio, T destino)
+    + int getDistanciaMinima(T inicio, T destino)
+  }
+
+  class "NodoGrafo(T)" as NodoGrafo {
+    - long id
+    - T dato
+    - ListaSE(ArcoGrafo(T)) arcosSalida
+  }
+
+  class "ArcoGrafo(T)" as ArcoGrafo {
+    - long id
+    - String etiqueta
+    - NodoGrafo(T) origen
+    - NodoGrafo(T) destino
+  }
+
+  interface "MiIterador(T)" as MIterador {
+    + boolean hasNext()
+    + T next()
+  }
+
+  ListaSE ..|> Lista
+  ListaDE ..|> Lista
+  Cola ..|> ICola
+  Grafo ..|> IGrafo
+  Grafo *-- NodoGrafo
+  Grafo *-- ArcoGrafo
+  NodoGrafo *-- ArcoGrafo
+}
+@enduml

@@ -710,7 +710,7 @@ public class PantallaJuego {
             }
         }
         agregarResaltadoEnemigosAdyacentes(filas, cols, cellSize);
-        agregarResaltadoCeldasAdyacentes(filas, cols, cellSize);
+        agregarResaltadoCeldasAdyacentes(filas, cols, cellSize, cueva);
         agregarFlashCelda(ataqueFila, ataqueCol, filas, cols, cellSize, Color.rgb(255, 220, 120, 0.32), Color.rgb(255, 230, 160, 0.95));
         agregarFlashCelda(recibirAtaqueFila, recibirAtaqueCol, filas, cols, cellSize, Color.rgb(255, 80, 80, 0.30), Color.rgb(255, 80, 80, 0.90));
 
@@ -1763,20 +1763,23 @@ public class PantallaJuego {
         }
     }
 
-    private void agregarResaltadoCeldasAdyacentes(int filas, int cols, double cellSize) {
+    private void agregarResaltadoCeldasAdyacentes(int filas, int cols, double cellSize, CuevaEnMapa cueva) {
         if (partida.isMovimientoRealizado()) {
             return;
         }
         int pf = partida.getJugador().getFila();
         int pc = partida.getJugador().getColumna();
+        // Solo ortogonal: -1,0 | +1,0 | 0,-1 | 0,+1
         int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int[] d : dirs) {
             int nf = pf + d[0];
             int nc = pc + d[1];
             if (nf < 0 || nf >= filas || nc < 0 || nc >= cols) continue;
             if (partida.hayEnemigoEn(nf, nc)) continue;
-            if (esObstaculo(partida.getCuevaActual().getCelda(nf, nc))) continue;
-            if (partida.getCuevaActual().getCelda(nf, nc).getTipo() == modelo.mapa.TipoCelda.TESORO) continue;
+            CeldaEnMapa celda = cueva.getCelda(nf, nc);
+            if (celda == null) continue;
+            if (esObstaculo(celda)) continue;
+            if (celda.getTipo() == modelo.mapa.TipoCelda.TESORO) continue;
             agregarAnilloCelda(nf, nc, filas, cols, cellSize,
                     Color.rgb(100, 255, 100, 0.20), Color.rgb(100, 255, 100, 0.90), 2.5);
         }
