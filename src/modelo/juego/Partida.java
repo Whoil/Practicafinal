@@ -340,12 +340,7 @@ public class Partida implements InterfazPartida {
             return false;
         }
 
-        Celda destino = cuevaActual.getCelda(fila, columna);
-        if (!getCeldasAlcanzablesJugadorSinTesoros(
-                cuevaActual,
-                jugador.getFila(),
-                jugador.getColumna(),
-                jugador.getMovimiento()).existeDato(destino)) {
+        if (Math.abs(fila - jugador.getFila()) + Math.abs(columna - jugador.getColumna()) != 1) {
             return false;
         }
 

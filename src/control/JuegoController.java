@@ -47,6 +47,8 @@ public class JuegoController {
             ListaSE<DisparoEnemigo> disparosEnemigosTurno = null;
             Jugador jug = partida.getJugador();
             int pf = jug.getFila(), pc = jug.getColumna();
+            int filas = partida.getCuevaActual().getFilas();
+            int cols = partida.getCuevaActual().getColumnas();
             if (k == KeyCode.F) {
                 activarModoHechizo(ConstantesJuego.HechizoPendiente.FUEGO);
                 e.consume();
@@ -81,22 +83,22 @@ public class JuegoController {
                         msg = "No puedes atacar ahora";
                     }
                 }
-            } else if (k == KeyCode.W || k == KeyCode.UP) {
+            } else if ((k == KeyCode.W || k == KeyCode.UP) && pf > 0) {
                 if (partida.hayEnemigoEn(pf - 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
                 else if (vista.esTesoro(partida.getCuevaActual().getCelda(pf - 1, pc))) { ok = false; msg = null; }
                 else if (vista.esObstaculo(partida.getCuevaActual().getCelda(pf - 1, pc))) { ok = false; msg = "Hay una pared"; }
                 else { ok = partida.moverJugadorArriba(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
-            } else if (k == KeyCode.S || k == KeyCode.DOWN) {
+            } else if ((k == KeyCode.S || k == KeyCode.DOWN) && pf < filas - 1) {
                 if (partida.hayEnemigoEn(pf + 1, pc)) { ok = false; msg = "Hay un enemigo ahi"; }
                 else if (vista.esTesoro(partida.getCuevaActual().getCelda(pf + 1, pc))) { ok = false; msg = null; }
                 else if (vista.esObstaculo(partida.getCuevaActual().getCelda(pf + 1, pc))) { ok = false; msg = "Hay una pared"; }
                 else { ok = partida.moverJugadorAbajo(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
-            } else if (k == KeyCode.A || k == KeyCode.LEFT) {
+            } else if ((k == KeyCode.A || k == KeyCode.LEFT) && pc > 0) {
                 if (partida.hayEnemigoEn(pf, pc - 1)) { ok = false; msg = "Hay un enemigo ahi"; }
                 else if (vista.esTesoro(partida.getCuevaActual().getCelda(pf, pc - 1))) { ok = false; msg = null; }
                 else if (vista.esObstaculo(partida.getCuevaActual().getCelda(pf, pc - 1))) { ok = false; msg = "Hay una pared"; }
                 else { ok = partida.moverJugadorIzquierda(); movio = ok; if (!ok) msg = "No puedes moverte mas este turno"; }
-            } else if (k == KeyCode.D || k == KeyCode.RIGHT) {
+            } else if ((k == KeyCode.D || k == KeyCode.RIGHT) && pc < cols - 1) {
                 if (partida.hayEnemigoEn(pf, pc + 1)) { ok = false; msg = "Hay un enemigo ahi"; }
                 else if (vista.esTesoro(partida.getCuevaActual().getCelda(pf, pc + 1))) { ok = false; msg = null; }
                 else if (vista.esObstaculo(partida.getCuevaActual().getCelda(pf, pc + 1))) { ok = false; msg = "Hay una pared"; }

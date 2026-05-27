@@ -1,0 +1,198 @@
+@startuml
+title modelo.juego
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "modelo.juego" #FFFFFF {
+
+  interface "InterfazPartida" as IPartida {
+    + CuevaEnMapa getCuevaActual()
+    + PersonajeEnMapa getJugadorEnMapa()
+    + ListaSE(PersonajeEnMapa) getEnemigos()
+    + ListaSE(ObjetoEnMapa) getObjetosEnSuelo()
+    + ListaDE(Objeto) getInventario()
+    + int getTurnosRestantes()
+    + EstadoPartida getEstado()
+    + boolean moverJugador(int fila, int columna)
+    + boolean atacar(int fila, int columna)
+    + boolean recogerObjeto(String idObjeto)
+    + boolean usarObjeto(String idObjeto)
+    + boolean equiparObjeto(String idObjeto)
+    + boolean avanzarACueva(String id)
+    + boolean tieneLlaveFinal()
+    + boolean pasarTurno()
+  }
+
+  class Partida {
+    - Mazmorra mazmorra
+    - Jugador jugador
+    - EstadisticasPartida estadisticas
+    - ListaSE(Puerta) puertas
+    - ListaSE(String) log
+    - int turnosRestantes
+    - EstadoPartida estado
+    - boolean movimientoRealizado
+    - boolean accionRealizada
+    - String codigoLlaveFinal
+    ..
+    + boolean moverJugador(int fila, int columna)
+    + boolean atacar(int fila, int columna)
+    + boolean recogerObjeto(String id)
+    + boolean usarObjeto(String id)
+    + boolean equiparObjeto(String id)
+    + boolean avanzarACueva(String id)
+    + boolean pasarTurno()
+    + void guardar(String ruta)
+    + boolean abrirTesoro()
+    + boolean puedeDispararBolaFuego()
+    + boolean registrarDisparoBolaFuego()
+    + ResultadoImpactoBolaFuego impactarBolaFuego(int f, int c, int d)
+  }
+
+  enum EstadoPartida {
+    EN_CURSO
+    VICTORIA
+    DERROTA
+  }
+
+  interface "InterfazMazmorra" as IMazmorra {
+    + boolean addCueva(Cueva cueva)
+    + boolean conectarCuevas(Cueva o, Cueva d, String e)
+    + Cueva getCuevaPorId(String id)
+    + ListaSE(Cueva) getCuevas()
+    + boolean setCuevaActual(Cueva cueva)
+    + boolean avanzarACueva(Cueva destino)
+  }
+
+  class Mazmorra {
+    - Grafo(Cueva) grafoCuevas
+    - Cueva cuevaActual
+    ..
+    + boolean addCueva(Cueva c)
+    + boolean conectarCuevas(Cueva o, Cueva d, String e)
+    + Cueva getCuevaPorId(String id)
+    + ListaSE(Cueva) getCuevas()
+    + boolean setCuevaActual(Cueva c)
+    + boolean avanzarACueva(Cueva d)
+  }
+
+  class Puerta {
+    - String id
+    - Cueva origen
+    - Cueva destino
+    - String codigoLlave
+    - boolean abierta
+    ..
+    + void abrir()
+    + boolean conecta(Cueva o, Cueva d)
+  }
+
+  class PersonajeEnMapa {
+    - String nombre
+    - String tipo
+    - int vidaActual
+    - int vidaMaxima
+    - int fila
+    - int columna
+  }
+
+  class ObjetoEnMapa {
+    - Objeto objeto
+    - Cueva cueva
+    - int fila
+    - int columna
+  }
+
+  class CeldaEnMapa {
+    - int fila
+    - int columna
+    - TipoCelda tipo
+  }
+
+  class CuevaEnMapa {
+    - String id
+    - int filas
+    - int columnas
+    - ListaSE(CeldaEnMapa) celdas
+    ..
+    + CeldaEnMapa getCelda(int f, int c)
+  }
+
+  class EstadisticasPartida {
+    - int turnosJugados
+    - int danoRecibido
+    - int danoEjercido
+    - int enemigosMuertos
+    - int bossesMuertos
+    - boolean malakorDerrotado
+    ..
+    + int calcularPuntuacion(boolean win)
+    + String calcularTitulo(boolean win)
+  }
+
+  class FabricaPartida {
+    - VIDA_JUGADOR = 100
+    - ATAQUE_JUGADOR = 15
+    - DEFENSA_JUGADOR = 5
+    - MOVIMIENTO_JUGADOR = 3
+    - TURNOS_INICIALES = 60
+    ..
+    + crearPartida(ResultadoCarga r)
+  }
+
+  class ConstantesJuego {
+    - DANO_BOLA_FUEGO = 10
+    - RANGO_BOLA_FUEGO = 5
+    - RADIO_VISION = 3
+  }
+
+  enum HechizoPendiente {
+    NINGUNO
+    FUEGO
+    HIELO
+  }
+
+  class DisparoEnemigo {
+    - int filaOrigen
+    - int columnaOrigen
+    - int filaDestino
+    - int columnaDestino
+    - int dano
+    - String nombreEnemigo
+  }
+
+  class ResultadoImpactoBolaFuego {
+    - boolean impacto
+    - int danoReal
+    - boolean enemigoMuerto
+    - boolean boss
+    ..
+    + sinImpacto()
+    + impacto(String, int, boolean, boolean)
+    + boolean hayImpacto()
+  }
+
+  class ResultadoImpactoBolaHielo {
+    - boolean impacto
+    - int turnosCongelado
+    ..
+    + sinImpacto()
+    + impacto(String, int)
+    + boolean hayImpacto()
+  }
+
+  Partida ..|> IPartida
+  Partida *-- Mazmorra
+  Partida *-- Jugador
+  Partida *-- EstadisticasPartida
+  Partida --> EstadoPartida
+  Partida *-- Puerta
+  Partida *-- ObjetoEnMapa
+  Partida *-- DisparoEnemigo
+  Mazmorra ..|> IMazmorra
+  Mazmorra *-- Grafo
+  Mazmorra --> Cueva
+  FabricaPartida ..> Partida : crea
+}
+@enduml

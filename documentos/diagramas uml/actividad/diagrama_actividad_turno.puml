@@ -1,0 +1,37 @@
+@startuml
+title Actividad - Ciclo de turno
+skinparam shadowing false
+start
+
+:Jugador elige accion;
+
+if (Moverse?) then (si)
+  :Mover;
+elseif (Atacar?) then (si)
+  :Calcular daño;
+  :Aplicar al enemigo;
+  if (Muere?) then (si)
+    :Eliminar;
+    if (Boss?) then (si)
+      :Entregar llave final;
+    endif
+  endif
+elseif (Hechizo?) then (si)
+  :Animar y aplicar;
+elseif (Usar objeto?) then (si)
+  :Curar o equipar;
+endif
+
+:Activar IA enemiga;
+:Decrementar turnos;
+
+if (Victoria?) then (si)
+  :Pantalla final;
+  stop
+elseif (Derrota?) then (si)
+  :Pantalla final;
+  stop
+endif
+
+:Preparar siguiente turno;
+@enduml

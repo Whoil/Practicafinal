@@ -1,0 +1,230 @@
+@startuml
+title Diagrama inicial - Escape de la Mazmorra
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+package "Juego" {
+  class Partida {
+    - turnosRestantes : int
+    - estado : EstadoPartida
+    + iniciar()
+    + pasarTurno()
+    + comprobarVictoria()
+    + comprobarDerrota()
+  }
+
+  enum EstadoPartida {
+    EN_CURSO
+    VICTORIA
+    DERROTA
+  }
+
+  class Mazmorra {
+    - nombre : String
+    - grafoCuevas : Grafo<Cueva>
+    - cuevaInicial : Cueva
+    - cuevaFinal : Cueva
+    + getCuevaActual()
+    + getCaminoMinimoSalida()
+  }
+
+  class Cueva {
+    - nombre : String
+    - nivelDificultad : int
+    - filas : int
+    - columnas : int
+    - matriz : ListaSE<ListaSE<Celda>>
+    + getCelda(fila, columna)
+    + esPosicionValida(fila, columna)
+    + getVecinasTransitables(celda)
+    + calcularCaminoMinimo(origen, destino)
+  }
+
+  class Celda {
+    - fila : int
+    - columna : int
+    - tipo : TipoCelda
+    + estaVacia()
+    + esTransitable()
+  }
+
+  enum TipoCelda {
+    VACIA
+    JUGADOR
+    ENEMIGO
+    BOSS
+    OBJETO
+    TRAMPA
+    PUERTA
+    SALIDA
+    ESCONDITE
+  }
+
+  class Puerta {
+    - id : String
+    - abierta : boolean
+    - requiereLlave : boolean
+    - idLlaveNecesaria : String
+    + puedeAbrirse(jugador)
+    + abrir(jugador)
+  }
+
+  class Trampa {
+    - dano : int
+    - activa : boolean
+    + activar(jugador)
+  }
+
+  class LogJuego {
+    + registrar(mensaje)
+    + mostrar()
+  }
+}
+
+package "Personajes" {
+  abstract class Personaje {
+    - nombre : String
+    - vida : int
+    - ataque : int
+    - defensa : int
+    - movimiento : int
+    - fila : int
+    - columna : int
+    + recibirDano(cantidad)
+    + estaVivo()
+  }
+
+  class Jugador {
+    - inventario : ListaDE<Objeto>
+    + mover(destino)
+    + atacar(enemigo)
+    + recoger(objeto)
+    + usar(objeto)
+    + equipar(objeto)
+  }
+
+  class Enemigo {
+    - tipo : String
+    + moverHaciaJugador(cueva, jugador)
+    + atacar(jugador)
+  }
+
+  class Boss {
+    + atacar(jugador)
+  }
+}
+
+package "Objetos" {
+  abstract class Objeto {
+    - id : String
+    - nombre : String
+    - vidaAporta : int
+    - ataqueAporta : int
+    - defensaAporta : int
+    - movimientoAporta : int
+    - usos : int
+    - equipable : boolean
+    - fungible : boolean
+    + aplicar(jugador)
+    + usar(jugador)
+  }
+
+  class Pocion {
+    + usar(jugador)
+  }
+
+  class Arma {
+    - alcance : int
+    + aplicar(jugador)
+  }
+
+  class Espada
+  class Arco
+
+  class Escudo {
+    + aplicar(jugador)
+  }
+
+  class Llave {
+    - idPuerta : String
+  }
+}
+
+package "Estructuras propias existentes" {
+  class "Grafo<Cueva>" as GrafoCueva
+  class "ListaDE<Objeto>" as ListaInventario
+  class "ListaSE<Celda>" as ListaCeldas
+  class "ListaSE<ListaSE<Celda>>" as MatrizPropia
+  class "Cola<Personaje>" as ColaTurnos
+}
+
+Personaje <|-- Jugador
+Personaje <|-- Enemigo
+Enemigo <|-- Boss
+
+Objeto <|-- Pocion
+Objeto <|-- Arma
+Objeto <|-- Escudo
+Objeto <|-- Llave
+Arma <|-- Espada
+Arma <|-- Arco
+
+Partida --> Mazmorra
+Partida --> Jugador
+Partida --> LogJuego
+Mazmorra --> GrafoCueva : cuevas conectadas
+Mazmorra --> Cueva : cueva actual
+Cueva --> MatrizPropia : matriz propia
+MatrizPropia --> ListaCeldas : filas
+Cueva --> Celda
+Celda --> TipoCelda
+Celda --> Puerta
+Celda --> Trampa
+Celda --> Objeto
+Celda --> Personaje
+Jugador --> ListaInventario : inventario
+Partida --> ColaTurnos : orden de turnos
+Puerta --> Cueva : destino
+
+note right of Mazmorra
+La mazmorra completa contiene 3 cuevas:
+- facil: 5x5
+- media: 6x6
+- dificil: 7x7 con boss
+
+La mazmorra NO hereda de Grafo.
+Contiene un Grafo<Cueva>.
+end note
+
+note bottom of MatrizPropia
+Decision provisional:
+matriz sin Celda[][].
+Lista de filas, y cada fila
+es una lista propia de celdas.
+end note
+
+note right of Cueva
+La cueva NO hereda de Grafo.
+Tiene matriz propia.
+
+Para movimiento, cada celda se
+trata como nodo implicito:
+arriba, abajo, izquierda y derecha.
+El BFS usa Cola propia.
+end note
+
+note bottom of Enemigo
+Movimiento pendiente de concretar.
+Idea: usar BFS/camino minimo
+hacia el jugador con Cola propia.
+end note
+
+note bottom of Objeto
+Objeto abstracto para permitir
+ampliar con armas, pociones,
+llaves, escudos y otros extras.
+end note
+
+@enduml

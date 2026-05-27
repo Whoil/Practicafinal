@@ -1,0 +1,59 @@
+{
+  "descripcion": "JSON de prueba para demostrar el formato de una partida simplificada de Escape de la Mazmorra.",
+  "tipo": "prueba_documental",
+  "jugador": {
+    "nombre": "Mago de Prueba",
+    "vidaActual": 80,
+    "vidaMaxima": 100,
+    "ataque": 15,
+    "defensa": 5,
+    "fila": 1,
+    "columna": 1,
+    "inventario": [
+      {
+        "tipo": "POCION",
+        "nombre": "Pocion de prueba",
+        "curacion": 25
+      },
+      {
+        "tipo": "LLAVE",
+        "nombre": "Llave de prueba",
+        "codigoCerradura": "llave-cueva_media"
+      }
+    ]
+  },
+  "cuevaActual": "cueva_facil",
+  "turnosRestantes": 60,
+  "estadoPartida": "EN_CURSO",
+  "enemigos": [
+    {
+      "tipo": "ESQUELETO",
+      "nombre": "Esqueleto de prueba",
+      "vidaActual": 30,
+      "ataque": 8,
+      "defensa": 2,
+      "fila": 3,
+      "columna": 4,
+      "vivo": true
+    }
+  ],
+  "objetosEnSuelo": [
+    {
+      "tipo": "ESCUDO",
+      "nombre": "Escudo de prueba",
+      "defensa": 3,
+      "fila": 2,
+      "columna": 5
+    }
+  ],
+  "puertas": [
+    {
+      "id": "puerta-media",
+      "origen": "cueva_facil",
+      "destino": "cueva_media",
+      "codigoLlave": "llave-cueva_media",
+      "abierta": false
+    }
+  ]
+}
+

@@ -135,21 +135,18 @@ class PartidaTest {
     }
 
     @Test
-    void recogerObjetoEnLaMismaCasilla() throws Exception {
-        Partida p = Partida.crearPartidaNueva();
-        assertTrue(p.moverJugador(2, 4));
-        p.terminarTurno();
-        assertTrue(p.moverJugador(2, 6));
-        p.terminarTurno();
-        assertTrue(p.moverJugador(4, 6));
-        p.terminarTurno();
-        assertTrue(p.moverJugador(4, 8));
-        p.terminarTurno();
-        assertTrue(p.moverJugador(5, 9));
-        p.terminarTurno();
-        assertTrue(p.moverJugador(6, 11));
-        assertFalse(p.hayObjetoEnPosicion());
-        assertEquals(1, p.getJugador().getCantidadObjetosInventario());
+    void recogerObjetoEnLaMismaCasilla() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 0, 0);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Pocion pocion = new Pocion("p1");
+
+        assertTrue(partida.anadirObjetoEnSuelo(cueva, pocion, 0, 1));
+        assertFalse(partida.hayObjetoEnPosicion());
+        assertTrue(partida.moverJugador(0, 1));
+        assertFalse(partida.hayObjetoEnPosicion());
+        assertEquals(1, jugador.getCantidadObjetosInventario());
     }
 
     @Test
@@ -401,10 +398,10 @@ class PartidaTest {
         Jugador jugador = new Jugador("Heroe", 100, 15, 5, 2, 0, 0);
         Partida partida = new Partida(mazmorra, jugador, 10);
 
-        assertTrue(partida.moverJugador(0, 2));
+        assertTrue(partida.moverJugador(0, 1));
         assertEquals(0, jugador.getFila());
-        assertEquals(2, jugador.getColumna());
-        assertFalse(partida.moverJugador(1, 2));
+        assertEquals(1, jugador.getColumna());
+        assertFalse(partida.moverJugador(0, 0));
     }
 
     @Test
@@ -540,6 +537,8 @@ class PartidaTest {
         assertTrue(partida.tieneLlaveFinal());
         assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
 
+        assertTrue(partida.moverJugador(0, 1));
+        assertTrue(partida.terminarTurno());
         assertTrue(partida.moverJugador(0, 0));
 
         assertEquals(EstadoPartida.VICTORIA, partida.getEstado());
@@ -561,6 +560,8 @@ class PartidaTest {
         assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
         assertEquals(2, jugador.getCantidadObjetosInventario());
 
+        assertTrue(partida.moverJugador(0, 1));
+        assertTrue(partida.terminarTurno());
         assertTrue(partida.moverJugador(0, 0));
 
         assertEquals(EstadoPartida.VICTORIA, partida.getEstado());
