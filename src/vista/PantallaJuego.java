@@ -6,6 +6,7 @@ import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -18,6 +19,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -83,6 +85,7 @@ public class PantallaJuego {
     private Pane gridCeldas;
     private Pane gridWalls;
     private Pane gridOverlay;
+    private ScrollPane gridScrollStyled;
     private StackPane[][] celdas;
     private Text txtVida, txtAtaque, txtDefensa, txtTurnos, txtCueva, txtEstado, txtFase;
     private Text txtDistPuerta, txtDistSalida;
@@ -236,6 +239,8 @@ public class PantallaJuego {
 
         // --- Grid de la cueva ---
         VBox gridConLog = new VBox(5);
+        HBox.setHgrow(gridConLog, Priority.ALWAYS);
+        gridConLog.setMinSize(0, 0);
         gridLayer = new StackPane();
         gridCeldas = new Pane();
         gridWalls = new Pane();
@@ -260,14 +265,31 @@ public class PantallaJuego {
         StackPane.setAlignment(feedbackPane, Pos.TOP_CENTER);
         StackPane.setMargin(feedbackPane, new Insets(10, 0, 0, 0));
         gridLayer.getChildren().add(feedbackPane);
-        gridConLog.getChildren().add(gridLayer);
+        gridScrollStyled = new ScrollPane(gridLayer);
+        gridScrollStyled.setFitToWidth(false);
+        gridScrollStyled.setFitToHeight(false);
+        gridScrollStyled.setPannable(true);
+        gridScrollStyled.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        gridScrollStyled.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        gridScrollStyled.setMinSize(0, 0);
+        gridScrollStyled.setFocusTraversable(false);
+        gridScrollStyled.addEventFilter(javafx.scene.input.KeyEvent.ANY, e -> {
+            if (e.getCode().isArrowKey() || e.getCode() == javafx.scene.input.KeyCode.SPACE) {
+                e.consume();
+            }
+        });
+        gridScrollStyled.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) -> centrarVistaEnJugador());
+        gridScrollStyled.setStyle("-fx-background: #000000; -fx-background-color: #000000; -fx-border-color: #333; -fx-border-width: 1;");
+        VBox.setVgrow(gridScrollStyled, Priority.ALWAYS);
+        gridConLog.getChildren().add(gridScrollStyled);
 
         // --- Log estilizado (debajo del grid) ---
         logContainer = new VBox(2);
         logContainer.setStyle("-fx-padding: 4;");
         logScrollStyled = new ScrollPane(logContainer);
-        logScrollStyled.setPrefHeight(140);
-        logScrollStyled.setMaxHeight(140);
+        logScrollStyled.setMinHeight(70);
+        logScrollStyled.setPrefHeight(115);
+        logScrollStyled.setMaxHeight(125);
         logScrollStyled.setFitToWidth(true);
         logScrollStyled.setStyle("-fx-background: transparent; -fx-background-color: #1a1410; -fx-border-color: #4a3b32; -fx-border-width: 2;");
         logScrollStyled.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -280,6 +302,7 @@ public class PantallaJuego {
         // --- Panel derecho ---
         VBox panelDer = new VBox(8);
         panelDer.setPrefWidth(340);
+        panelDer.setMinWidth(300);
         panelDer.setPadding(new Insets(4));
         panelDer.setStyle("-fx-background-color: rgba(0,0,0,0.4); -fx-border-color: #444; -fx-border-width: 1; -fx-padding: 8;");
 
@@ -287,6 +310,7 @@ public class PantallaJuego {
         txtCuevaNombre = new Text();
         txtCuevaNombre.setFont(Font.font(FONT, FontWeight.BOLD, 16));
         txtCuevaNombre.setFill(Color.web("#C89D65"));
+        txtCuevaNombre.setWrappingWidth(300);
         panelDer.getChildren().add(txtCuevaNombre);
 
         // Stats
@@ -320,13 +344,31 @@ public class PantallaJuego {
         accBox.getChildren().addAll(tituloAcc, accionesBox);
         panelDer.getChildren().add(accBox);
 
-        centro.getChildren().add(panelDer);
+        ScrollPane panelDerScroll = new ScrollPane(panelDer);
+        panelDerScroll.setFitToWidth(true);
+        panelDerScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        panelDerScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        panelDerScroll.setMinWidth(320);
+        panelDerScroll.setPrefWidth(360);
+        panelDerScroll.setFocusTraversable(false);
+        panelDerScroll.addEventFilter(javafx.scene.input.KeyEvent.ANY, e -> {
+            if (e.getCode().isArrowKey() || e.getCode() == javafx.scene.input.KeyCode.SPACE) {
+                e.consume();
+            }
+        });
+        panelDerScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        centro.getChildren().add(panelDerScroll);
         root.setCenter(centro);
 
         // Teclado — delegado al controlador
         Scene scene = new Scene(rootStack, ANCHO, ALTO);
-        scene.setOnKeyPressed(controlador::handleKeyPressed);
-        scene.setOnKeyReleased(controlador::handleKeyReleased);
+        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, controlador::handleKeyPressed);
+        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_RELEASED, controlador::handleKeyReleased);
+        scene.windowProperty().addListener((obs, oldWindow, newWindow) -> {
+            if (newWindow != null) {
+                centrarVistaEnJugador();
+            }
+        });
 
         // Que el clic en cualquier parte devuelva el foco al root (teclado)
         root.setFocusTraversable(true);
@@ -494,12 +536,67 @@ public class PantallaJuego {
 
         gridOverlay.setPrefSize(totalWidth, totalHeight);
         gridCeldas.setPrefSize(totalWidth, totalHeight);
+        gridLayer.setMinSize(totalWidth, totalHeight);
+        gridLayer.setPrefSize(totalWidth, totalHeight);
         gridWalls.setPrefSize(0, 0);
         gridFog.setPrefSize(totalWidth, totalHeight);
         StackPane.setAlignment(gridCeldas, Pos.TOP_LEFT);
         StackPane.setAlignment(gridWalls, Pos.TOP_LEFT);
         StackPane.setAlignment(gridFog, Pos.TOP_LEFT);
         StackPane.setAlignment(gridOverlay, Pos.TOP_LEFT);
+    }
+
+    /**
+     * Coloca la vista del mapa alrededor del jugador. Es importante en ventanas
+     * pequenas: algunas cuevas empiezan lejos de la esquina superior izquierda y,
+     * sin este ajuste, el jugador queda fuera de la zona visible.
+     */
+    private void centrarVistaEnJugador() {
+        centrarVistaEnJugador(0);
+    }
+
+    private void centrarVistaEnJugador(int intentos) {
+        if (gridScrollStyled == null || cumX == null || cumY == null || colWidth == null || rowHeight == null) {
+            return;
+        }
+        Jugador jugador = partida.getJugador();
+        if (jugador == null) {
+            return;
+        }
+        int fila = jugador.getFila();
+        int columna = jugador.getColumna();
+        if (fila < 0 || columna < 0 || fila >= cumY.length || columna >= cumX.length) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            Bounds viewport = gridScrollStyled.getViewportBounds();
+            double contenidoAncho = gridLayer.getWidth();
+            double contenidoAlto = gridLayer.getHeight();
+            if (viewport.getWidth() <= 1 || viewport.getHeight() <= 1
+                    || contenidoAncho <= 1 || contenidoAlto <= 1) {
+                if (intentos < 4) {
+                    centrarVistaEnJugador(intentos + 1);
+                }
+                return;
+            }
+
+            if (contenidoAncho <= viewport.getWidth()) {
+                gridScrollStyled.setHvalue(0.0);
+            } else {
+                double centroX = cumX[columna] + colWidth[columna] / 2.0;
+                double maxX = Math.max(1.0, contenidoAncho - viewport.getWidth());
+                gridScrollStyled.setHvalue(Math.max(0.0, Math.min(1.0, (centroX - viewport.getWidth() / 2.0) / maxX)));
+            }
+
+            if (contenidoAlto <= viewport.getHeight()) {
+                gridScrollStyled.setVvalue(0.0);
+            } else {
+                double centroY = cumY[fila] + rowHeight[fila] / 2.0;
+                double maxY = Math.max(1.0, contenidoAlto - viewport.getHeight());
+                gridScrollStyled.setVvalue(Math.max(0.0, Math.min(1.0, (centroY - viewport.getHeight() / 2.0) / maxY)));
+            }
+        });
     }
 
     // ---------------------------------------------------------------
@@ -540,7 +637,8 @@ public class PantallaJuego {
 
             // Reconstruir el grid si la cueva ha cambiado
             String cuevaIdActual = cueva.getId();
-            if (!cuevaIdActual.equals(ultimaCuevaId)) {
+            boolean cuevaCambiada = !cuevaIdActual.equals(ultimaCuevaId);
+            if (cuevaCambiada) {
                 ultimaCuevaId = cuevaIdActual;
                 construirGrid();
             }
@@ -583,6 +681,9 @@ public class PantallaJuego {
         this.jugadorSprite = crearSpriteAssets("characters" + File.separator + "Spritesheets" + File.separator + "knight_idle.png", spriteSize);
         if (j.getFila() >= 0 && j.getFila() < filas && j.getColumna() >= 0 && j.getColumna() < cols) {
             celdas[j.getFila()][j.getColumna()].getChildren().add(jugadorSprite);
+        }
+        if (cuevaCambiada) {
+            centrarVistaEnJugador();
         }
 
         // Enemigos (icono del asset pack segun tematica y tipo)
@@ -734,7 +835,9 @@ public class PantallaJuego {
         accionesBox.getChildren().add(btnArriba);
         HBox movHoriz = new HBox(4);
         movHoriz.setAlignment(Pos.CENTER);
+        movHoriz.setMaxWidth(285);
         btnIzq = crearBotonTexto("< IZQ [A]");
+        btnIzq.setWrappingWidth(120);
         btnIzq.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
             if (pc <= 0) { ejecutarAccion(false, null); return; }
@@ -748,6 +851,7 @@ public class PantallaJuego {
             }
         });
         btnDer = crearBotonTexto("DER [D] >");
+        btnDer.setWrappingWidth(120);
         btnDer.setOnMouseClicked(e -> {
             int pf = partida.getJugador().getFila(), pc = partida.getJugador().getColumna();
             if (pc >= partida.getCuevaActual().getColumnas() - 1) { ejecutarAccion(false, null); return; }
@@ -1146,6 +1250,7 @@ public class PantallaJuego {
         Text t = new Text(nombre + ": ");
         t.setFont(Font.font(FONT, FontWeight.NORMAL, 13));
         t.setFill(Color.WHITE);
+        t.setWrappingWidth(285);
         return t;
     }
 
@@ -1153,6 +1258,7 @@ public class PantallaJuego {
         Text t = new Text(texto);
         t.setFont(Font.font(FONT, FontWeight.BOLD, 12));
         t.setFill(Color.web("#C89D65"));
+        t.setWrappingWidth(285);
         t.setCursor(Cursor.HAND);
         t.setOnMouseEntered(e -> t.setFill(Color.web("#FFD700")));
         t.setOnMouseExited(e -> t.setFill(Color.web("#C89D65")));

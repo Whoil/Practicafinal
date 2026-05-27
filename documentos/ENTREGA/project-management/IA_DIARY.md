@@ -1084,3 +1084,25 @@ Alvaro pidio corregir dos problemas de la implementacion anterior: la botonera d
 Se ajusto la posicion vertical de la botonera del menu y se sustituyo el `TextInputDialog` por un modal JavaFX propio dentro de `EscapeMazmorraApp`, con velo oscuro, panel estilo pergamino, campo `TextField` estilizado, botones `Comenzar` y `Cancelar`, soporte de Enter/Escape y el mismo fallback a "Mago Errante".
 
 Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 208/208 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-25 - Guillermo / Responsive en pantalla de partida
+
+Guillermo reporto dos problemas visuales al comenzar una nueva sesion: en ventana no maximizada el jugador podia quedar fuera de la zona visible al inicio de una mazmorra, y la parte inferior de la pantalla cortaba texto.
+
+Se mantuvo el alcance en la capa JavaFX. En `PantallaJuego` el area de mapa paso a estar dentro de un `ScrollPane` y se agrego centrado automatico sobre el jugador al cambiar de cueva. Tambien se redujo la rigidez del log inferior y se envolvio el panel derecho en un scroll vertical para evitar que las acciones queden cortadas en ventanas bajas.
+
+No se modificaron reglas de juego ni persistencia. La compilacion desde Codex quedo bloqueada por permisos de lectura sobre los JAR locales de JavaFX en `.m2`; queda pendiente validar visualmente desde IntelliJ. La revision independiente detecto riesgos de foco de teclado, centrado prematuro y corte horizontal; se corrigieron antes de preparar PR.
+
+## 2026-05-25 - Guillermo / Correccion visual de pocion
+
+Guillermo aviso de que el PNG de la pocion se veia cortado por la mitad. Se reviso la carga del icono en `PantallaJuego` y se detecto que se estaba tratando como spritesheet cuando realmente es una imagen vertical unica.
+
+Se cambio la carga para usar el PNG completo sin recorte. El cambio no afecta reglas de partida, inventario, JSON ni turnos. Se solicito revision independiente para el PR #24; el revisor no encontro bloqueos y recomendo validacion visual manual en mapa e inventario.
+
+## 2026-05-26 - Guillermo / Portabilidad de ejecucion y ventana fija
+
+Guillermo pidio abordar dos puntos finales de entrega: comprobar como abrir el juego en otros ordenadores y resolver el problema de pantalla completa/maximizado, que seguia deformando la interfaz en algunas pruebas.
+
+Se revisaron `README.md`, `scripts/run.ps1`, `scripts/test.ps1`, `ControladorFlujo` y `EscapeMazmorraApp`. Los scripts dejaron de depender de una ruta fija de JDK y ahora usan `JAVA_HOME` o el `PATH`. Tambien se documento que JavaFX 21.0.5 puede estar en `.m2` o copiarse a `lib\javafx` para una entrega mas portable.
+
+Para el problema visual se eligio la solucion conservadora: quitar el redimensionado de la ventana de juego y restaurar siempre a una ventana ajustada a la escena 1280x720, sin maximizado ni pantalla completa al cambiar de escena. Es menos flexible, pero reduce riesgo para la entrega. La revision independiente recomendo usar `sizeToScene()` para no confundir tamano exterior de ventana con area util de escena, y se aplico. Tambien marco como riesgo menor que una carpeta `lib\javafx` incompleta bloqueara el fallback a `.m2`; se corrigio para intentar Maven local si no estan los cuatro JAR locales. La compilacion en Codex queda bloqueada por permisos al leer JavaFX en `.m2`; se solicita validacion local en IntelliJ/PowerShell.

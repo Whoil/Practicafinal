@@ -2287,3 +2287,70 @@ Nota: la primera ejecucion en sandbox no pudo leer los JAR locales de JavaFX; se
 - NC-10 a NC-13: Revision de diagramas.
 - NC-06: Planificar memoria.
 - NC-08: Planificar guion video.
+
+## 2026-05-25 - Guillermo / Ajuste responsive pantalla de partida
+
+### Contexto
+
+Guillermo inicio una nueva sesion porque, al ejecutar el juego sin maximizar la ventana, el jugador no siempre quedaba visible al principio de cada mazmorra y el texto inferior de la pantalla de partida aparecia cortado.
+
+### Trabajo realizado
+
+- `src/vista/PantallaJuego.java`: el mapa de la cueva queda dentro de un `ScrollPane` pannable, en lugar de depender de que toda la grilla quepa siempre en la ventana.
+- Se anadio centrado automatico de la vista sobre el jugador cuando se construye o cambia la cueva.
+- El log inferior deja de usar una altura fija tan rigida y conserva una altura minima menor.
+- El panel derecho queda dentro de un `ScrollPane` vertical para que las acciones no se corten en ventanas bajas.
+- No se tocaron reglas de partida, movimiento, combate, inventario, JSON ni datos de mapa.
+
+### Pruebas ejecutadas
+
+- Intento de compilacion: `powershell.exe -ExecutionPolicy Bypass -File scripts\run.ps1 -CompileOnly`.
+- Resultado en Codex: bloqueado por permisos al leer los JAR locales de JavaFX en `C:\Users\landm\.m2\repository\org\openjfx\...`.
+- Pendiente: validar visualmente desde IntelliJ con ventana no maximizada, cambio de cueva y panel inferior/derecho.
+
+### Revision independiente
+
+- Revisor independiente solicitado antes de preparar PR.
+- Resultado: detecto riesgos de foco de teclado en `ScrollPane`, centrado antes del layout y posible corte horizontal. Se corrigieron usando filtros de teclado a nivel de `Scene`, reintento/espera de medidas validas para el centrado y wrapping controlado en textos/botones del panel derecho.
+
+## 2026-05-25 - Guillermo / Icono de pocion completo
+
+### Contexto
+
+Guillermo detecto que el icono PNG de la pocion se veia cortado por la mitad en el juego.
+
+### Trabajo realizado
+
+- Se reviso `src/vista/PantallaJuego.java`.
+- La pocion deja de cargarse con el helper de spritesheet y pasa a cargarse como imagen completa.
+- No se tocaron reglas de juego, inventario, JSON, turnos ni datos de mapa.
+
+### Pruebas y revision
+
+- Cambio visual de una linea; no se anadieron tests JUnit.
+- Pendiente validacion visual desde IntelliJ.
+- Revisor independiente solicitado para el PR #24.
+
+## 2026-05-26 - Guillermo / Ejecucion en otros equipos y pantalla completa
+
+### Contexto
+
+Guillermo pidio revisar que el proyecto pueda abrirse en otros ordenadores y corregir o eliminar el problema de pantalla completa/maximizado, porque en algunas pruebas la interfaz seguia deformandose.
+
+### Trabajo realizado
+
+- `scripts/run.ps1` y `scripts/test.ps1`: eliminada la dependencia de la ruta fija `C:\Users\UAH\.jdks\ms-21.0.10`.
+- Los scripts ahora usan `JAVA_HOME` si apunta a un JDK con `javac`; si no, buscan `java.exe` y `javac.exe` en el `PATH`.
+- Los scripts aceptan JavaFX 21.0.5 desde `lib\javafx\` dentro del proyecto o desde el repositorio Maven local del usuario.
+- `README.md`: documentados requisitos, forma de ejecutar, dependencias necesarias y notas de entrega.
+- `ControladorFlujo` y `EscapeMazmorraApp`: las escenas restauran la ventana a un tamano fijo equivalente a la escena 1280x720, no redimensionable, sin maximizado ni pantalla completa.
+
+### Pruebas ejecutadas
+
+- `git diff --check`: correcto.
+- `scripts\run.ps1 -CompileOnly`: el script arranca y llega a `javac`, pero en el entorno Codex falla por no poder leer los JAR locales de JavaFX en `.m2`.
+
+### Pendiente
+
+- Validar desde IntelliJ/PowerShell local que el juego abre en ventana fija y ya no se deforma al intentar maximizar.
+- Si se quiere portabilidad completa por ZIP, copiar los JAR de JavaFX 21.0.5 para Windows a `lib\javafx\`. Si esa carpeta esta incompleta, los scripts prueban igualmente el fallback del repositorio Maven local.
