@@ -129,6 +129,69 @@ class MazmorraTest {
     }
 
     @Test
+    void caminoMasLargoEnGrafoConBifurcacion() {
+        Mazmorra mazmorra = new Mazmorra();
+        Cueva a = cueva("A");
+        Cueva b = cueva("B");
+        Cueva c = cueva("C");
+        Cueva d = cueva("D");
+        mazmorra.addCueva(a);
+        mazmorra.addCueva(b);
+        mazmorra.addCueva(c);
+        mazmorra.addCueva(d);
+        mazmorra.conectarCuevas(a, b, "ab");
+        mazmorra.conectarCuevas(a, c, "ac");
+        mazmorra.conectarCuevas(b, d, "bd");
+        mazmorra.conectarCuevas(c, d, "cd");
+
+        assertTrue(mazmorra.existeCamino(a, d));
+        assertEquals(2, mazmorra.getDistanciaMinima(a, d));
+        assertEquals(4, mazmorra.getNumeroCuevas());
+        assertEquals(4, mazmorra.getNumeroConexiones());
+    }
+
+    @Test
+    void grafoDisconexoNoTieneCamino() {
+        Mazmorra mazmorra = new Mazmorra();
+        Cueva a = cueva("A");
+        Cueva b = cueva("B");
+        mazmorra.addCueva(a);
+        mazmorra.addCueva(b);
+
+        assertFalse(mazmorra.existeCamino(a, b));
+        assertTrue(mazmorra.getCaminoMinimo(a, b).isEmpty());
+        assertEquals(-1, mazmorra.getDistanciaMinima(a, b));
+    }
+
+    @Test
+    void caminoMinimoACuevaMismaEsVacio() {
+        Mazmorra mazmorra = new Mazmorra();
+        Cueva a = cueva("A");
+        mazmorra.addCueva(a);
+
+        assertTrue(mazmorra.existeCamino(a, a));
+        assertEquals(0, mazmorra.getDistanciaMinima(a, a));
+        assertTrue(mazmorra.getCaminoMinimo(a, a).isEmpty());
+    }
+
+    @Test
+    void cicloEnGrafoNoBloqueaCamino() {
+        Mazmorra mazmorra = new Mazmorra();
+        Cueva a = cueva("A");
+        Cueva b = cueva("B");
+        Cueva c = cueva("C");
+        mazmorra.addCueva(a);
+        mazmorra.addCueva(b);
+        mazmorra.addCueva(c);
+        mazmorra.conectarCuevas(a, b, "ab");
+        mazmorra.conectarCuevas(b, c, "bc");
+        mazmorra.conectarCuevas(c, a, "ca");
+
+        assertTrue(mazmorra.existeCamino(a, c));
+        assertEquals(2, mazmorra.getDistanciaMinima(a, c));
+    }
+
+    @Test
     void getCuevasDevuelveCopiaDeLaLista() {
         Mazmorra mazmorra = new Mazmorra();
         mazmorra.addCueva(cueva("nivel-1"));

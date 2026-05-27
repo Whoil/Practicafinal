@@ -30,6 +30,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.geometry.Rectangle2D;
 import java.io.File;
 import javafx.application.Platform;
@@ -1607,11 +1608,22 @@ public class PantallaJuego {
         if (img == null) {
             try {
                 File f = new File(fullPath);
-                img = new Image(f.toURI().toString());
+                img = new Image(f.toURI().toString(), false);
+                if (img.isError() || img.getWidth() <= 0 || img.getHeight() <= 0) {
+                    img = new Image(new java.io.FileInputStream(f));
+                }
                 IMAGE_CACHE.addLast(new EntradaImagen(fullPath, img));
             } catch (Exception e) {
                 return new ImageView();
             }
+        }
+        if (img.isError() || img.getWidth() <= 0 || img.getHeight() <= 0) {
+            WritableImage fallback = new WritableImage(1, 1);
+            fallback.getPixelWriter().setColor(0, 0, Color.web("#888888"));
+            ImageView iv = new ImageView(fallback);
+            iv.setFitWidth(tamanio);
+            iv.setFitHeight(tamanio);
+            return iv;
         }
         ImageView iv = new ImageView(img);
 

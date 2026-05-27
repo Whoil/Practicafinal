@@ -2,39 +2,58 @@
 
 ## Requisitos
 
-- Windows con PowerShell.
-- JDK 21 instalado.
-- `JAVA_HOME` apuntando al JDK 21, o `java` y `javac` disponibles en el `PATH`.
-- JavaFX 21.0.5 para Windows. El script lo busca en este orden:
-  1. `lib\javafx\` dentro del proyecto.
-  2. Repositorio Maven local del usuario: `%USERPROFILE%\.m2\repository\org\openjfx\...`.
+- **Windows 10/11** con PowerShell.
+- **JDK 21** instalado (Eclipse Temurin recomendado).
+  - Descarga: https://adoptium.net/temurin/releases/?version=21
+  - El lanzador detecta automaticamente el JDK en `JAVA_HOME`, el `PATH`, o en directorios comunes de instalacion. No es necesario configurar nada.
+- **JavaFX 21.0.5** para Windows. Necesitas estos cuatro JAR en `lib\javafx\`:
 
-Si el juego se abre en otro ordenador y falta JavaFX, copia en `lib\javafx\` estos cuatro JAR:
+  ```text
+  lib/javafx/
+    javafx-base-21.0.5-win.jar
+    javafx-controls-21.0.5-win.jar
+    javafx-graphics-21.0.5-win.jar
+    javafx-media-21.0.5-win.jar
+  ```
 
-```text
-javafx-base-21.0.5-win.jar
-javafx-controls-21.0.5-win.jar
-javafx-graphics-21.0.5-win.jar
-javafx-media-21.0.5-win.jar
+  Si faltan, descargalos desde https://gluonhq.com/products/javafx/ (JavaFX 21.0.5, Windows, SDK). Extrae solo los JAR listados y copialos a `lib\javafx\`.
+
+## Contenido del ZIP (entrega)
+
+```
+EscapeMazmorra.bat          <-- Lanzador principal (doble clic)
+scripts/
+    run.ps1                 <-- Compila y ejecuta el juego
+    test.ps1                <-- Compila y ejecuta los tests
+src/                        <-- Codigo fuente
+test/                       <-- Tests JUnit
+lib/
+    gson-2.10.1.jar         <-- Gson para JSON
+    junit-platform-console-standalone-1.10.0.jar  <-- JUnit (solo tests)
+    javafx/                 <-- JAR de JavaFX (ver requisitos)
+datos/
+    cuevas.json             <-- Configuracion del juego
 ```
 
-## Ejecutar el juego
+No incluir `build/`, `out/` ni archivos temporales.
 
-La forma recomendada es hacer doble clic en:
+## Ejecutar el juego (recomendado)
+
+Haz doble clic en:
 
 ```text
 EscapeMazmorra.bat
 ```
 
-Ese lanzador compila y abre el juego automaticamente usando `scripts\run.ps1`.
+El lanzador busca automaticamente el JDK 21, compila el codigo y abre la ventana del juego.
 
-Si se prefiere ejecutar manualmente desde PowerShell, en la raiz del proyecto:
+## Ejecutar desde PowerShell
 
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -File scripts\run.ps1
 ```
 
-## Solo compilar
+## Solo compilar (sin abrir ventana)
 
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -File scripts\run.ps1 -CompileOnly
@@ -46,9 +65,8 @@ powershell.exe -ExecutionPolicy Bypass -File scripts\run.ps1 -CompileOnly
 powershell.exe -ExecutionPolicy Bypass -File scripts\test.ps1
 ```
 
-## Notas para entrega
+## Notas
 
-- No es necesario subir `build/`, `out/` ni archivos temporales de ejecucion.
-- `datos/cuevas.json` debe estar presente porque contiene la configuracion del juego.
-- `lib\gson-2.10.1.jar` y `lib\junit-platform-console-standalone-1.10.0.jar` deben conservarse.
 - La ventana de juego se mantiene fija a 1280x720 para evitar errores visuales al maximizar o usar pantalla completa en algunos equipos.
+- `datos/cuevas.json` debe estar presente porque contiene la configuracion del juego.
+- Si el `.bat` no encuentra el JDK, muestra un mensaje con el enlace de descarga de Adoptium JDK 21.

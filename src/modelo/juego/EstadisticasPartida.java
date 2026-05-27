@@ -72,7 +72,7 @@ public class EstadisticasPartida {
         if (victoria) {
             puntuacion += 1000;
         }
-        return puntuacion;
+        return Math.max(0, puntuacion);
     }
 
     public String calcularTitulo(boolean victoria) {

@@ -114,7 +114,8 @@ public class ControladorFlujo {
         } catch (IOException ex) {
             logDirecto("No se pudo guardar ranking: " + ex.getMessage());
         }
-        PantallaFinal pantallaFinal = new PantallaFinal(victoria, resultado, volverAlMenu);
+        Estructuras.ListaSE<String> logPartida = (partida != null) ? partida.getLog() : new Estructuras.ListaSE<>();
+        PantallaFinal pantallaFinal = new PantallaFinal(victoria, resultado, logPartida, volverAlMenu);
         Scene scene = pantallaFinal.crearScene();
         scene.setOnMouseClicked(e -> scene.getRoot().requestFocus());
         stage.setScene(scene);
