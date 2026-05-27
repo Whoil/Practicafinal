@@ -30,43 +30,66 @@ class FabricaPartidaTest {
 
     @Test
     void permiteRecogerLlaveYAvanzarConPuertaCreadaDesdeConexion() throws Exception {
-        ResultadoCarga resultado = new CargadorConfiguracion().cargar(RUTA_JSON);
+        ResultadoCarga resultado = cargarJsonTemporal("""
+                {
+                  "nombre": "Mazmorra test",
+                  "cuevas": [
+                    {
+                      "id": "cueva_a",
+                      "filas": 4,
+                      "columnas": 4,
+                      "matriz": [
+                        ["MURO","MURO","MURO","MURO"],
+                        ["MURO","INICIO","SUELO","MURO"],
+                        ["MURO","SUELO","SUELO","MURO"],
+                        ["MURO","PUERTA","SUELO","MURO"]
+                      ],
+                      "objetos": [
+                        {
+                          "tipo": "LLAVE",
+                          "id": "llave-test",
+                          "fila": 1,
+                          "columna": 2,
+                          "nombre": "Llave test",
+                          "descripcion": "Test",
+                          "tipoLlave": "PUERTA",
+                          "codigoCerradura": "llave-cueva_b"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "cueva_b",
+                      "filas": 3,
+                      "columnas": 3,
+                      "matriz": [
+                        ["MURO","MURO","MURO"],
+                        ["MURO","INICIO","MURO"],
+                        ["MURO","SUELO","MURO"]
+                      ]
+                    }
+                  ],
+                  "conexiones": [
+                    {
+                      "origen": "cueva_a",
+                      "destino": "cueva_b",
+                      "etiqueta": "puerta_test"
+                    }
+                  ]
+                }
+                """);
         Partida partida = new FabricaPartida().crearPartida(resultado);
 
-        assertTrue(partida.moverJugador(2, 4));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(2, 6));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(4, 6));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(4, 8));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(5, 9));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(6, 8));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(6, 6));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(8, 6));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(8, 4));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(8, 2));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(10, 2));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(10, 4));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(12, 4));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(12, 6));
-        assertTrue(partida.pasarTurno());
-        assertTrue(partida.moverJugador(12, 7));
-        assertTrue(partida.avanzarACueva("cueva_media"));
+        assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
 
-        assertEquals("cueva_media", partida.getCuevaActual().getId());
-        assertEquals(2, partida.getJugadorEnMapa().getFila());
-        assertEquals(2, partida.getJugadorEnMapa().getColumna());
+        assertTrue(partida.moverJugador(1, 2)); assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(2, 2)); assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(3, 2)); assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(3, 1));
+        assertTrue(partida.avanzarACueva("cueva_b"));
+
+        assertEquals("cueva_b", partida.getCuevaActual().getId());
+        assertEquals(1, partida.getJugadorEnMapa().getFila());
+        assertEquals(1, partida.getJugadorEnMapa().getColumna());
     }
 
     @Test

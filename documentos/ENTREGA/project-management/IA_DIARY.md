@@ -1,0 +1,1108 @@
+﻿# Diario de Uso de IA
+
+Este archivo servira como base para la entrega de metodologia.
+
+Cada uso relevante de agentes debe registrarse.
+
+## Formato
+
+```markdown
+## YYYY-MM-DD - Persona
+
+### Agente o herramienta
+
+Nombre del agente/herramienta.
+
+### Objetivo
+
+Que se queria conseguir.
+
+### Prompt o resumen del prompt
+
+Resumen claro de lo pedido.
+
+### Resultado
+
+Que produjo el agente.
+
+### Cambios aceptados
+
+Que se incorporo al proyecto.
+
+### Cambios rechazados o modificados
+
+Que no se acepto y por que.
+
+### Critica
+
+Valoracion del uso de IA y mejoras para siguientes prompts.
+```
+
+## 2026-05-20 - Coordinacion
+
+### Agente o herramienta
+
+Codex.
+
+### Objetivo
+
+Organizar metodologia de trabajo con agentes antes de conectar GitHub.
+
+### Prompt o resumen del prompt
+
+Se pidio estructurar la forma de trabajo del grupo, definir roles de agentes, archivos de coordinacion, reglas de revision y metodologia human-in-the-loop.
+
+### Resultado
+
+Se crearon documentos base:
+
+- `PRD.md`
+- `ARCHITECTURE.md`
+- `AGENTS.md`
+- `TASKS.md`
+- `DECISIONS.md`
+- `SCRATCHPAD.md`
+- `REVIEW_CHECKLIST.md`
+- `IA_DIARY.md`
+
+### Cambios aceptados
+
+Se acepta usar carpeta `project-management` como centro de coordinacion.
+
+### Cambios rechazados o modificados
+
+No se implemento codigo del juego. Se decidio preparar organizacion primero.
+
+### Critica
+
+La organizacion ayuda a reducir conflictos entre agentes, pero debe mantenerse actualizada. Si los agentes no actualizan `SCRATCHPAD.md` y `TASKS.md`, el sistema pierde valor.
+
+## 2026-05-21 - Alvaro
+
+### Agente o herramienta
+
+Codex.
+
+### Objetivo
+
+Optimizar el workflow de agentes para reducir consumo de tokens sin abandonar la estructura de `project-management`.
+
+### Prompt o resumen del prompt
+
+Alvaro pidio dejar aparcada la Parte A y ajustar el workflow usado con agentes, manteniendo la estructura existente de la carpeta `project-management`.
+
+### Resultado
+
+Se documento un modo economico de agentes en `AGENTS.md` y se creo una plantilla breve para delegar tareas en `templates/AGENT_BRIEF_TEMPLATE.md`.
+
+### Cambios aceptados
+
+- Lectura escalonada de documentos.
+- Delegacion solo cuando haya ventaja clara.
+- Prompts compactos para agentes auxiliares.
+- Respuestas breves con archivos relevantes, cambios y riesgos.
+
+### Cambios rechazados o modificados
+
+No se creo una estructura nueva fuera de `project-management`; se adapto el workflow a los documentos y carpetas ya existentes.
+
+### Critica
+
+La mejora reduce duplicacion de contexto, pero solo funcionara si los agentes registran buenos resumenes en `SCRATCHPAD.md` y evitan repetir investigaciones ya hechas.
+
+## 2026-05-21 - Alvaro
+
+### Agente o herramienta
+
+Codex.
+
+### Objetivo
+
+Fijar una politica de modelos para el proyecto que reduzca coste sin romper la coordinacion ni la calidad.
+
+### Prompt o resumen del prompt
+
+Alvaro pregunto si convenia usar GPT-5.5 o una version anterior para ahorrar tokens y despues pidio dejar la politica cerrada dentro de `project-management`.
+
+### Resultado
+
+Se documento en `AGENTS.md` una politica de modelos ligada al modo economico de agentes.
+
+### Cambios aceptados
+
+- `GPT-5.4` como modelo principal.
+- `GPT-5.4-Mini` para tareas auxiliares ligeras.
+- `GPT-5.5` solo para tareas dificiles o de alto impacto.
+- `GPT-5.3-Codex` para implementacion mecanica acotada.
+- Priorizar primero ahorro por contexto y workflow antes que por cambio de modelo.
+
+### Cambios rechazados o modificados
+
+No se impuso GPT-5.5 como modelo general del proyecto porque el coste adicional no compensa en el trabajo diario.
+
+### Critica
+
+La politica queda clara y util, pero su efecto real depende mas de la disciplina con el contexto y la delegacion que del nombre del modelo elegido.
+## 2026-05-20 - Guillermo
+
+### Agente o herramienta
+
+Codex / Agente B Logica.
+
+### Objetivo
+
+Preparar la primera sesion de Parte B y cerrar el diseno inicial de logica del juego antes de programar.
+
+### Prompt o resumen del prompt
+
+Guillermo se identifico como responsable de Parte B y pidio trabajar segun los documentos del proyecto. Se acordo releer `project-management` al inicio de cada sesion y revisar los archivos actualizados antes de cualquier commit/push. Despues se revisaron y decidieron, por partes, los elementos de jugador, enemigos, objetos, inventario, turnos y reglas basicas.
+
+### Resultado
+
+Se obtuvo un diseno inicial para Parte B:
+
+- Jugador con vida 100, ataque 15, defensa 5, movimiento 3, 40 turnos, inventario y objeto equipado.
+- Enemigos: esqueleto, orco, mago y boss, con valores base definidos.
+- Objetos: pocion, espada, arco, llave y escudo.
+- Pociones de cura e invisibilidad.
+- Llaves de puertas o cofres, encontradas en el suelo o como drop.
+- Drops fijos sin aleatoriedad.
+- Cofres con 0 o 1 objeto.
+- Turno con 1 movimiento y 1 accion.
+- Equipar/cambiar objeto no consume movimiento; usar objeto consume accion.
+- Penalizacion de defensa de 2 puntos al bajar al 75% o menos de vida, excepto boss.
+
+### Cambios aceptados
+
+Se aceptaron las decisiones de diseno anteriores como base de trabajo de Guillermo / Parte B para futuras tareas `B-01`, `B-02` y `B-03`.
+
+### Cambios rechazados o modificados
+
+Se rechazo seguir implementando codigo durante esta sesion. Tambien se decidio no usar aleatoriedad en los drops por ahora para reducir complejidad.
+
+### Critica
+
+La sesion fue util para concretar reglas antes de programar. Para proximas sesiones conviene confirmar con el grupo si arco, escudo e invisibilidad pasan a ser obligatorios o siguen siendo extras, porque los documentos iniciales los trataban como opcionales. Tambien se debe documentar formalmente la regla del 75% antes de implementarla. La interrupcion antes del primer intento de push ayudo a detectar que habia documentacion remota mas reciente; desde ahora se revisaran archivos actualizados antes de cualquier commit/push.
+
+
+## 2026-05-21 - Hector
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Realizar la tarea C-01: disenar el JSON inicial de configuracion de las 3 cuevas de la mazmorra, incluyendo la configuracion de Gson en el proyecto y la creacion del cargador que construye los objetos del modelo.
+
+### Prompt o resumen del prompt
+
+Hector se identifico como Parte C y pidio iniciar con la tarea C-01. Se acordo el plan: configurar Gson, crear el JSON, los DTOs, el cargador y los tests. Hector tambien recordo actualizar SCRATCHPAD.md, TASKS.md e IA_DIARY.md.
+
+### Resultado
+
+- Gson 2.10.1 configurado en el proyecto (lib/, .iml, .idea/libraries).
+- Fichero `datos/cuevas.json` con las 3 cuevas (facil 5x5, media 6x6, dificil 7x7), matrices de tipos de celda, enemigos, objetos y conexiones del grafo.
+- 5 DTOs en `src/json/` para mapear el JSON.
+- `CargadorConfiguracion.java` que lee el JSON con Gson y construye objetos Cueva y Mazmorra del modelo de Parte A.
+- `ResultadoCarga.java` que devuelve la Mazmorra junto con las configuraciones de enemigos y objetos para que Parte B las use despues.
+- 10 tests unitarios en `test/json/CargadorConfiguracionTest.java`.
+
+### Cambios aceptados
+
+- Todo el codigo de C-01: JSON, DTOs, cargador y tests.
+- La configuracion de Gson en el proyecto.
+
+### Cambios rechazados o modificados
+
+Ninguno. Todo el plan se ejecuto segun lo acordado.
+
+### Critica
+
+La tarea salio segun lo planeado. La compilacion fue correcta tanto de src como de tests. Los tests no pudieron ejecutarse desde terminal por falta de runner JUnit standalone, pero se dejaron preparados para IntelliJ. Para futuras sesiones, convendria tener los mensajes de commit preparados y pedir autorizacion humana al final de la sesion.
+
+## 2026-05-21 - Hector (sesion 2)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Resolver merge conflicts de la PR #3, actualizar la documentacion y cerrar la sesion.
+
+### Prompt o resumen del prompt
+
+Hector volvio al Agente C pidiendo ayuda para resolver conflictos de merge en la PR #3
+(feature/c-javafx-json-docs -> main). Los conflictos estaban en IA_DIARY.md, SCRATCHPAD.md
+y "Practica final.iml". Tras resolverlos, se pidio actualizar ambos documentos con el registro
+de esta sesion.
+
+### Resultado
+
+- Identificados conflictos en 3 archivos al hacer `git merge main`.
+- Resueltos: se mantuvo la entrada Gson en .iml (HEAD), se conservaron las entradas de sesion
+  C-01 en los diarios (HEAD), se descartaron las versiones vacias de main.
+- Commit del merge y push a origin.
+- PR #3 actualizada: estado OPEN, mergeability en calculo por GitHub.
+- Entradas de esta sesion anadidas a IA_DIARY.md y SCRATCHPAD.md.
+
+### Cambios aceptados
+
+- Merge commit ed1aea7 con la resolucion de conflictos.
+- Ningun cambio funcional en el codigo.
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Los conflictos fueron triviales: main tenia versiones vacias de los documentos de Parte C
+porque la rama feature incorporaba contenido que main aun no tenia. Para evitar estos
+conflictos en el futuro, conviene hacer `git merge main` en la feature branch antes de
+crear la PR, o mantener los documentos sincronizados periodicamente.
+
+## 2026-05-21 - Guillermo
+
+### Agente o herramienta
+
+Codex / Agente B Logica.
+
+### Objetivo
+
+Implementar la tarea `B-01 Modelo de personajes` respetando los documentos de coordinacion, el PDF de la practica y el alcance acordado con Guillermo.
+
+### Prompt o resumen del prompt
+
+Guillermo inicio una nueva sesion como responsable de Parte B. Pidio revisar GitHub y releer `project-management` antes de proponer o modificar nada. Despues pidio buscar en el PDF la indicacion sobre contratos/interfaces. Tras confirmar que el PDF exige declarar contratos necesarios, se acordo usar `Personaje` abstracto como contrato base para B-01 y no crear interfaces Java innecesarias.
+
+Tambien se acordo que antes de programar se cerraria el alcance, que la regla del 75% quedaria para combate, que no se incluirian objetos ni inventario en B-01, y que al final se usaria revision independiente. Antes del commit se volvio a actualizar la rama con los cambios de Parte C.
+
+### Resultado
+
+Se implemento el modelo base de personajes:
+
+- `Personaje`
+- `Jugador`
+- `Enemigo`
+- `Boss`
+- `TipoEnemigo`
+
+Se crearon tests JUnit:
+
+- `PersonajeTest`
+- `EnemigoTest`
+
+Guillermo verifico en IntelliJ cobertura del 100% para el paquete `modelo.personajes`. Se dejo `B-01` en estado `REVISION` porque la aceptacion final depende de la PR.
+
+El Agente Revisor Independiente recomendo aceptar sin bloqueos. La nota de compatibilidad Java se corrigio sustituyendo `String.isBlank()` por `trim().isEmpty()`. Tambien se corrigio una errata de comentario en `TipoEnemigo` y se anadieron comentarios a las validaciones privadas de `Personaje`.
+
+### Cambios aceptados
+
+- `Personaje` como clase abstracta y contrato base.
+- Constructores libres para no fijar valores por defecto dentro de las clases.
+- Sin setters generales para estadisticas base.
+- Comentarios en clases y metodos importantes, no en getters.
+- Tests en `test/modelo/personajes/`, aprovechando la configuracion JUnit incorporada desde `main`.
+
+### Cambios rechazados o modificados
+
+- No se implemento `atacar`, porque pertenece a `B-03 Combate y turnos`.
+- No se implemento inventario ni objeto equipado, porque pertenecen a `B-02`.
+- No se implemento regla de bajada de defensa al 75%, porque se acordo dejarla para `B-03`.
+- No se creo una interfaz Java adicional para `Personaje`, porque la clase abstracta ya cubre el contrato necesario de B-01.
+
+### Critica
+
+La sesion fue util para ajustar el trabajo al PDF: primero contratos y alcance, luego implementacion. El principal cuidado fue actualizar la rama con los cambios recientes de Parte A y Parte C antes de preparar la PR, porque `main` habia incorporado JSON, Gson, documentos actualizados y tests de otra parte. Tambien conviene mantener la disciplina de no mezclar B-01 con objetos, combate o turnos aunque parezcan cercanos.
+
+## 2026-05-22 - Guillermo
+
+### Agente o herramienta
+
+Codex / Agente B Logica.
+
+### Objetivo
+
+Iniciar e implementar la tarea `B-02 Modelo de objetos e inventario`, manteniendo el alcance separado de B-03 y revisando antes los dos PDF del proyecto.
+
+### Prompt o resumen del prompt
+
+Guillermo pidio empezar la sesion del dia revisando GitHub y `project-management`, despues leer los dos PDF del proyecto para comprobar que estaba hecho y que faltaba en Parte B. Tras confirmar que B-01 estaba cubierta y que B-02 debia centrarse en objetos e inventario, Guillermo pidio decidir el alcance punto por punto antes de programar.
+
+Se acordo incluir `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo` y `Llave`; permitir objetos del mismo tipo si tienen ids distintos; rechazar ids duplicados; usar ranuras separadas de arma y escudo; hacer que el arco ocupe las dos manos; dejar llaves sin equipar; implementar solo pocion de cura; y dejar drops, cofres, mapa, JSON, JavaFX, turnos, combate, invisibilidad y regla del 75% fuera de B-02.
+
+### Resultado
+
+Se implemento la base de B-02:
+
+- `ListaDE`, `ElementoDE` e `IteradorDE` traidos desde las estructuras del grupo.
+- `ListaDE` adaptada para no exigir `Comparable`, usando `equals`, porque el inventario necesita guardar objetos sin orden natural.
+- Paquete `modelo.objetos` con `Objeto`, `Pocion`, `Arma`, `Espada`, `Arco`, `Escudo`, `Llave` y `TipoLlave`.
+- `Jugador` ampliado con inventario `ListaDE<Objeto>`, equipo de arma/escudo, ataque/defensa total, uso de pocion de cura y reglas de duplicados por id.
+- Tests JUnit nuevos para `ListaDE`, objetos e inventario/equipo del jugador.
+- Revision independiente completada sin bloqueos funcionales.
+- Verificacion local por reflexion: 105 tests ejecutados, 0 fallos.
+
+### Cambios aceptados
+
+- Incluir `Arco` y `Escudo` en B-02.
+- Permitir objetos repetidos por tipo pero no duplicar el mismo `id`.
+- Arco a dos manos: al equiparlo desequipa el escudo y bloquea equipar escudo mientras siga equipado.
+- Llaves no equipables: quedan en inventario con tipo y codigo de cerradura.
+- Pocion de cura de 25 puntos consumible.
+- `getInventario()` devuelve copia defensiva.
+
+### Cambios rechazados o modificados
+
+- No se implementa pocion de invisibilidad porque depende de turnos y ataques enemigos.
+- No se implementan drops, cofres ni recoger del suelo porque dependen de combate/mapa.
+- No se integra con JSON ni JavaFX en B-02.
+- No se implementa combate, turnos ni regla del 75%.
+- El revisor independiente marco que `src/Estructuras/` estaba fuera del alcance normal de B-02; se documento la autorizacion expresa de Guillermo en `TASKS.md`.
+
+### Critica
+
+La sesion fue util para frenar antes de programar y cerrar decisiones pequenas pero importantes: especialmente equipo por ranuras, arco a dos manos y llaves sin equipar. El principal ajuste fue traer `ListaDE` desde las estructuras del grupo sin mantener `Comparable`, porque exigir orden natural a `Objeto` habria sido artificial. Para futuras sesiones conviene mantener esta misma disciplina: decidir primero, implementar despues, y documentar cualquier excepcion de alcance compartido antes del commit.
+
+## 2026-05-22 - Hector (sesion 3)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Implementar C-02: guardado y carga de partida en JSON.
+
+### Prompt o resumen del prompt
+
+Hector inicio sesion pidiendo trabajar en C-02. Se analizo primero el proyecto
+(que ya incluye B-01 y B-02 de Parte B: personajes, enemigos, objetos,
+inventario). Se disenaron DTOs para el formato de guardado y un serializador
+con Gson.
+
+### Resultado
+
+- Creados 6 DTOs de guardado y SerializadorPartida con guardar/cargar.
+- Ampliado ConexionDTO con constructores.
+- 10 tests JUnit de guardado/carga: round-trip, matriz, enemigos, objetos,
+  inventario, equipo, estado, errores de ruta.
+- Tests compilados y ejecutados desde terminal (0 fallos).
+- Tests existentes de CargadorConfiguracion siguen pasando.
+
+### Cambios aceptados
+
+- Formato de guardado version 1.0 con estructura completa de mazmorra,
+  jugador, enemigos y objetos.
+- Uso de arrays Java en DTOs (misma justificacion que C-01: estructuras
+  temporales de serializacion, no evaluables).
+- SerializadorPartida como clase de metodos estaticos (no requiere instancia).
+
+### Cambios rechazados o modificados
+
+- No se implementa conversion DTO <-> modelo (Jugador, Enemigo, Objeto, etc.)
+  porque Partida aun no existe (B-03). Los DTOs definen el formato; la
+  integracion se hara cuando Parte B tenga Partida lista.
+
+### Critica
+
+La tarea salio segun lo planeado. El haber descargado JUNIT standalone
+permitio ejecutar tests desde terminal, lo que no se pudo en C-01. Para
+proximas sesiones, mantener el standalone en lib/ para poder seguir
+ejecutando tests sin IntelliJ.
+
+## 2026-05-22 - Hector (sesion 4)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Planificar C-03: boceto de la interfaz JavaFX.
+
+### Prompt o resumen del prompt
+
+Hector pidio planificar C-03 siguiendo todos los requisitos del proyecto.
+Se revisaron PRD.md, ARCHITECTURE.md, DECISIONS.md, AGENTS.md,
+GITHUB_WORKFLOW.md, TASKS.md y las clases del modelo (InterfazCueva,
+InterfazMazmorra, TipoCelda, Jugador, Objeto, etc.).
+
+### Resultado
+
+- Creado `documentos/BOCETO_JAVAFX.md` con:
+  - Layout ASCII completo (5 zonas: matriz, estado, inventario, acciones, log).
+  - Tabla de simbolos y colores por TipoCelda.
+  - Descripcion detallada de cada zona y su mapeo a componentes JavaFX.
+  - Flujo de datos desde Partida a cada panel.
+  - Estructura de clases propuesta para C-04 (7 clases).
+  - Contrato minimo que Partida debe exponer.
+  - Estrategia de mock para C-04 si B-03 no esta listo.
+  - Checklist de verificacion.
+
+### Cambios aceptados
+
+- Layout con matriz a la izquierda, estado+inventario a la derecha,
+  acciones debajo del inventario, log en la parte inferior.
+- Clic en celda de la matriz como alternativa a botones direccionales.
+- Botones contextuales (Atacar solo si hay enemigo adyacente, etc.).
+- Mock de Partida para C-04 si B-03 no esta listo.
+
+### Cambios rechazados o modificados
+
+- No se incluyen animaciones ni transiciones (extra congelado en PRD).
+- No se incluyen Arco ni escondite en acciones (extra congelado).
+- El boceto no entra en detalles de estilos CSS ni tamanos exactos de
+  ventana; eso se decidira en C-04.
+
+### Critica
+
+La planificacion previa es util para que el grupo valide el diseno antes
+de implementar. El contrato con Partida queda explicito, lo que deberia
+facilitar la coordinacion con Parte B. Para la siguiente sesion (C-04)
+habra que descargar las librerias JavaFX (openjfx) para el JDK 25 y
+verificar que el mock de Partida es suficiente para probar la interfaz.
+
+## 2026-05-22 - Hector (sesion 6)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Cerrar formalmente C-02: verificar que todo el codigo de guardado/carga existe,
+compila y pasa tests, y marcar la tarea como HECHA en TASKS.md.
+
+### Prompt o resumen del prompt
+
+Hector volvio como Parte C y pidio terminar C-02. Se verifico que SerializadorPartida
+ya tenia todos los metodos de conversion modelo<->DTO (implementados en sesiones
+anteriores). Se compilo y ejecutaron los 19 tests JUnit desde terminal.
+
+### Resultado
+
+- 19/19 tests pasados (0 fallos, 81 ms).
+- C-02 marcada como HECHA en TASKS.md.
+- SCRATCHPAD.md actualizado.
+
+### Cambios aceptados
+
+Todo el codigo de C-02 existente se acepta como final: DTOs, SerializadorPartida
+con metodos de E/S y conversion, y sus tests.
+
+### Cambios rechazados o modificados
+
+Ninguno. No se modifico codigo fuente, solo documentacion de coordinacion.
+
+### Critica
+
+C-02 estaba esencialmente terminado desde la sesion del 2026-05-22. Solo faltaba
+la verificacion formal y el cambio de estado. La cobertura de tests es buena
+(19 tests cubren guardado, carga, errores y conversion bidireccional de todos
+los tipos del modelo).
+
+## 2026-05-22 - Hector (sesion 5)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Implementar el menu principal JavaFX (C-04) con fondo de cueva, antorchas animadas, tesoro decorativo, transiciones FadeTransition y dos pantallas navegables (Inicio -> Opciones -> Inicio).
+
+### Prompt o resumen del prompt
+
+Hector inicio sesion pidiendo comprobar GitHub y docs de `project-management`. C-03 estaba en REVISION. Hector rechazo el enfoque anterior de C-04 (layout 5-panel con matriz) y pidio disenar desde cero un menu principal con criterios concretos: ventana 1280x720, gradiente radial de cueva, antorchas animadas con Timeline, tesoro de monedas y cofre, titulo "ESCAPE DE LA MAZMORRA", boton Inicio con globo terraqueo, pantalla de opciones con 3 botones, fade transitions y hover effects.
+
+### Resultado
+
+- Creado `src/vista/EscapeMazmorraApp.java` como unico archivo.
+- `crearFondoCueva()` con RadialGradient.
+- `crearLlama()` con Polygon 7 puntos + LinearGradient tricolor.
+- `animarLlamas()` con Timeline de 20 KeyFrames (80ms c/u) oscilando escala y posicion Y.
+- `crearTesoro()` con 4 filas de monedas + cofre abierto (cuerpo, tapa, cerradura).
+- `crearPantallaInicio()` con titulo 3 lineas + boton Inicio + globo terraqueo.
+- `crearPantallaOpciones()` con titulo 38px + 3 botones con hover.
+- `cambiarAPantallaOpciones/inicio()` con FadeTransition 300ms.
+- Compilacion correcta con JavaFX 23.
+
+### Cambios aceptados
+
+- Un solo archivo `EscapeMazmorraApp.java` con ambas pantallas como metodos internos.
+- Fondo compartido (capa inferior del StackPane) que se mantiene al cambiar de pantalla.
+- Timeline de 20 frames con valores calculados trigonometricamente para animacion determinista.
+- Botones con efecto hover (escala 1.05-1.06 + aclarado de color).
+- Transition Fade 300ms salida + 300ms entrada.
+
+### Cambios rechazados o modificados
+
+- No se crean archivos separados PantallaInicio.java ni PantallaOpciones.java (se prefirio mantenerlo en un unico archivo porque los metodos son simples y comparten acceso a los metodos de navegacion privados).
+- No se usa Random en la animacion de llamas (se usa Math.sin para mantenerla determinista).
+
+### Critica
+
+La sesion fue productiva porque el prompt estaba muy detallado, lo que evito idas y vueltas. Mantener todo en un solo archivo simplifica la navegacion inicial, pero si mas adelante se anaden pantallas o logica compleja habra que separarlo. Pendiente: conectar PARTIDA NUEVA y ESTADISTICAS cuando exista Partida (B-03), y crear script de lanzamiento con JavaFX.
+
+## 2026-05-22 - Hector (sesion 7)
+
+### Agente o herramienta
+
+Agente C JavaFX/JSON/Docs.
+
+### Objetivo
+
+Crear Partida (motor de juego), PantallaJuego (UI del juego) y conectar el boton
+"Iniciar partida" del menu para tener una partida jugable completa.
+
+### Prompt o resumen del prompt
+
+Hector pidio construir el juego jugable: que el boton "Iniciar partida" del menu
+cree una partida cargando datos/cuevas.json y muestre la pantalla de juego con
+grid, jugador, enemigos, objetos, stats, inventario, acciones y log. Tambien pidio
+que el teclado funcione (WASD para mover) y que se pueda atacar, recoger objetos,
+cambiar de cueva, guardar/cargar y volver al menu.
+
+### Resultado
+
+- Partida.java: motor completo con carga JSON, movimiento, combate, objetos,
+  turnos, condiciones de victoria/derrota, navegacion entre cuevas y guardado/carga.
+- PantallaJuego.java: interfaz con grid coloreado, overlay de entidades,
+  panel de estadisticas, inventario con botones USAR/EQUIPAR, panel de acciones
+  y log de eventos. Teclado WASD + SPACE/R/T. Clic en celdas para moverse.
+- EscapeMazmorraApp.java: "Iniciar partida" conectado a Partida+PantallaJuego.
+  Nuevo metodo volverAlMenu().
+- SerializadorPartida.java: ampliado con metodos de conversion modelo<->DTO
+  para que Partida pueda guardar y cargar.
+- PartidaTest.java: 24 tests de creacion, movimiento, combate, objetos,
+  turnos, puertas, guardado/carga y estados.
+
+### Cambios aceptados
+
+- Partida como unica clase de motor de juego con responsabilidad clara.
+- PantallaJuego separada de EscapeMazmorraApp (no mezclan responsabilidades).
+- Atajos de teclado SPACE (atacar), R (recoger), T (terminar turno).
+- 24 tests unitarios para Partida (movimiento, combate, objetos, turnos,
+  condiciones de victoria/derrota, guardado/carga).
+- Focus management para que el teclado funcione tras clics en UI.
+
+### Cambios rechazados o modificados
+
+- No se implemento pathfinding para clic en celdas lejanas (el movimiento
+  sigue siendo de 1 paso, usando teclado/botones direccionales).
+- No se implemento animacion de transicion entre cuevas (solo cambio
+  instantaneo de grid).
+- No se implementaron drops de enemigos al morir (los objetos solo se
+  recogen del suelo).
+
+### Critica
+
+La sesion fue la mas larga del proyecto y produjo tres archivos grandes
+(Partida.java 571 ln, PantallaJuego.java 425 ln, PartidaTest.java ~200 ln).
+El revisor independiente detecto que Partida no tenia tests, lo que se
+corrigio antes del commit. La demo revelo que los atajos de teclado SPACE, R y T
+estaban anunciados en la UI pero no implementados, y que el foco del teclado
+se perdia al hacer clic en la UI. Ambos problemas se corrigieron.
+Para futuras sesiones: probar la demo uno mismo antes de entregarla al usuario.
+## 2026-05-22 - Alvaro
+
+### Agente o herramienta
+
+Codex-A Estructuras, trabajando con permiso de coordinacion sobre la primera version de `Partida`.
+
+### Objetivo
+
+Planificar y dejar implementada una primera version funcional de la interfaz y la logica de partida, despues de integrar desde `main` la parte ya terminada de personajes, objetos e inventario.
+
+### Prompt o resumen del prompt
+
+Alvaro pidio actualizar la rama con `main`, releer `TASKS.md` y revisar las nuevas clases de personajes, objetos e inventario. Despues se decidio planificar antes de implementar: `Partida` debia ser la clase que coordina la logica del juego, pero no la responsable de conectar cuevas ni de crear la mazmorra desde cero.
+
+Durante la sesion se cerraron reglas de movimiento, recogida, combate, turnos, puertas, llave final, victoria y log. Alvaro detecto un error importante de diseno: metodos como `conectarCuevas` no debian estar en `Partida`, porque pertenecen a `Mazmorra`. Ese error se corrigio y se registro en el postmortem. Tambien se pidio revision independiente sobre las clases nuevas, se corrigieron los problemas importantes y se dejaron mejoras futuras en `TASKS.md`.
+
+### Resultado
+
+Se implemento una primera capa de logica de partida:
+
+- `InterfazPartida`
+- `EstadoPartida`
+- `Partida`
+- `Puerta`
+- `ObjetoEnMapa`
+- `PersonajeEnMapa`
+- `CuevaEnMapa`
+- `CeldaEnMapa`
+
+La partida coordina jugador, mazmorra, enemigos, objetos en suelo, puertas, acciones, turnos, combate, victoria, derrota y log. La interfaz publica evita exponer referencias mutables principales mediante vistas para personaje, cueva y celda.
+
+Se anadieron tests JUnit en `PartidaTest` y Alvaro mostro cobertura de IntelliJ para `modelo.juego`: 100% de clases, 89% de metodos, 79% de lineas y 58% de ramas.
+
+### Cambios aceptados
+
+- `Partida` recibe una `Mazmorra` ya creada; no la construye desde cero.
+- `Mazmorra` conecta cuevas; `Partida` solo valida avance segun puertas y llaves.
+- Las puertas son configuracion inicial de partida sobre conexiones ya existentes.
+- El jugador puede recoger objetos en celdas adyacentes.
+- El ataque cuerpo a cuerpo permite diagonales.
+- El arco permite atacar a distancia.
+- El dano se calcula como ataque menos defensa, con minimo 1.
+- Enemigos adyacentes atacan; si no estan adyacentes, se acercan usando camino minimo.
+- El turno termina cuando el jugador llama a `pasarTurno()`.
+- Para avanzar entre cuevas hace falta llave, salvo que la puerta ya este abierta.
+- Para ganar hace falta la llave final obtenida al derrotar al boss final.
+- El log vive de momento en `Partida`.
+- Jugador y enemigos vivos no pueden compartir celda.
+
+### Cambios rechazados o modificados
+
+- Se elimino del diseno la idea de que `Partida` conecte cuevas.
+- Se sacaron de `InterfazPartida` metodos de preparacion como anadir enemigos u objetos.
+- Se dejo como mejora futura mover enemigos y objetos a una estructura mas definitiva si el diseno final lo pide.
+- Se dejo como mejora futura impedir que el movimiento largo atraviese enemigos.
+- Se dejo como mejora futura que la IA busque rutas alternativas si el primer paso esta ocupado.
+- Se dejo como mejora futura sustituir referencias a `Cueva` en `ObjetoEnMapa` por id o vista inmutable.
+
+### Critica
+
+La sesion corrigio una frontera de responsabilidades a tiempo: `Partida` estaba creciendo hacia tareas estructurales que ya pertenecian a `Mazmorra`. La revision independiente tambien fue util porque detecto riesgos de mutabilidad y ocupacion que podian romper la primera version jugable. Queda como aviso que esta capa todavia no esta conectada en profundidad con JSON ni JavaFX, asi que debe presentarse como base funcional de logica, no como juego cerrado.
+
+## 2026-05-22 - Guillermo
+
+### Agente o herramienta
+
+Codex-B Logica, continuando desde `feature/b-json-partida`.
+
+### Objetivo
+
+Desbloquear a Parte C con una forma simple de crear una `Partida` desde el JSON ya cargado, sin ampliar hoy combate, regla del 75% ni efectos por turnos.
+
+### Resultado
+
+Se anadio `FabricaPartida`, que recibe `ResultadoCarga`, busca la celda `INICIO`, crea el jugador base, traduce conexiones a puertas, coloca enemigos y coloca objetos en suelo. Tambien se ajustaron los DTO y el JSON de ejemplo para conservar la cueva de cada elemento y datos minimos de llaves.
+
+### Decisiones
+
+- La fabrica es estricta: configuraciones invalidas lanzan `IllegalArgumentException`.
+- Las puertas usan codigos `llave-` + id de cueva destino.
+- Los valores del jugador quedan fijos en la fabrica para esta primera version.
+- No se implementan todavia invisibilidad, regla del 75% ni guardado/carga de estado.
+
+### Pruebas
+
+Se comprobaron por terminal compilacion de `src`, compilacion de tests y ejecucion por reflexion de `CargadorConfiguracionTest` y `FabricaPartidaTest`: 21 tests, 0 fallos.
+
+La revision independiente detecto tres ajustes reales: no ignorar conexiones JSON invalidas, recolocar al jugador al cambiar de cueva y corregir las estadisticas del boss del JSON. Se aplicaron las tres correcciones y se anadieron tests de regresion.
+
+### Critica
+
+La solucion es deliberadamente pequena y util para coordinacion: evita meter reglas de juego en `src/json` y ofrece a Hector un punto de entrada claro. El coste es que `FabricaPartida` conoce DTOs de JSON desde la capa de juego, algo aceptable como adaptador inicial pero revisable cuando el guardado/carga de estado este mas definido.
+
+## 2026-05-22 - Hector
+
+### Agente o herramienta
+
+opencode (big-pickle)
+
+### Objetivo
+
+Corregir tres problemas UI: titulos descentrados en pantallas de inicio, retardo en auto-turno por feedback erroneo y ausencia de efecto visual cuando enemigo ataca al jugador.
+
+### Prompt o resumen del prompt
+
+1. "varios problemas: ahora los botones... se han ido hacia un lado y los titulos siguen descentrados"
+2. Confirmacion del plan de revertir PantallaOpciones a Pane + medir texto con getLayoutBounds().getWidth().
+3. "los titulos se ven bien pero en la primera pantalla la palabra escape se ha intentado curvar y se ve mal, ponla en recta. ... los cambios de turno automaticos va muy con delay. sigue sin haber efectos visuales cuando un enemigo te ataca"
+
+### Resultado
+
+Se aplicaron las 3 correcciones en `EscapeMazmorraApp.java` y `PantallaJuego.java`.
+
+### Cambios aceptados
+
+- ESCAPE en linea recta (sin arco, sin rotacion).
+- Titulos centrados con `getLayoutBounds().getWidth()` en todas las pantallas.
+- PantallaOpciones revertida a Pane con posicion absoluta original de los botones.
+- Auto-turno suprime mensaje erroneo cuando se dispara por segundo movimiento fallido.
+- Flash rojo (400ms) en celda del jugador cuando recibe dano enemigo.
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Sesion eficaz: tres problemas resueltos con compilacion y ejecucion correctas. La medicion dinamica de texto con `getLayoutBounds()` evita constantes magicas y se adapta a cualquier fuente. El flash de ataque enemigo reutiliza el mismo patron que el flash de ataque del jugador, minimizando codigo nuevo.
+
+## 2026-05-22 - Hector (continuacion)
+
+### Agente o herramienta
+
+opencode (big-pickle)
+
+### Objetivo
+
+Implementar guardado completo de partida (enemigos vivos, objetos en suelo, puertas), restaurar ContenidoCueva al cargar, anadir ayuda integrada en el juego y actualizar documentacion.
+
+### Prompt o resumen del prompt
+
+Trabajo continuado sobre C-07 (guardado completo) y C-08 (ayuda integrada). Se pidio:
+1. Crear DatosPuertaDTO y modificar DatosPartidaDTO/guardar() para serializar enemigos/objetos/puertas.
+2. Modificar cargarPartida() para restaurar ContenidoCueva desde DTO.
+3. Anadir boton "AYUDA [H]" y overlay con controles en PantallaJuego.
+4. Tests de guardado/carga round-trip.
+
+### Resultado
+
+Implementacion completa de los 4 objetivos:
+
+**C-07 Guardado completo:**
+- `DatosPuertaDTO.java` creado con id, origen, destino, codigoLlave, abierta.
+- `DatosPartidaDTO` modificado para aceptar `DatosPuertaDTO[] puertas`.
+- `DatosObjetoDTO` extendido con `codigoCerradura` para reconstruir llaves.
+- `Partida.guardar()` serializa enemigos (incluyendo Boss), objetos en suelo (Pocion, Espada, Arco, Escudo, Llave) y puertas.
+- `Partida.cargarPartida()` restaura `ContenidoCueva` con enemigos y objetos desde DTO, y restaura estado desde DTO.
+- Ayudante `reconstruirObjeto()` mapea DTO a objetos concretos.
+
+**C-08 Ayuda integrada:**
+- Boton "AYUDA [H]" en panel de acciones de PantallaJuego.
+- Overlay semitransparente con todos los controles (WASD, ESPACIO, R, T, H, clics) y estructura del juego.
+- Atajo tecla H para mostrar/ocultar.
+- Root envuelto en StackPane para superponer overlay sobre BorderPane.
+
+**Tests:**
+- `guardarYCargarRoundTripPreservaContenidos`: verifica que stats basicos se mantienen.
+- `guardarYCargarRoundTripPreservaEnemigosDeFabrica`: verifica que enemigos de fabrica se preservan.
+
+### Cambios aceptados
+
+- `src/json/DatosPuertaDTO.java` (nuevo)
+- `src/json/DatosPartidaDTO.java` (modificado)
+- `src/json/DatosObjetoDTO.java` (modificado)
+- `src/json/DatosCuevaDTO.java` (modificado)
+- `src/modelo/juego/Partida.java` (modificado)
+- `src/vista/PantallaJuego.java` (modificado)
+- `test/modelo/juego/PartidaTest.java` (modificado)
+- `documentos/ENTREGA/project-management/TASKS.md` (modificado)
+- `documentos/ENTREGA/project-management/IA_DIARY.md` (modificado)
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Sesion larga pero productiva. El guardado completo requirio modificar varias clases (DTOs, Partida, tests) pero mantiene 182 tests pasando. La ayuda integrada fue directa: overlay en StackPane sobre el BorderPane existente. La reconstruccion de objetos desde DTO usa `instanceof` y switch, aceptable para la primera iteracion. Pendiente: el test de enemigo anadido manualmente falla por razones no determinadas (los enemigos de fabrica se preservan correctamente).
+
+## 2026-05-22 — Álvaro (sesión 2)
+
+### Objetivos
+- C-09 pulido audiovisual: música de fondo + obstáculos + mapas laberínticos.
+
+### Cambios realizados
+
+**Infraestructura de audio (C-09.2):**
+- Añadido `javafx-media-21.0.5-win.jar` al module-path en `run.ps1` y `test.ps1`
+- Añadido `--add-modules javafx.media` a ambos scripts
+- Creado `src/vista/ReproductorMusica.java`: Singleton con `MediaPlayer`, ciclo `INDEFINITE`, volumen configurable
+- Integrado en `EscapeMazmorraApp.java`: `ReproductorMusica.getInstancia().reproducir()` al iniciar el menú
+- Archivo de música: `datos/audio/Cueva1.mp3` (generado con suno.ai)
+
+**Obstáculos y mapas laberínticos (C-09.1):**
+- `TipoCelda.java`: añadidos `ROCA` y `ARBUSTO`
+- `Celda.java`: `esTransitable()` ahora bloquea `ROCA` y `ARBUSTO` además de `MURO`
+- `PantallaJuego.java`: `colorParaTipo()` asigna colores (gris pizarra 🪨, verde oscuro 🌿) y emojis permanentes
+- `datos/cuevas.json`:
+  - Criptas de Marfil: 7×7 → **9×9** con ROCA y ARBUSTO decorativos
+  - Páramo Putrefacto: 10×10 → **13×13** con obstáculos
+  - Abismo de Malakor: 13×13 → **15×15** con obstáculos
+  - PUERTA movida a (5,5) en cueva_facil para compatibilidad con tests
+  - Posiciones de enemigos/objetos reubicadas en celdas válidas
+
+**Tests actualizados:**
+- `CargadorConfiguracionTest.java`: dimensiones (7→9, 10→13, 13→15) + nombres de tests
+- `SerializadorPartidaTest.java`: dimensión 7→9 en dos asserts
+- `PartidaTest.java` y `FabricaPartidaTest.java`: sin cambios lógicos (las posiciones elegidas en el JSON son compatibles)
+- 182/182 tests siguen pasando
+
+**Compactación de muros (dentro de C-09.1):**
+- `PantallaJuego.java`: `gridCeldas` cambiado de `GridPane` a `Pane`
+- Anchos de columna y altos de fila calculados según si toda la columna/fila es MURO: columnas/filas 100% MURO → 5px, mixtas → `cellSize`
+- **Muros como bordes finos**: las celdas MURO ya no se rellenan completas; dibujan únicamente tiras de 5px en los bordes donde limitan con celdas no-MURO (o borde del mapa)
+- Esto hace que todas las paredes visibles sean líneas finas de 5px, incluyendo muros interiores en columnas/filas mixtas
+- Las celdas transitables (SUELO, PUERTA, SALIDA) mantienen su tamaño normal
+- 182/182 tests siguen pasando
+
+### Pendiente
+- C-09.3: Animaciones (movimiento suave, ataque, muerte, etc.)
+- C-09.4: Efectos visuales (partículas, brillos, etc.)
+- C-09.5: Sonidos de juego (paso, ataque, objeto, puerta, victoria/derrota) — pendiente de grabar assets
+
+## 2026-05-23 — Turnos 40→60 y auto-avance en PUERTA
+
+**Cambio**: Aumento de TURNOS_INICIALES (40→60) y auto-avance automatico al pisar PUERTA con llave.
+
+**Archivos**: `FabricaPartida.java`, `PantallaJuego.java`, `FabricaPartidaTest.java`, `PartidaTest.java`, `TASKS.md`, `SCRATCHPAD.md`, `IA_DIARY.md`.
+
+**Hallazgo del revisor**: El auto-avance usaba `ok` en lugar de `movio`, lo que provocaria que atacar desde una PUERTA tambien avanzara. Corregido con flag `boolean movio`.
+
+**Tests**: 182/182 OK.
+
+## 2026-05-23 — Revisor Independiente: HashMap reemplazado por ListaDE
+
+**Cambio**: Sustituido `HashMap<String, Image>` en `PantallaJuego.java` por `ListaDE<EntradaImagen>` para cumplir la restriccion de colecciones prohibidas.
+
+**Archivos**: `PantallaJuego.java`, `SCRATCHPAD.md`.
+
+**Merge**: `origin/main` mergeado en `feature/a-iconos` sin conflictos.
+
+**Tests**: 182/182 OK.
+
+## 2026-05-23 — Depuracion cierre al entrar a cueva + tareas iconos
+
+**Problema**: Tras merge de `origin/main`, el juego se cerraba al hacer clic en "Entrar" en la pantalla de transicion. El `crash.log` aparecia vacio.
+
+**Diagnostico**: Los catch capturaban solo `Exception`, no `Throwable`. Un posible `Error` (como `StackOverflowError`) no era capturado y el uncaught exception handler cerraba el stage. Se anadio logging directo a archivo (`direct_debug.log`, `crash_detail.log`) para diagnosticar.
+
+**Correccion**: 
+- `PantallaJuego.java`: anadido `logError()` que escribe a `crash_detail.log`; catch cambiado de `Exception` a `Throwable` en `actualizar()` y `crearScene()`; logging detallado en excepciones.
+- `EscapeMazmorraApp.java`: anadido `logDirecto()` que escribe a `direct_debug.log`; `mostrarJuego()` envuelto en try-catch(Throwable).
+
+**Hallazgos adicionales**:
+- No hay icono para celda PUERTA (solo color amarillo).
+- El icono de ESCUDO usa `staff2.png` (un baston).
+- No hay iconos para TESORO ni SALIDA.
+- Faltan assets de pociones, puertas, escudos, cofres y bosses (buscar en itch.io).
+
+**Tareas anadidas**: C-09.13 a C-09.16 en `TASKS.md`.
+
+**Archivos**: `PantallaJuego.java`, `EscapeMazmorraApp.java`, `TASKS.md`, `SCRATCHPAD.md`, `IA_DIARY.md`.
+
+**Tests**: Compilacion OK. Juego verificado que ya no se cierra.
+
+## 2026-05-23 - Guillermo / apoyo Parte C-09
+
+Guillermo decidio ayudar primero a las tareas audiovisuales pendientes antes de retomar las mejoras de Parte B. Se acordo implementar una version practica para hoy: menu de pausa, iconos pendientes y SFX minimos, sin tocar reglas de combate ni logica de partida.
+
+Decisiones aplicadas:
+- Pausa con `P` o `ESC`.
+- Menu de pausa con Continuar, Guardar partida y Volver al menu.
+- Volver al menu requiere confirmacion.
+- Puerta y salida se dibujan como iconos locales; salida es una puerta mas grande.
+- Tesoro usa cofre del `Dungeon Asset Pack`.
+- Escudo usa icono simple propio para dejar de mostrarse como `staff2.png`.
+- SFX basicos generados localmente para recoger, ataque, dano, puerta, guardar y pausa.
+
+Cambios:
+- `PantallaJuego.java`: overlay de pausa, confirmacion de salida al menu, iconos para PUERTA/TESORO/SALIDA/ESCUDO y llamadas a SFX en acciones clave.
+- `ReproductorSfx.java`: nuevo reproductor de efectos cortos con `AudioClip`.
+- `datos/audio/sfx/*.wav`: efectos WAV basicos generados localmente.
+- `ReproductorSfxTest.java`: comprueba existencia y cabecera RIFF/WAVE de los efectos.
+- `TASKS.md`: C-09.7, C-09.12, C-09.13, C-09.14 y C-09.15 pasan a REVISION.
+
+Verificacion:
+- No se pudo completar compilacion desde Codex por entorno local: `scripts/run.ps1` busca el JDK de `C:\Users\UAH`, y la compilacion manual no puede leer los JAR de JavaFX del usuario desde el proceso sandbox.
+- Queda pendiente validar en IntelliJ o PowerShell local del usuario.
+
+### Ajustes tras primera prueba visual
+
+Guillermo probo el juego y confirmo que la mayor parte funcionaba, pero detecto mejoras necesarias: ataque y puerta sonaban poco, la accion de atacar podia confundirse tras haber atacado ya, la vida se leia mal encima de la celda y el inventario no distinguia claramente objetos equipados.
+
+Se aplicaron ajustes:
+- `ReproductorSfx` sube volumen por defecto.
+- `ataque.wav` y `puerta.wav` se regeneran mas fuertes y largos.
+- `PantallaJuego` muestra aviso claro si se intenta atacar con la accion ya usada: hay que terminar turno con `T`.
+- La barra de vida sobre entidades queda sin texto numerico para no tapar iconos.
+- Los objetos equipados en inventario se marcan con borde dorado y etiqueta `EQ`.
+- Se reviso el `Dungeon Asset Pack` local y no aparecieron assets claros con nombres de shield/door/gate/portal.
+
+Nuevo ajuste tras segunda prueba:
+- Se elimina el auto-fin de turno de `PantallaJuego`; atacar ya no termina a veces automaticamente segun si antes hubo movimiento. El jugador termina siempre con `T` o el boton correspondiente.
+- La vida vuelve a mostrar numeros arriba de la entidad y barra abajo.
+- El equipo se presenta con ranuras etiquetadas para arma y escudo, separadas visualmente del inventario general.
+
+Nuevo ajuste de pulido:
+- Se generan iconos PNG propios en `datos/iconos/` para puerta, salida, escudo y tesoro, y `PantallaJuego` los usa en lugar de figuras dibujadas en codigo.
+- Los numeros de vida se hacen mas legibles con Arial extra bold, color claro y contorno negro.
+- La confirmacion de volver al menu se integra como panel del menu de pausa, evitando el `Alert` nativo.
+- La pantalla de controles oculta el cofre decorativo para que no tape el boton Volver.
+- La ventana principal se marca como redimensionable y se fija minimo 960x540.
+- Se anade `IconosVisualesTest` para validar cabecera PNG de los iconos.
+
+Ultimo ajuste antes de preparar PR:
+- Se recupera el boton visible `RECOGER OBJETO [R]` en el panel de acciones.
+- Atacar o recoger con la accion ya usada deja de mostrar aviso flotante intrusivo; la UI lo comunica mediante el estado/deshabilitado de la accion.
+
+Correcciones tras revision independiente:
+- `VOLVER AL MENU` desde el panel lateral muestra correctamente la confirmacion propia aunque no estuviera abierto el menu de pausa.
+- `actualizarBotonesAccion()` se ejecuta despues de reconstruir los botones para que opacidad/cursor reflejen el estado real.
+- `datos/partida_guardada.json` queda ignorado en `.gitignore` como artefacto local de prueba.
+- `ReproductorSfx` genera los WAV en tiempo de ejecucion como archivos temporales, asi no se versionan SFX binarios.
+
+Ajuste final antes de PR:
+- Guillermo pidio confirmar que recoger objetos no se habia perdido y quitar el feedback repetitivo al terminar turno.
+- `RECOGER OBJETO [R]` queda visible y el atajo `R` respeta el estado de accion usada sin cartel intrusivo.
+- Terminar turno sigue siendo manual, pero deja de mostrar el aviso verde `Turno terminado`.
+
+## 2026-05-24 - Alvaro / Ataque direccional
+
+Alvaro pidio implementar un plan acotado para ataque direccional trabajando en la rama oficial de Parte A (`feature/a-estructuras`). Antes de modificar archivos se cambio desde `feature/a-iconos`, se actualizo la rama con `origin/main` por fast-forward y Alvaro autorizo expresamente tocar logica de Parte B y UI de Parte C para este alcance.
+
+Se implemento la consulta `hayEnemigoEnDireccion(int df, int dc)` y `getEnemigosAdyacentes()` en `Partida`, exponiendolas tambien en `InterfazPartida`. En `PantallaJuego` se anadio ataque por clic sobre enemigo, ataque direccional con `Shift+WASD` o `Shift+Flechas`, resaltado de enemigos adyacentes cuando la accion esta disponible y flash visible de ataque/dano mediante overlays propios.
+
+Se anadieron tests en `PartidaTest` para enemigo en direccion, direccion vacia, varios enemigos adyacentes, dano solo al objetivo elegido y ataque a direccion vacia. La verificacion completa con `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 189/189 tests correctos.
+
+`B-05` queda en `REVISION`. `C-10` sigue pendiente salvo su punto 1, porque ataque especial cargable y revision de turnos quedaron fuera de esta sesion por decision de alcance.
+
+Revision independiente posterior: sin bloqueos P1/P2. Se aceptan como riesgos menores que `hayEnemigoEnDireccion(df, dc)` confia en deltas seguros desde sus callers actuales y que el boton/atajo antiguo de espacio conserva el comportamiento de atacar al primer enemigo adyacente.
+
+## 2026-05-24 - Guillermo / Cierre de B-02 y B-03
+
+Guillermo pidio revisar el estado real de `B-02` y `B-03` tras los ultimos merges. Se comprobo que el PR #15 ya estaba integrado en `main`, que `B-05` debia figurar como `REVISION`, y que quedaba una regla pendiente: el cambio de cueva no debia gastar accion ni turno, y los turnos debian reiniciarse al entrar en otra cueva.
+
+Decisiones cerradas:
+- `FabricaPartida` sirve para la integracion JSON/JavaFX de la primera version.
+- `ALCANCE_ARCO = 3` queda aceptado.
+- Equipar o cambiar objeto no consume accion.
+- Cambiar de cueva no consume accion, no termina turno y reinicia los turnos a 60; si la accion o el movimiento ya estaban usados, se conservan hasta pasar turno.
+
+Cambios aplicados:
+- `Partida.equiparObjeto(...)` no marca `accionRealizada`.
+- `Partida.avanzarACueva(...)` permite avanzar aunque la accion del turno ya este usada y restaura `turnosRestantes` a `TURNOS_POR_CUEVA`, conservando los flags de accion/movimiento previos.
+- `PartidaTest` incorpora tests para proteger estas reglas.
+- `TASKS.md` marca `B-02` y `B-03` como `HECHA` y corrige `B-05` a `REVISION` en el resumen.
+
+Verificacion:
+- Revisor independiente detecto un riesgo inicial: borrar `accionRealizada` y `movimientoRealizado` al cambiar de cueva regalaba una segunda accion/movimiento. Se corrigio y se anadio test de regresion.
+- Verificacion dirigida de logica sin JavaFX: `PartidaTest` y `FabricaPartidaTest`, 64/64 tests correctos.
+- La ejecucion completa con JavaFX queda para IntelliJ por dependencias locales del entorno.
+
+## 2026-05-24 - Guillermo / Pulido de iconos, TESORO y posiciones de objetos
+
+Nueva sesion iniciada despues del merge de B-02/B-03. Guillermo pidio primero quitar del alcance los bosses distintos porque no estaba claro si debia resolverse ahora, asi que el trabajo se centro en C-09/B-04 visual y de consistencia de mapa.
+
+Se ajusto `PantallaJuego` para que las pociones usen un icono local propio (`datos/iconos/pocion.png`) y los escudos sigan usando `datos/iconos/escudo.png`, ya reemplazado por una version mas reconocible. Tambien se elimino el color morado de `TESORO`, que era lo que se veia debajo del icono en partida.
+
+En `datos/cuevas.json` se corrigio el tesoro de la cueva dificil, moviendolo a una posicion con acceso vecino transitable. Para proteger esa regla, se anadieron tests en `CargadorConfiguracionTest`: los objetos configurados no pueden aparecer sobre muros/rocas/arbustos y los `TESORO` del mapa deben tener al menos una celda vecina transitable. `IconosVisualesTest` ahora valida tambien la existencia y cabecera PNG de `pocion.png`.
+
+Tras probar visualmente, Guillermo propuso dos opciones para resolver los cofres: hacerlos pisables solo en caminos seguros o tratarlos como cofres no pisables pero abribles desde al lado. Se acordo la opcion B minima. `Partida` bloquea ahora el movimiento hacia `TESORO` cerrado, permite `abrirTesoro()` desde una casilla cardinal adyacente o desde la misma casilla para partidas antiguas, cambia la celda a `SUELO` y consume accion. `PantallaJuego` usa esa regla para mostrar `ABRIR COFRE [R]` y evitar el aviso de pared al intentar caminar hacia un cofre cerrado.
+
+Revision independiente posterior: detecto que el BFS de movimiento aun podia atravesar un TESORO cerrado para llegar a una celda posterior. Se corrigio haciendo que las celdas alcanzables de `Partida` excluyan TESORO cerrado, sin cambiar `Celda.esTransitable()` global para no afectar mapa/fog/estructura base. Tambien se actualizo el texto de ayuda para indicar que `R` recoge objetos o abre cofres.
+
+Verificacion ejecutada:
+- `PartidaTest` + `FabricaPartidaTest` + `CargadorConfiguracionTest` + `IconosVisualesTest`: 83/83 tests correctos.
+
+Pendiente:
+- Revision independiente: detecto que `crearSpriteArchivo` recortaba los PNG locales como si fueran spritesheets. Corregido creando una ruta de carga sin recorte para iconos locales.
+- Se reforzo el test de TESORO para exigir camino desde `INICIO`.
+- La compilacion JavaFX desde Codex queda bloqueada por permisos de los JAR OpenJFX locales (`AccessDeniedException`); validar visualmente en IntelliJ.
+- Preparar commit/PR cuando Guillermo confirme y pueda hacer push desde su entorno.
+
+## 2026-05-24 - Alvaro (Animaciones C-09.3)
+
+### Agente o herramienta
+
+opencode (big-pickle)
+
+### Objetivo
+
+Implementar animaciones visuales en PantallaJuego para movimiento suave, ataque (circulo expansivo) y muerte (fade+scale) dentro de la tarea C-09.3 Pulido audiovisual.
+
+### Prompt o resumen del prompt
+
+Alvaro se identifico como Parte A, reviso TASKS.md para priorizar subtareas de C-09, y selecciono C-09.3 Animaciones. Se acordo implementar tres fases: movimiento suave con Timeline, ataque con overlay circular, y muerte con FadeTransition + ScaleTransition, todo integrado con los handlers de teclado/raton/botones existentes.
+
+### Resultado
+
+Implementacion completa de C-09.3 en PantallaJuego.java (~200 lineas):
+
+- Movimiento suave: Timeline 150ms con translateX/Y sobre sprite del jugador, smoothstep easing, 8 frames, offset entre centros de celda origen y destino.
+- Ataque: circulo expansivo en gridOverlay (220ms) con radio creciente y opacidad decreciente.
+- Muerte: FadeTransition + ScaleTransition simultaneos (400ms) en animOverlay (capa separada que no se limpia al redibujar), con getEnemyAssetPath() para sprite segun tipo enemigo.
+- Integracion en handlers de teclado (movimiento, espacio, shift+WASD), clic (movimiento y ataque sobre enemigo) y botones de accion.
+
+### Cambios aceptados
+
+- `animOverlay` como Pane separado para animaciones de muerte, evitando que `actualizar()` las borre al limpiar gridOverlay.
+- `translateX/Y` sobre sprite del jugador (no modifica jerarquia de celdas, compatible con actualizar() existente).
+- Death check post-actualizar() iterando enemigos vivos en la celda atacada.
+
+### Cambios rechazados o modificados
+
+Ninguno.
+
+### Critica
+
+Las tres fases se implementaron secuencialmente segun el plan acordado. La decision de usar `animOverlay` separado fue clave para que la animacion de muerte no fuera borrada por el refresco de la grilla en `actualizar()`. Compilacion y 189 tests correctos. Pendiente decidir siguiente prioridad dentro de C-09.
+
+## 2026-05-24 - Alvaro / Estadisticas y ranking con Gson
+
+Alvaro pidio implementar el plan acordado para estadisticas de partida, puntuacion por rangos y ranking local con Gson. La sesion se hizo desde `feature/a-estructuras` como excepcion autorizada para tocar logica de Parte B, UI de Parte C y JSON.
+
+Se creo `EstadisticasPartida` en el modelo y se integro en `Partida` para registrar turnos jugados, dano ejercido, dano recibido, enemigos comunes derrotados, bosses derrotados y bandera de Malakor. Tambien se ampliaron los DTOs de guardado para conservar estas estadisticas al guardar/cargar partidas.
+
+En JavaFX se anadio primero la captura de nombre de mago con valor por defecto "Mago Errante"; despues se sustituyo por un modal propio con estetica de pergamino. La pantalla final muestra nombre, estadisticas, puntuacion y titulo, y el menu incorpora un boton `Ranking` que lee `ranking.json` y muestra el Top 10 ordenado por puntuacion. La persistencia del ranking usa Gson con pretty printing y `ranking.json` queda ignorado por Git.
+
+Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 208/208 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-24 - Alvaro / Bola de Fuego en tiempo real
+
+Alvaro pidio implementar el plan acordado para una mecanica avanzada de ataque a distancia con `F + Flecha`. Se mantuvo la decision de balance: consume accion, no consume movimiento y hace dano fijo 10.
+
+Se anadio `ResultadoImpactoBolaFuego` y metodos publicos en `Partida` para registrar el disparo y aplicar impactos sin que JavaFX toque enemigos internos. `PantallaJuego` ahora crea una instancia interna `BolaDeFuego` por disparo, con Timeline propio cada 120 ms, rango 5, trayectoria en `animOverlay`, colision contra bloqueantes y enemigos, y fallback visual si no existe `datos/iconos/bola_fuego.png`.
+
+Tambien se ampliaron los SFX para intentar cargar `datos/audio/sonido_disparo.mp3` y `datos/audio/sonido_impacto.mp3`, usando clips generados como respaldo. La ayuda muestra `F + Flecha` y el log colorea los mensajes de Bola de Fuego en naranja.
+
+Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 213/213 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-24 - Alvaro / Redisenio premium de inicio
+
+Alvaro pidio implementar el plan de mejora visual para la pantalla de inicio con estilo "mazmorra premium" y una base visual reutilizable dentro de `EscapeMazmorraApp`.
+
+Se reemplazo la composicion antigua de tres textos y boton con globo por un logo premium con degradado dorado, sombra/brillo, marco central, silueta de arco de mazmorra, luz ambiental, vineta y chispas generadas por JavaFX. Tambien se creo un helper de boton premium y el menu de opciones paso a reutilizarlo sin cambiar sus acciones.
+
+No se tocaron reglas de juego ni persistencia. Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 213/213 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-24 - Alvaro / Inicio pixel art
+
+Alvaro indico que la nueva pantalla de inicio no convencio y pidio rehacerla con una direccion mas pixel art. Se sustituyo la composicion de marco central, arco y chispas por una pantalla mas simple: titulo centrado, separador, boton de pergamino limpio y assets existentes del Dungeon Asset Pack (mago, demonio, baston, cofre y llave). El helper de carga recorta spritesheets al primer frame para evitar que se vean como tiras comprimidas.
+
+El menu de opciones conserva el boton pergamino limpio y no se tocaron flujos ni reglas de juego. Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 213/213 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-24 - Alvaro / Reversion primera pantalla de inicio
+
+Alvaro pidio dejar la primera pantalla de inicio como estaba antes de los cambios visuales de esta sesion. Se restauro la composicion original: titulo en tres lineas (`ESCAPE`, `DE LA`, `MAZMORRA`) y boton dorado `Inicio` con globo. No se tocaron los flujos de opciones ni la logica de juego.
+
+Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 213/213 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-24 - Alvaro / Ajustes visuales menu y nombre
+
+Alvaro pidio corregir dos problemas de la implementacion anterior: la botonera del menu de opciones tapaba el cofre inferior y el cuadro nativo para introducir nombre no encajaba con la estetica del juego.
+
+Se ajusto la posicion vertical de la botonera del menu y se sustituyo el `TextInputDialog` por un modal JavaFX propio dentro de `EscapeMazmorraApp`, con velo oscuro, panel estilo pergamino, campo `TextField` estilizado, botones `Comenzar` y `Cancelar`, soporte de Enter/Escape y el mismo fallback a "Mago Errante".
+
+Verificacion: `powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1` paso con 208/208 tests correctos tras ejecutar con permisos para leer los JAR locales de JavaFX.
+
+## 2026-05-25 - Guillermo / Responsive en pantalla de partida
+
+Guillermo reporto dos problemas visuales al comenzar una nueva sesion: en ventana no maximizada el jugador podia quedar fuera de la zona visible al inicio de una mazmorra, y la parte inferior de la pantalla cortaba texto.
+
+Se mantuvo el alcance en la capa JavaFX. En `PantallaJuego` el area de mapa paso a estar dentro de un `ScrollPane` y se agrego centrado automatico sobre el jugador al cambiar de cueva. Tambien se redujo la rigidez del log inferior y se envolvio el panel derecho en un scroll vertical para evitar que las acciones queden cortadas en ventanas bajas.
+
+No se modificaron reglas de juego ni persistencia. La compilacion desde Codex quedo bloqueada por permisos de lectura sobre los JAR locales de JavaFX en `.m2`; queda pendiente validar visualmente desde IntelliJ. La revision independiente detecto riesgos de foco de teclado, centrado prematuro y corte horizontal; se corrigieron antes de preparar PR.
+
+## 2026-05-25 - Guillermo / Correccion visual de pocion
+
+Guillermo aviso de que el PNG de la pocion se veia cortado por la mitad. Se reviso la carga del icono en `PantallaJuego` y se detecto que se estaba tratando como spritesheet cuando realmente es una imagen vertical unica.
+
+Se cambio la carga para usar el PNG completo sin recorte. El cambio no afecta reglas de partida, inventario, JSON ni turnos. Se solicito revision independiente para el PR #24; el revisor no encontro bloqueos y recomendo validacion visual manual en mapa e inventario.
+
+## 2026-05-26 - Guillermo / Portabilidad de ejecucion y ventana fija
+
+Guillermo pidio abordar dos puntos finales de entrega: comprobar como abrir el juego en otros ordenadores y resolver el problema de pantalla completa/maximizado, que seguia deformando la interfaz en algunas pruebas.
+
+Se revisaron `README.md`, `scripts/run.ps1`, `scripts/test.ps1`, `ControladorFlujo` y `EscapeMazmorraApp`. Los scripts dejaron de depender de una ruta fija de JDK y ahora usan `JAVA_HOME` o el `PATH`. Tambien se documento que JavaFX 21.0.5 puede estar en `.m2` o copiarse a `lib\javafx` para una entrega mas portable.
+
+Para el problema visual se eligio la solucion conservadora: quitar el redimensionado de la ventana de juego y restaurar siempre a una ventana ajustada a la escena 1280x720, sin maximizado ni pantalla completa al cambiar de escena. Es menos flexible, pero reduce riesgo para la entrega. La revision independiente recomendo usar `sizeToScene()` para no confundir tamano exterior de ventana con area util de escena, y se aplico. Tambien marco como riesgo menor que una carpeta `lib\javafx` incompleta bloqueara el fallback a `.m2`; se corrigio para intentar Maven local si no estan los cuatro JAR locales. La compilacion en Codex queda bloqueada por permisos al leer JavaFX en `.m2`; se solicita validacion local en IntelliJ/PowerShell.
