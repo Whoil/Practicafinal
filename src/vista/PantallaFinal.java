@@ -13,6 +13,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import Estructuras.ListaSE;
+import javafx.scene.control.ScrollPane;
 import json.ResultadoPartidaDTO;
 
 /**
@@ -31,15 +33,19 @@ public class PantallaFinal {
     private final boolean victoria;
     private final ResultadoPartidaDTO resultado;
     private final Runnable volverAlMenu;
+    private final ListaSE<String> log;
     private Scene scene;
 
     /**
      * @param victoria     true para pantalla de victoria, false para derrota
+     * @param resultado    datos estadisticos de la partida
+     * @param log          registro de eventos de la partida
      * @param volverAlMenu callback al pulsar "Volver al Menu Principal"
      */
-    public PantallaFinal(boolean victoria, ResultadoPartidaDTO resultado, Runnable volverAlMenu) {
+    public PantallaFinal(boolean victoria, ResultadoPartidaDTO resultado, ListaSE<String> log, Runnable volverAlMenu) {
         this.victoria = victoria;
         this.resultado = resultado;
+        this.log = log;
         this.volverAlMenu = volverAlMenu;
     }
 
@@ -98,7 +104,40 @@ public class PantallaFinal {
 
         bloque.getChildren().addAll(titulo, cuerpo, btnVolver);
 
-        raiz.getChildren().addAll(fondo, bloque);
+        // Log de eventos - siempre visible
+        if (log != null && log.getSize() > 0) {
+            Text tituloLog = new Text("── Registro de eventos ──");
+            tituloLog.setFont(Font.font("Georgia", FontWeight.NORMAL, 14));
+            tituloLog.setFill(Color.web("#888888"));
+
+            VBox logBox = new VBox(2);
+            logBox.setPadding(new Insets(5));
+            for (int i = 0; i < log.getSize(); i++) {
+                Text linea = new Text(log.get(i));
+                linea.setFont(Font.font("Consolas", 10));
+                linea.setFill(Color.web("#aaaaaa"));
+                logBox.getChildren().add(linea);
+            }
+
+            ScrollPane scrollLog = new ScrollPane(logBox);
+            scrollLog.setMaxHeight(160);
+            scrollLog.setPrefWidth(700);
+            scrollLog.setFitToWidth(true);
+            scrollLog.setStyle("-fx-background: transparent; -fx-background-color: rgba(0,0,0,0.5); -fx-background-insets: 0;");
+            scrollLog.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            scrollLog.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+            bloque.getChildren().addAll(tituloLog, scrollLog);
+        }
+
+        // ScrollPane para permitir ver todo el contenido si la pantalla es pequeña
+        ScrollPane scrollRaiz = new ScrollPane(bloque);
+        scrollRaiz.setFitToWidth(true);
+        scrollRaiz.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        scrollRaiz.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollRaiz.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        raiz.getChildren().addAll(fondo, scrollRaiz);
 
         scene = new Scene(raiz, ANCHO, ALTO);
         return scene;

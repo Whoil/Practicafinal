@@ -804,7 +804,7 @@ public class EscapeMazmorraApp extends Application {
                 modelo.juego.Partida p = modelo.juego.Partida.cargarPartida("datos/partida_guardada.json");
                 flujo.setPartida(p);
                 flujo.setNombreJugador(p.getJugador().getNombre());
-                flujo.mostrarIntroduccion();
+                flujo.mostrarJuego();
             } catch (Exception ex) {
                 Alert alerta = new Alert(Alert.AlertType.ERROR);
                 alerta.setTitle("Error al cargar");

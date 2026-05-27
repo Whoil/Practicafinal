@@ -1,6 +1,27 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Auto-detect JDK si no esta configurado o no es valido
+if (-not $env:JAVA_HOME -or -not (Test-Path (Join-Path $env:JAVA_HOME "bin\javac.exe"))) {
+    $searchDirs = @(
+        "$env:ProgramFiles\Java",
+        "$env:ProgramFiles\Eclipse Adoptium",
+        "$env:ProgramFiles\Microsoft",
+        "$env:LocalAppData\Programs\Eclipse Adoptium",
+        "$env:USERPROFILE\.jdks"
+    )
+    :outer foreach ($base in $searchDirs) {
+        $jdks = Get-ChildItem -Path "$base\*" -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "jdk*" }
+        foreach ($jdk in $jdks) {
+            if (Test-Path (Join-Path $jdk.FullName "bin\javac.exe")) {
+                $env:JAVA_HOME = $jdk.FullName
+                break outer
+            }
+        }
+    }
+}
+
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $BuildDir = Join-Path $ProjectRoot "build\test-classes"
 $SourcesFile = Join-Path $ProjectRoot "build\test-sources.txt"

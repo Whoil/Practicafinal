@@ -785,11 +785,9 @@ public class Partida implements InterfazPartida {
     }
 
     private int calcularDano(int ataque, int defensa) {
-        int dano = ataque - defensa;
-        if (dano < 1) {
-            return 1;
-        }
-        return dano;
+        double aleatorio = Math.random();
+        double danoBruto = ataque * (aleatorio * 2.0) - defensa;
+        return (int) Math.max(0, Math.round(danoBruto));
     }
 
     private Enemigo buscarEnemigoEn(int fila, int columna) {

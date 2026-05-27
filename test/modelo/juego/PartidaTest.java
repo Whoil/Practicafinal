@@ -1162,6 +1162,126 @@ class PartidaTest {
         assertEquals(0, partida.consumirDisparosEnemigosPendientes().getSize());
     }
 
+    @Test
+    void atacarConAtaqueCeroNoHaceDaño() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 0, 100, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo e = new Enemigo("Eseleto", TipoEnemigo.ESQUELETO, 100, 10, 200, 2, 1, 2);
+        partida.anadirEnemigo(cueva, e);
+        int vidaAntes = e.getVidaActual();
+        assertTrue(partida.atacar(1, 2));
+        // ataque 0 - defensa 200 -> dano = max(0, round(0 * aleatorio * 2 - 200)) = 0
+        assertEquals(vidaAntes, e.getVidaActual());
+    }
+
+    @Test
+    void atacarConAtaqueAltoNuncaIncrementaVida() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 50, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo e = new Enemigo("Eseleto", TipoEnemigo.ESQUELETO, 100, 10, 0, 2, 1, 2);
+        partida.anadirEnemigo(cueva, e);
+        int vidaAntes = e.getVidaActual();
+        assertTrue(partida.atacar(1, 2));
+        int vidaDespues = e.getVidaActual();
+        assertTrue(vidaDespues <= vidaAntes, "El dano nunca debe incrementar la vida");
+        assertTrue(vidaDespues >= 0, "La vida nunca debe ser negativa");
+    }
+
+    @Test
+    void atacarNuncaDejaVidaNegativa() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 999, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo e = new Enemigo("Eseleto", TipoEnemigo.ESQUELETO, 1, 1, 0, 2, 1, 2);
+        partida.anadirEnemigo(cueva, e);
+        assertTrue(partida.atacar(1, 2));
+        assertFalse(e.estaVivo());
+        assertTrue(e.getVidaActual() >= 0);
+    }
+
+    @Test
+    void moverYPasarTurnoFunciona() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 50, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo e = new Enemigo("Eseleto", TipoEnemigo.ESQUELETO, 100, 10, 0, 2, 1, 2);
+        partida.anadirEnemigo(cueva, e);
+        assertTrue(partida.moverJugador(1, 2));
+        assertTrue(partida.pasarTurno());
+    }
+
+    @Test
+    void noPuedeMoverseDosVecesEnUnTurno() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 0, 0, 2, 0, 0);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        assertTrue(partida.moverJugador(0, 1));
+        assertFalse(partida.moverJugador(0, 1));
+    }
+
+    @Test
+    void noPuedeAtacarDosVecesEnUnTurno() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 50, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo e = new Enemigo("Eseleto", TipoEnemigo.ESQUELETO, 500, 10, 0, 2, 1, 2);
+        partida.anadirEnemigo(cueva, e);
+        assertTrue(partida.atacar(1, 2));
+        assertFalse(partida.atacar(1, 2));
+    }
+
+    @Test
+    void pasarTurnoReiniciaMovimientoYAccion() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 50, 0, 2, 0, 0);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        assertTrue(partida.moverJugador(0, 1));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.moverJugador(0, 1));
+    }
+
+    @Test
+    void getLogNoEsNulo() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 0, 0, 2, 0, 0);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        assertNotNull(partida.getLog());
+    }
+
+    @Test
+    void getLogRegistraEventoAlMoverse() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 0, 0, 2, 0, 0);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        int antes = partida.getLog().getSize();
+        assertTrue(partida.moverJugador(0, 1));
+        assertEquals(antes + 1, partida.getLog().getSize());
+    }
+
+    @Test
+    void pasarTurnoReiniciaAccionDeAtaque() {
+        Cueva cueva = new Cueva("c1", 3, 3);
+        Mazmorra mazmorra = mazmorraCon(cueva);
+        Jugador jugador = new Jugador("Heroe", 100, 50, 0, 2, 1, 1);
+        Partida partida = new Partida(mazmorra, jugador, 10);
+        Enemigo e = new Enemigo("Eseleto", TipoEnemigo.ESQUELETO, 500, 10, 0, 2, 1, 2);
+        partida.anadirEnemigo(cueva, e);
+        assertTrue(partida.atacar(1, 2));
+        assertTrue(partida.pasarTurno());
+        assertTrue(partida.atacar(1, 2));
+    }
+
     private Mazmorra mazmorraCon(Cueva cueva) {
         Mazmorra mazmorra = new Mazmorra();
         mazmorra.addCueva(cueva);
